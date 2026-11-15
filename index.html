@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="PCCheck helps you review used gaming PCs and check basic custom PC build compatibility.">
+<meta name="theme-color" content="#080b12"><meta name="application-name" content="PCCheck"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>PCCheck — PC buying and build checker</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="glow g1"></div><div class="glow g2"></div>
+<header class="topbar">
+  <a class="brand" href="#top" aria-label="PCCheck home"><span class="logo">PC</span> PC<span>CHECK</span></a>
+  <nav aria-label="Main navigation"><a href="#analyze">Used PC</a><a href="#build">Build checker</a><a href="#saved">Saved reports</a><a href="guides.html">Guides</a><a href="privacy.html">Privacy & limits</a></nav>
+  <button class="profile" id="accountBtn" type="button">Guest workspace <b>⌄</b></button>
+</header>
+<main id="top">
+<section class="hero">
+  <div class="eyebrow"><i></i> PC BUYING INTELLIGENCE</div>
+  <h1>Know the PC.<br><em>Before you pay.</em></h1>
+  <p>Review used gaming PC details, catch missing information, and check basic compatibility before you spend money on a build.</p>
+  <div class="hero-actions"><a class="btn primary" href="#analyze">Check a used PC <b>↗</b></a><a class="btn ghost" href="#build">Check a build</a></div>
+  <div class="hero-stats"><span>01 <small>USED PC REVIEW</small></span><span>02 <small>BUILD COMPATIBILITY</small></span><span>03 <small>SAVED REPORTS</small></span><span>04 <small>BUYER GUIDES</small></span></div>
+  <div class="hero-art" aria-hidden="true"><div class="ring r1"></div><div class="ring r2"></div><div class="gpu"><div class="gpu-screen">PC<span>CHECK</span><small>HARDWARE INTELLIGENCE</small></div></div><div class="float f1">SYSTEM ANALYSIS <b>● READY</b></div><div class="float f2">BUY SMARTER&nbsp; ✦ &nbsp;BUILD BETTER</div></div>
+</section>
+
+<section class="workspace" id="analyze">
+  <div class="section-title"><div class="eyebrow">01 / USED PC LISTING</div><h2>Review a used gaming PC</h2><p>Paste a listing link to identify the source, then enter the PC details for an assessment.</p></div>
+  <div class="panel">
+    <div class="panel-head"><div><span class="mini-label">LISTING SOURCE</span><h3>Start with a listing URL</h3></div><span class="pill">LINK RECOGNITION</span></div>
+    <form id="urlForm">
+      <label for="listingUrl">Public listing URL</label>
+      <div class="url-row"><span>↗</span><input id="listingUrl" type="url" placeholder="https://www.ebay.com/itm/..." autocomplete="url"><button class="btn primary" type="submit">Recognize link →</button></div>
+      <div class="marketplaces"><span>SITES PCHECK CAN RECOGNIZE</span><div class="chips"><b>Facebook Marketplace</b><b>eBay</b><b>Craigslist</b><b>OfferUp</b><b>Other websites</b></div></div>
+      <div id="linkMessage" class="message" role="status" hidden></div>
+    </form>
+  </div>
+  <div class="or"><span>ENTER THE PC DETAILS</span></div>
+  <form class="panel manual" id="manualForm">
+    <div class="panel-head"><div><span class="mini-label">USED PC ASSESSMENT</span><h3>What is the seller offering?</h3></div><span class="step">01 / 02</span></div>
+    <input type="hidden" name="sourceUrl" id="sourceUrl"><input type="hidden" name="sourceName" id="sourceName">
+    <div class="fields">
+      <label>CPU <input name="cpu" required placeholder="Ryzen 5 5600X"></label>
+      <label>GPU <input name="gpu" required placeholder="RTX 3060"></label>
+      <label>RAM <input name="ram" required placeholder="16GB DDR4"></label>
+      <label>Storage <input name="storage" required placeholder="1TB NVMe SSD"></label>
+      <label>Asking price (USD) <input name="price" type="number" min="0" step="1" placeholder="650"></label>
+      <label>Power supply model <input name="psu" placeholder="Corsair RM650x 650W"></label>
+      <label>Motherboard model <input name="motherboard" placeholder="MSI B550 Tomahawk"></label>
+      <label>Approximate age <input name="age" placeholder="Built in 2022"></label>
+      <label class="full-field">Condition / seller notes <textarea name="condition" rows="3" placeholder="Tested and working, no known issues, includes Wi-Fi... "></textarea></label>
+    </div>
+    <button class="btn primary" type="submit">Analyze this PC →</button>
+    <p class="fine">The assessment checks the information you provide and flags questions to ask. It does not test the computer or provide a live market valuation.</p>
+  </form>
+  <div id="reportOutput" class="report-host" hidden aria-live="polite"></div>
+</section>
+
+<section class="workspace build-section" id="build">
+  <div class="section-title"><div class="eyebrow">02 / CUSTOM PC BUILD</div><h2>Check a custom build</h2><p>Enter the main component details to catch common compatibility problems.</p></div>
+  <form class="panel" id="buildForm">
+    <div class="panel-head"><div><span class="mini-label">COMPATIBILITY CHECKER</span><h3>Your planned parts</h3></div><span class="step">BASIC CHECKS</span></div>
+    <div class="fields">
+      <label>CPU model <input name="cpu" required placeholder="e.g. Ryzen 7 7800X3D"></label>
+      <label>GPU model <input name="gpu" required placeholder="e.g. RTX 5070"></label>
+      <label>CPU socket <select name="cpuSocket"><option value="">Select socket</option><option>AM5</option><option>AM4</option><option>LGA1851</option><option>LGA1700</option><option>LGA1200</option><option>LGA1151</option><option value="">Other / unknown</option></select></label>
+      <label>Motherboard CPU socket <select name="boardSocket"><option value="">Select socket</option><option>AM5</option><option>AM4</option><option>LGA1851</option><option>LGA1700</option><option>LGA1200</option><option>LGA1151</option><option value="">Other / unknown</option></select></label>
+      <label>RAM generation <select name="ramType"><option value="">Select RAM type</option><option>DDR5</option><option>DDR4</option><option>DDR3</option></select></label>
+      <label>Motherboard RAM support <select name="boardRam"><option value="">Select board RAM</option><option>DDR5</option><option>DDR4</option><option>DDR3</option></select></label>
+      <label>Motherboard size <select name="boardForm"><option value="">Select size</option><option>ATX</option><option>Micro-ATX</option><option>Mini-ITX</option></select></label>
+      <label>Case support / size <select name="caseForm"><option value="">Select case size</option><option>ATX</option><option>Micro-ATX</option><option>Mini-ITX</option></select></label>
+      <label>Power supply wattage (W) <input name="psuWatts" type="number" min="1" max="3000" placeholder="750"></label>
+      <label>Estimated GPU power (W) <input name="gpuPower" type="number" min="1" max="1500" placeholder="Optional — check GPU specs"></label>
+      <label>Estimated CPU power (W) <input name="cpuPower" type="number" min="1" max="500" placeholder="Optional — check CPU specs"></label>
+      <label>RAM capacity (GB) <input name="ramCapacity" type="number" min="1" max="1024" placeholder="32"></label>
+      <label>Motherboard maximum RAM (GB) <input name="boardMaxRam" type="number" min="1" max="2048" placeholder="128"></label>
+      <label>GPU length (mm) <input name="gpuLength" type="number" min="1" max="600" placeholder="Optional"></label>
+      <label>Case maximum GPU length (mm) <input name="caseGpuMax" type="number" min="1" max="600" placeholder="Optional"></label>
+      <label>CPU cooler height (mm) <input name="coolerHeight" type="number" min="1" max="300" placeholder="Optional"></label>
+      <label>Case maximum cooler height (mm) <input name="caseCoolerMax" type="number" min="1" max="300" placeholder="Optional"></label>
+      <label>Storage <input name="storage" placeholder="2TB NVMe SSD"></label>
+      <label>Estimated total budget (USD) <input name="price" type="number" min="0" step="1" placeholder="1500"></label>
+    </div>
+    <button class="btn primary" type="submit">Check compatibility →</button>
+    <p class="fine">Checks compare the details you enter. Optional dimensions and power figures must come from manufacturer specifications. BIOS support, PSU quality/connectors, cooler mounting, and exact model fit still need verification.</p>
+  </form>
+  <div class="report-host" id="buildReportOutput" hidden></div>
+</section>
+
+<section class="workspace saved-section" id="saved">
+  <div class="section-title"><div class="eyebrow">03 / YOUR WORKSPACE</div><h2>Saved reports</h2><p>Reports are saved in this browser on this device.</p></div>
+  <div id="savedReports" class="saved-list"><div class="empty">No saved reports yet. Create and save a report above.</div></div>
+  <p class="storage-status" id="storageStatus">Local browser storage · No account or cloud sync yet</p>
+</section>
+
+<section class="workspace guide-section" id="guides">
+  <div class="section-title"><div class="eyebrow">04 / PC BUYER KNOWLEDGE</div><h2>Know what you are buying</h2><p>Practical checklists to use before purchasing parts or a used gaming PC.</p></div>
+  <div class="guide-grid">
+    <article class="guide-card"><span class="mini-label">USED PC BUYING</span><h3>Before you meet the seller</h3><ul><li>Ask for the exact CPU, GPU, motherboard, RAM, storage, and PSU models.</li><li>Request a recent video showing the PC booting and running a game or benchmark.</li><li>Ask whether any parts were repaired, overclocked, or replaced.</li><li>Confirm what accessories and operating-system license are included.</li><li>Compare the asking price with several similar systems, not just one listing.</li></ul></article>
+    <article class="guide-card"><span class="mini-label">IN-PERSON CHECK</span><h3>What to inspect</h3><ul><li>Check that the PC starts reliably and recognizes all installed RAM and drives.</li><li>Look for unexpected shutdowns, crashes, artifacts, or loud unusual noises.</li><li>Check temperatures during a sustained workload, not only at the desktop.</li><li>Inspect ports, Wi-Fi, Bluetooth, fans, and front-panel connections.</li><li>Do not pay before you have tested the system and agreed on what is included.</li></ul></article>
+    <article class="guide-card"><span class="mini-label">CUSTOM BUILDS</span><h3>Compatibility checklist</h3><ul><li>Match the CPU socket and confirm the board supports that exact CPU and BIOS version.</li><li>Match DDR generation; DDR4 and DDR5 are not interchangeable.</li><li>Check motherboard form factor against the case's supported sizes.</li><li>Check GPU length, cooler height, radiator support, and slot clearance.</li><li>Confirm PSU wattage, quality, native connectors, and manufacturer guidance.</li><li>Check storage interface, M.2 slot sharing, and available SATA ports.</li></ul></article>
+    <article class="guide-card"><span class="mini-label">UNDERSTAND THE REPORT</span><h3>What the labels mean</h3><ul><li><b>Conflict:</b> entered details contradict a basic compatibility rule.</li><li><b>Warning:</b> a risk needs more information or manufacturer verification.</li><li><b>Not checked:</b> required details were missing or outside the tool's reference data.</li><li><b>Pass:</b> the specific check passed; it does not certify the entire PC.</li><li><b>Completeness:</b> how many required listing fields you filled in, not a quality score.</li></ul></article>
+  </div>
+  <div class="faq panel"><span class="mini-label">COMMON QUESTIONS</span><h3>Does PCCheck read marketplace listings automatically?</h3><p>Not in this version. It recognizes a URL's website and lets you enter the specifications manually. Automatic extraction needs an approved data source or marketplace API and must follow that site's rules.</p><h3>Does a green result guarantee compatibility?</h3><p>No. A pass only applies to the check shown. Exact part numbers, BIOS versions, dimensions, connectors, and manufacturer documentation still matter.</p><h3>Does PCCheck tell me if a used PC is worth the price?</h3><p>Not yet. It does not have verified live sale prices, regional pricing, or a current market database. Use the asking price as a note and compare recent similar listings yourself.</p><h3>Are saved reports available on all my devices?</h3><p>No. Reports are stored in this browser on this device. Cloud accounts and syncing are not connected.</p></div>
+</section>
+
+<section class="workspace about-section" id="about">
+  <div class="section-title"><div class="eyebrow">ABOUT PCCHECK</div><h2>Make better PC decisions.</h2><p>PCCheck is an independent decision-support tool for people buying used gaming PCs or planning a custom build.</p></div>
+  <div class="panel about-panel"><h3>Accuracy before hype</h3><p>PCCheck uses transparent rule-based checks, not an AI claim or a hidden certification. It can help organize details and surface common issues, but it cannot physically test hardware, verify seller claims, guarantee performance, or replace manufacturer specifications.</p><h3>Privacy and data</h3><p>In this prototype, reports stay in your browser's local storage. No sign-in, cloud account, analytics, marketplace account connection, or automatic listing scraping is provided. Clearing browser data may remove saved reports. Do not enter passwords, payment details, or other sensitive information.</p><h3>Independent project</h3><p>PCCheck is not affiliated with Facebook Marketplace, eBay, Craigslist, OfferUp, AMD, Intel, NVIDIA, or any PC manufacturer. Product and brand names are used only to identify hardware or listing sources.</p><p class="fine">This is an early product release. Always verify critical details with the manufacturer and inspect a used computer in person before buying.</p></div>
+</section>
+</main>
+<footer><a class="brand" href="#top"><span class="logo">PC</span> PC<span>CHECK</span></a><span>Independent PC evaluation tool · Early release</span><span class="footer-note"><a href="guides.html">Buyer guides</a> · <a href="privacy.html">Privacy & limits</a> · Not affiliated with any marketplace.</span></footer>
+
+<div class="modal-backdrop" id="accountModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="close" id="closeModal" type="button" aria-label="Close">×</button><div class="eyebrow">PCCHECK WORKSPACE</div><h2 id="modalTitle">Guest workspace</h2><p>PCCheck currently saves reports locally in this browser. There is no sign-in or cloud sync. A real account system requires a secure backend and privacy protections; it is not simulated here.</p><button class="btn primary" id="modalOk" type="button">Understood</button></div>
+</div>
+<script src="app.js" defer></script>
+</body></html>
