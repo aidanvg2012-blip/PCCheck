@@ -81,3 +81,17 @@ html{scroll-padding-top:76px}body{padding-bottom:env(safe-area-inset-bottom)}
 }
 @keyframes mobilePanelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.mobile-tabs button{transition:none}body.mobile-app-view [id]{animation:none!important}}
+
+/* Plus plan concept preview — deliberately non-transactional */
+.pro-teaser{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:30px;padding:18px 20px;border:1px solid #69d8e733;border-radius:10px;background:linear-gradient(115deg,#122332dd,#171a2add);text-align:left;max-width:680px}
+.pro-teaser h3,.pro-preview h3{margin:5px 0 6px;font-size:17px;letter-spacing:-.02em}
+.pro-teaser p,.pro-preview p{margin:0;color:var(--muted);font-size:11px;line-height:1.6}
+.pro-teaser-actions{display:flex;align-items:flex-end;flex-direction:column;gap:10px;flex-shrink:0}
+.pro-price{font-size:10px;color:var(--muted);white-space:nowrap}.pro-price b{color:#9ce8ed;font-size:13px;margin-left:5px}
+.pro-preview{position:relative;z-index:2;max-width:680px;margin-top:10px;padding:20px;border:1px solid #69d8e755;border-radius:10px;background:#101c28;text-align:left;animation:mobilePanelIn .22s ease both}
+.pro-preview-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:16px}
+.pro-feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pro-feature-grid article{padding:13px;border:1px solid #2c4053;border-radius:8px;background:#0c1520}
+.pro-feature-grid article>b{font-size:11px;color:#e8f5fa}.pro-feature-grid article p{margin:8px 0 12px}.pro-feature-grid article small{font-size:9px;color:#9ce8ed;text-transform:uppercase;letter-spacing:.08em}
+.pro-demo-note{margin:16px 0!important;padding:10px 12px;border-left:2px solid #69d8e7;background:#69d8e70a}
+@media(max-width:700px){.pro-teaser{display:block;margin-top:26px;padding:16px}.pro-teaser-actions{align-items:flex-start;margin-top:13px}.pro-feature-grid{grid-template-columns:1fr}.pro-preview{padding:16px}.pro-preview-head{flex-wrap:wrap}}
