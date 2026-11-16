@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="PCCheck helps you review used gaming PCs and check basic custom PC build compatibility.">
-<meta name="theme-color" content="#080b12"><meta name="application-name" content="PCCheck"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PCCheck"><link rel="apple-touch-icon" href="icon.svg"><meta name="version" content="2.4.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#080b12"><meta name="application-name" content="PCCheck"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PCCheck"><link rel="apple-touch-icon" href="icon.svg"><meta name="version" content="2.5.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>PCCheck — PC buying and build checker</title>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -39,7 +39,7 @@
       <article><b>02 / Expanded reports</b><p>More detailed risk explanations and printable report layouts.</p><small>Planned feature</small></article>
       <article><b>03 / Build history</b><p>Keep versions of a build and review changes over time.</p><small>Planned feature</small></article>
     </div>
-    <p class="pro-demo-note">Stripe test checkout preview. No live payments are accepted. A successful test checkout does not unlock Plus yet; account access will be connected after subscription storage and verification are added.</p>
+    <p class="pro-demo-note">Stripe test checkout preview. No live payments are accepted. Account linking is in beta; Plus access is granted only after a verified Stripe webhook updates your subscription record.</p>
     <button class="btn primary" id="plusCheckoutButton" type="button">Try test checkout — $4.99/mo</button>
     <p class="fine" id="plusCheckoutStatus" role="status" aria-live="polite"></p>
     <button class="btn ghost" id="closeProPreview" type="button">Close preview</button>
@@ -124,7 +124,7 @@
   <div class="section-title"><div class="eyebrow">03 / YOUR WORKSPACE</div><h2>Saved reports</h2><p>Reports are saved in this browser on this device.</p></div>
   <div id="savedReports" class="saved-list"><div class="empty">No saved reports yet. Create and save a report above.</div></div>
   <div class="saved-tools"><button class="btn ghost" id="exportAll" type="button">Export all reports</button><button class="btn ghost" id="clearSaved" type="button">Clear saved reports</button></div>
-  <p class="storage-status" id="storageStatus">Local browser storage · No account or cloud sync yet</p>
+  <p class="storage-status" id="storageStatus">Saved locally · Cloud report sync is not enabled</p>
 </section>
 
 <section class="workspace guide-section" id="guides">
