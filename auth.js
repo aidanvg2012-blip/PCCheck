@@ -49,6 +49,7 @@
     try {
       const session = await getSession();
       const signedIn = Boolean(session?.user);
+      $('accountManageBilling').hidden = true;
       $('accountSignedOut').hidden = signedIn;
       $('accountSignedIn').hidden = !signedIn;
       $('accountOpenButton').textContent = signedIn ? 'My account' : 'Sign in';
