@@ -4,6 +4,11 @@
   const SUPABASE_URL = 'https://rtssojyophcgybdhhqzz.supabase.co';
   // Publishable browser key. This key is designed for public client-side use.
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_kK8xaomzreBOVF4Dnvy4UQ_uuVvLWH3';
+  if (!window.supabase?.createClient) {
+    const button = document.getElementById('accountOpenButton');
+    if (button) { button.textContent = 'Accounts unavailable'; button.disabled = true; }
+    return;
+  }
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
