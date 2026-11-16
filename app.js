@@ -1,8 +1,8 @@
 'use strict';
 
 const $ = (id) => document.getElementById(id);
-const STORAGE_KEY = 'pccheck_reports_v4';
-const APP_VERSION = '2.1.0';
+const STORAGE_KEY = 'pccheck_reports_v5';
+const APP_VERSION = '2.3.0';
 const knownHosts = [
   ['facebook.com', 'Facebook Marketplace'], ['fb.com', 'Facebook'],
   ['ebay.com', 'eBay'], ['craigslist.org', 'Craigslist'], ['offerup.com', 'OfferUp']
@@ -63,6 +63,7 @@ const HARDWARE_CATALOG = {
     ['NVIDIA GeForce GTX 1660 Super',['gtx 1660 super','1660s']],
     ['NVIDIA GeForce GTX 1660 Ti',['gtx 1660 ti','1660ti']],
     ['NVIDIA GeForce GTX 1660',['gtx 1660']],
+    ['NVIDIA GeForce GTX 1650 Super',['gtx 1650 super','1650super']],
     ['NVIDIA GeForce GTX 1650',['gtx 1650']],
     ['AMD Radeon RX 9070 XT',['rx 9070 xt','9070xt']],
     ['AMD Radeon RX 9070',['rx 9070']],
@@ -106,18 +107,36 @@ function populateHardwareSuggestions() {
   }
 }
 function extractListingSpecs(text) {
-  const cpu = findCatalogMatch(text,'cpu');
-  const gpu = findCatalogMatch(text,'gpu');
-  const ram = clean(text).match(/\b(8|16|24|32|48|64|96|128|256)\s*gb\s*(?:of\s*)?(ddr\s*[345])\b/i);
-  const storage = clean(text).match(/\b(256|500|512|1000|1024|2000|2048|4000|4096)\s*(gb|tb)\s*(?:m\.2\s*)?(nvme|ssd|hdd|hard\s*drive)\b/i)
-    || clean(text).match(/\b(\d+)\s*(tb|gb)\s*(nvme|ssd|hdd)\b/i);
-  return {
-    cpu:cpu?.canonical || '',
-    gpu:gpu?.canonical || '',
-    ram:ram ? `${ram[1]}GB ${ram[2].replace(/\s/g,'').toUpperCase()}` : '',
-    storage:storage ? `${storage[1]}${storage[2].toUpperCase()} ${storage[3].toUpperCase().replace(/\s/g,'')}` : '',
-    found:[cpu&&'CPU',gpu&&'GPU',ram&&'RAM',storage&&'Storage'].filter(Boolean)
-  };
+  const source = clean(text);
+  const cpu = findCatalogMatch(source,'cpu') || (() => {
+    const m = source.match(/\b(?:amd\s*)?ryzen\s*[3579]\s*[- ]?(\d{4,5})(\s*x3d|\s*x)?\b/i);
+    if (m) return {canonical:`AMD Ryzen ${source.match(/ryzen\s*([3579])/i)?.[1] || ''} ${m[1]}${(m[2]||'').replace(/\s/g,'').toUpperCase()}`.trim()};
+    const i = source.match(/\b(?:intel\s*)?(?:core\s*)?i([3579])\s*[- ]?(\d{4,5})([a-z]{0,2})\b/i);
+    return i ? {canonical:`Intel Core i${i[1]}-${i[2]}${i[3].toUpperCase()}`} : null;
+  })();
+  const gpu = findCatalogMatch(source,'gpu') || (() => {
+    const m = source.match(/\b(rtx|gtx|rx)\s*[- ]?(\d{3,4})(?:\s*(ti|super|xt|xtx))?\b/i);
+    if (!m) return null;
+    const brand = m[1].toUpperCase(), suffix = m[3] ? ` ${m[3].toUpperCase()}` : '';
+    return {canonical: brand === 'RX' ? `AMD Radeon RX ${m[2]}${suffix}` : `NVIDIA GeForce ${brand} ${m[2]}${suffix}`};
+  })();
+  const ramMatch = source.match(/\b(ddr\s*[345])\s*(8|16|24|32|48|64|96|128|256)\s*gb\b/i)
+    || source.match(/\b(8|16|24|32|48|64|96|128|256)\s*gb\s*(?:ram|memory)?\s*(?:of\s*)?(ddr\s*[345])\b/i)
+    || source.match(/\b(8|16|24|32|48|64|96|128|256)\s*gb\s*(?:ram|memory)\s*(?:ddr\s*[345])?\b/i)
+    || source.match(/\b(ddr\s*[345])\s*(8|16|24|32|48|64|96|128|256)\s*gb\b/i);
+  const ram = ramMatch ? (String(ramMatch[1]).toLowerCase().startsWith('ddr') ? `${ramMatch[2]}GB ${String(ramMatch[1]).replace(/\s/g,'').toUpperCase()}` : String(ramMatch[2] || '').toLowerCase().startsWith('ddr') ? `${ramMatch[1]}GB ${String(ramMatch[2]).replace(/\s/g,'').toUpperCase()}` : `${ramMatch[1]}GB ${ramMatch[2] ? String(ramMatch[2]).replace(/\s/g,'').toUpperCase() : '(type unknown)'}`) : null;
+  let storageMatch = source.match(/\b(256|500|512|1000|1024|2000|2048|4000|4096|1|2|4)\s*(gb|tb)\s*(?:m\.2\s*)?(nvme|ssd|hdd|hard\s*drive)\b/i)
+    || source.match(/\b(nvme|ssd|hdd)\s*(256|500|512|1000|1024|2000|2048|4000|4096|1|2|4)\s*(gb|tb)\b/i);
+  let storage = '';
+  if (storageMatch) {
+    if (/^(nvme|ssd|hdd)$/i.test(storageMatch[1])) storage = `${storageMatch[2]} ${storageMatch[3].toUpperCase()} ${storageMatch[1].toUpperCase()}`;
+    else storage = `${storageMatch[1]} ${storageMatch[2].toUpperCase()} ${storageMatch[3].toUpperCase().replace(/\s/g,'')}`;
+  } else {
+    const capacity = source.match(/\b(256|500|512|1000|1024|2000|2048|4000|4096|1|2|4)\s*(gb|tb)\b/i);
+    const kind = source.match(/\b(nvme|m\.2|ssd|hdd|hard\s*drive)\b/i);
+    if (capacity && kind) storage = `${capacity[1]} ${capacity[2].toUpperCase()} ${kind[1].toUpperCase().replace('M.2','M.2')}`;
+  }
+  return {cpu:cpu?.canonical || '',gpu:gpu?.canonical || '',ram:ram || '',storage,found:[cpu&&'CPU',gpu&&'GPU',ram&&'RAM',storage&&'Storage'].filter(Boolean)};
 }
 
 let reports = loadReports();
@@ -126,7 +145,7 @@ let activeReport = null;
 function loadReports() {
   try {
     const current = localStorage.getItem(STORAGE_KEY);
-    const legacy = localStorage.getItem('pccheck_reports_v3');
+    const legacy = localStorage.getItem('pccheck_reports_v4') || localStorage.getItem('pccheck_reports_v3');
     const value = JSON.parse(current || legacy || '[]');
     return Array.isArray(value) ? value : [];
   } catch { return []; }
@@ -204,6 +223,59 @@ function wireHardwareRecognition() {
       if (match) input.value = match.canonical;
     });
   }
+  const pasteButton = $('pasteClipboard');
+  pasteButton?.addEventListener('click', async () => {
+    const status = $('extractStatus');
+    if (!navigator.clipboard?.readText) {
+      status.textContent = 'Clipboard access is unavailable here. Click the listing box and press Ctrl+V instead.';
+      return;
+    }
+    try {
+      const clip = await navigator.clipboard.readText();
+      if (!clip.trim()) { status.textContent = 'Your clipboard is empty. Copy the listing details first.'; return; }
+      $('listingText').value = clip;
+      status.textContent = 'Clipboard text added. Select Extract hardware to review the detected parts.';
+      $('listingText').focus();
+    } catch {
+      status.textContent = 'Clipboard permission was blocked. Click the listing box and press Ctrl+V instead.';
+    }
+  });
+
+  const imageInput=$('listingImage'), preview=$('imagePreview'), ocrButton=$('analyzeScreenshot'), ocrText=$('ocrText');
+  let previewUrl = '';
+  imageInput?.addEventListener('change',()=>{
+    const file=imageInput.files?.[0];
+    if (!file) { ocrButton.disabled=true; preview.hidden=true; return; }
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size>8*1024*1024) {
+      $('ocrStatus').textContent='Choose a PNG, JPG, or WEBP image under 8 MB.'; imageInput.value=''; ocrButton.disabled=true; return;
+    }
+    if (previewUrl) URL.revokeObjectURL(previewUrl); previewUrl=URL.createObjectURL(file); preview.src=previewUrl; preview.hidden=false; ocrButton.disabled=false; $('ocrStatus').textContent='Image ready. Select Read screenshot.';
+  });
+  ocrButton?.addEventListener('click',async()=>{
+    const file=imageInput.files?.[0]; if(!file) return;
+    ocrButton.disabled=true; $('ocrStatus').textContent='Loading screenshot text reader…';
+    try {
+      if(!window.Tesseract?.recognize){
+        await new Promise((resolve,reject)=>{
+          const script=document.createElement('script');
+          script.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+          script.onload=resolve; script.onerror=()=>reject(new Error('OCR library could not load'));
+          document.head.appendChild(script);
+        });
+      }
+      if(!window.Tesseract?.recognize) throw new Error('OCR library unavailable');
+      $('ocrStatus').textContent='Reading image… this can take a little while.';
+      const result=await Tesseract.recognize(file,'eng',{logger:m=>{if(m.status==='recognizing text') $('ocrStatus').textContent=`Reading text… ${Math.round((m.progress||0)*100)}%`;}});
+      ocrText.value=result.data.text.trim(); $('extractOcrText').disabled=!ocrText.value;
+      $('ocrStatus').textContent=ocrText.value?'Text recognized. Review it, then extract the specs.':'No readable text found. Try a clearer screenshot.';
+    } catch(err) { $('ocrStatus').textContent='OCR could not load or read this image. Check your connection, try a clearer screenshot, or paste the listing text manually.'; }
+    finally { ocrButton.disabled=false; }
+  });
+  $('extractOcrText')?.addEventListener('click',()=>{
+    $('listingText').value=ocrText.value;
+    $('extractSpecs').click();
+    $('extractStatus').textContent='Screenshot text sent to hardware parser. Review the filled fields.';
+  });
 }
 
 function classifyRam(value) {
@@ -238,6 +310,28 @@ function getCpuFamily(value) {
   if (/xeon/.test(s)) return 'Intel Xeon';
   return s ? 'Unrecognized / other' : 'Not provided';
 }
+function getPriceComparison(d) {
+  const asking = Number(d.price);
+  const comps = [d.comp1,d.comp2,d.comp3].map(Number).filter(n => Number.isFinite(n) && n > 0);
+  if (!(asking > 0) || comps.length < 2) return {available:false,asking,comps};
+  const sorted = [...comps].sort((a,b)=>a-b);
+  const mid = Math.floor(sorted.length/2);
+  const median = sorted.length % 2 ? sorted[mid] : (sorted[mid-1]+sorted[mid])/2;
+  const ratio = asking / median;
+  let verdict, detail;
+  if (ratio <= .85) { verdict='Below comparable prices'; detail='The asking price is at least 15% below the median of your comparable listings. Check condition and missing parts carefully; unusually low prices can have a reason.'; }
+  else if (ratio <= 1.10) { verdict='In line with comparables'; detail='The asking price is within about 10% of the median of your comparable listings.'; }
+  else { verdict='Above comparable prices'; detail=`The asking price is ${Math.round((ratio-1)*100)}% above the median. Consider negotiating or comparing more closely matched systems.`; }
+  return {available:true,asking,comps,median,low:Math.min(...comps),high:Math.max(...comps),ratio,verdict,detail};
+}
+function priceChartMarkup(price) {
+  if (!price.available) return `<div class="price-analysis"><h4>Price comparison</h4><p class="report-note">Enter an asking price and at least two comparable prices from similar PCs to generate a chart and recommendation. Compare similar specs, condition, and included accessories.</p></div>`;
+  const values=[...price.comps,price.asking];
+  const max=Math.max(...values)*1.12;
+  const rows=values.map((v,i)=>`<div class="price-bar-row"><span>${i===values.length-1?'This PC':`Comparable ${i+1}`}</span><div class="price-track"><i class="${i===values.length-1?'asking':''}" style="width:${Math.max(3,v/max*100)}%"></i></div><b>${money(v)}</b></div>`).join('');
+  return `<div class="price-analysis"><h4>Price comparison</h4><div class="price-verdict"><b>${escapeHTML(price.verdict)}</b><span>Median comparable: ${money(price.median)}</span></div><p class="report-note">${escapeHTML(price.detail)} Comparable range: ${money(price.low)}–${money(price.high)}. Based on ${price.comps.length} asking prices you entered. Use closely matched systems and exclude listings with very different condition or parts.</p><div class="price-chart" role="img" aria-label="Bar chart comparing this PC price with comparable listing prices">${rows}</div><p class="report-note">This is a comparison of asking prices you supplied, not verified sold prices or an automatic live market valuation. It does not adjust for exact model, condition, warranty, or location.</p></div>`;
+}
+
 function buildUsedAssessment(d) {
   const warnings = [];
   const positives = [];
@@ -268,8 +362,9 @@ function buildUsedAssessment(d) {
     verdict = 'Details look promising';
     verdictText = 'The core specifications are present. This is not a guarantee of condition, performance, compatibility, or fair price.';
   }
+  const priceComparison = getPriceComparison(d);
   return {
-    kind:'used', title:`Used PC · ${clean(d.gpu) || 'GPU not entered'}`,
+    kind:'used', priceComparison, title:`Used PC · ${clean(d.gpu) || 'GPU not entered'}`,
     summary:`${clean(d.cpu)||'CPU unknown'} / ${clean(d.ram)||'RAM unknown'} / ${clean(d.storage)||'storage unknown'} · ${money(d.price)}`,
     input:d, verdict, verdictText, completeness, warnings, positives, missing,
     insights:[`CPU family: ${cpuFamily}`,`GPU generation guide: ${gpuTier}`,`Memory type: ${ramType || 'Not confirmed'}`],
@@ -374,7 +469,7 @@ function reportMarkup(report) {
     if (report.missing.length) body += `<h4>Missing core details</h4><ul>${report.missing.map(x=>`<li>${escapeHTML(x)} not entered</li>`).join('')}</ul>`;
     if (report.warnings.length) body += `<h4>Buyer checks</h4><ul class="warning-list">${report.warnings.map(x=>`<li>${escapeHTML(x)}</li>`).join('')}</ul>`;
     if (report.positives.length) body += `<h4>Potential positives to verify</h4><ul>${report.positives.map(x=>`<li>${escapeHTML(x)}</li>`).join('')}</ul>`;
-    body += `<p class="report-note">Asking price: <b>${money(report.input.price)}</b>. PCCheck does not have live market-price data in this version, so it cannot say whether the asking price is fair.</p>`;
+    body += `<p class="report-note">Asking price: <b>${money(report.input.price)}</b>.</p>${priceChartMarkup(report.priceComparison || getPriceComparison(report.input))}`;
   } else {
     body += `<div class="check-list">${report.checks.map(c=>`<div class="check-row"><span class="check-dot ${c.status}">${c.status==='pass'?'✓':c.status==='fail'?'!':c.status==='warn'?'!':'?'}</span><div><b>${escapeHTML(c.name)}</b><p>${escapeHTML(c.detail)}</p></div></div>`).join('')}</div>`;
     if (report.issues.length) body += `<h4>Fix before buying parts</h4><ul class="warning-list">${report.issues.map(x=>`<li>${escapeHTML(x)}</li>`).join('')}</ul>`;
@@ -389,10 +484,10 @@ function openReport(report) {
   const target = report.kind === 'build' ? $('buildReportOutput') : $('reportOutput');
   target.innerHTML = reportMarkup(report);
   target.hidden = false;
-  $('saveCurrent').addEventListener('click', () => saveReport(report));
-  $('closeReport').addEventListener('click', () => { target.hidden = true; activeReport = null; });
-  $('printReport').addEventListener('click', () => { window.print(); });
-  $('exportReport').addEventListener('click', () => downloadJSON(report, 'pccheck-report.json'));
+  $('saveCurrent')?.addEventListener('click', () => saveReport(report));
+  $('closeReport')?.addEventListener('click', () => { target.hidden = true; activeReport = null; });
+  $('printReport')?.addEventListener('click', () => { window.print(); });
+  $('exportReport')?.addEventListener('click', () => downloadJSON(report, 'pccheck-report.json'));
   target.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function saveReport(report) {
@@ -437,8 +532,8 @@ function downloadJSON(data, filename) {
   const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-$('exportAll').addEventListener('click',()=>downloadJSON(reports,'pccheck-saved-reports.json'));
-$('clearSaved').addEventListener('click',()=>{
+$('exportAll')?.addEventListener('click',()=>downloadJSON(reports,'pccheck-saved-reports.json'));
+$('clearSaved')?.addEventListener('click',()=>{
   if (!reports.length) return;
   if (confirm('Delete every saved PCCheck report from this browser? This cannot be undone.')) { reports=[]; persistReports(); }
 });
@@ -449,6 +544,53 @@ $('closeModal').addEventListener('click', () => { modal.hidden = true; });
 $('modalOk').addEventListener('click', () => { modal.hidden = true; });
 modal.addEventListener('click', event => { if (event.target === modal) modal.hidden = true; });
 document.addEventListener('keydown', event => { if (event.key === 'Escape') modal.hidden = true; });
+// Small synthesized interface sounds. Audio is opt-in and starts only after a user gesture.
+const SOUND_KEY = 'pccheck_ui_sounds';
+let soundEnabled = false;
+try { soundEnabled = localStorage.getItem(SOUND_KEY) === 'on'; } catch {}
+let audioContext = null;
+function playUiSound(kind='tap') {
+  if (!soundEnabled || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    audioContext ||= new AudioCtx();
+    if (audioContext.state === 'suspended') audioContext.resume();
+    const now = audioContext.currentTime;
+    const notes = kind === 'success' ? [660, 880] : kind === 'toggle' ? [520] : [420];
+    notes.forEach((frequency, index) => {
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(frequency, now + index * 0.075);
+      gain.gain.setValueAtTime(0.0001, now + index * 0.075);
+      gain.gain.exponentialRampToValueAtTime(kind === 'tap' ? 0.018 : 0.025, now + index * 0.075 + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.075 + 0.095);
+      oscillator.connect(gain); gain.connect(audioContext.destination);
+      oscillator.start(now + index * 0.075); oscillator.stop(now + index * 0.075 + 0.105);
+    });
+  } catch { /* Audio is decorative; never interrupt core app behavior. */ }
+}
+function syncSoundToggle() {
+  const button = $('soundToggle'), label = $('soundLabel');
+  if (!button || !label) return;
+  button.setAttribute('aria-pressed', String(soundEnabled));
+  label.textContent = soundEnabled ? 'Sound on' : 'Sound off';
+  button.title = soundEnabled ? 'Turn interface sounds off' : 'Turn interface sounds on';
+}
+$('soundToggle')?.addEventListener('click', () => {
+  soundEnabled = !soundEnabled;
+  try { localStorage.setItem(SOUND_KEY, soundEnabled ? 'on' : 'off'); } catch {}
+  syncSoundToggle();
+  if (soundEnabled) playUiSound('toggle');
+});
+document.addEventListener('click', event => {
+  const control = event.target.closest('button, .btn');
+  if (!control || control.id === 'soundToggle' || control.disabled) return;
+  playUiSound(control.id === 'saveCurrent' || control.id === 'extractSpecs' || control.id === 'analyzeScreenshot' ? 'success' : 'tap');
+});
+syncSoundToggle();
+
 renderReports();
 wireHardwareRecognition();
 

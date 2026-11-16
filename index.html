@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="PCCheck helps you review used gaming PCs and check basic custom PC build compatibility.">
-<meta name="theme-color" content="#080b12"><meta name="application-name" content="PCCheck"><meta name="version" content="2.1.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#080b12"><meta name="application-name" content="PCCheck"><meta name="version" content="2.3.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>PCCheck — PC buying and build checker</title>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -12,20 +12,20 @@
 <header class="topbar">
   <a class="brand" href="#top" aria-label="PCCheck home"><span class="logo">PC</span> PC<span>CHECK</span></a>
   <nav aria-label="Main navigation"><a href="#analyze">Used PC</a><a href="#build">Build checker</a><a href="#saved">Saved reports</a><a href="guides.html">Guides</a><a href="privacy.html">Privacy & limits</a></nav>
-  <button class="profile" id="accountBtn" type="button">Guest workspace <b>⌄</b></button>
+  <div class="topbar-tools"><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="Turn interface sounds on or off"><span class="sound-icon" aria-hidden="true">♪</span><span id="soundLabel">Sound off</span></button><button class="profile" id="accountBtn" type="button">Local workspace <b>⌄</b></button></div>
 </header>
 <main id="top">
 <section class="hero">
-  <div class="eyebrow"><i></i> PC BUYING INTELLIGENCE</div>
+  <div class="eyebrow"><i></i> PC BUYING TOOLKIT</div>
   <h1>Know the PC.<br><em>Before you pay.</em></h1>
   <p>Review used gaming PC details, catch missing information, and check basic compatibility before you spend money on a build.</p>
   <div class="hero-actions"><a class="btn primary" href="#analyze">Check a used PC <b>↗</b></a><a class="btn ghost" href="#build">Check a build</a></div>
   <div class="hero-stats"><span>01 <small>USED PC REVIEW</small></span><span>02 <small>BUILD COMPATIBILITY</small></span><span>03 <small>SAVED REPORTS</small></span><span>04 <small>BUYER GUIDES</small></span></div>
-  <div class="hero-art" aria-hidden="true"><div class="ring r1"></div><div class="ring r2"></div><div class="gpu"><div class="gpu-screen">PC<span>CHECK</span><small>HARDWARE INTELLIGENCE</small></div></div><div class="float f1">SYSTEM ANALYSIS <b>● READY</b></div><div class="float f2">BUY SMARTER&nbsp; ✦ &nbsp;BUILD BETTER</div></div>
+  <div class="hero-art" aria-hidden="true"><div class="ring r1"></div><div class="ring r2"></div><div class="gpu"><div class="gpu-screen">PC<span>CHECK</span><small>HARDWARE INTELLIGENCE</small></div></div><div class="float f1">LOCAL CHECKS <b>● READY</b></div><div class="float f2">BUY SMARTER&nbsp; ✦ &nbsp;BUILD BETTER</div></div>
 </section>
 
 <section class="workspace" id="analyze">
-  <div class="section-title"><div class="eyebrow">01 / USED PC LISTING</div><h2>Review a used gaming PC</h2><p>Paste a listing link to identify the source, then enter the PC details for an assessment.</p></div>
+  <div class="section-title"><div class="eyebrow">01 / USED PC LISTING</div><h2>Review a used gaming PC</h2><p>Paste listing text or upload a screenshot, then compare the asking price with similar systems.</p></div>
   <div class="panel">
     <div class="panel-head"><div><span class="mini-label">LISTING SOURCE</span><h3>Start with a listing URL</h3></div><span class="pill">LINK RECOGNITION</span></div>
     <form id="urlForm">
@@ -36,10 +36,20 @@
     </form>
   </div>
   <div class="panel import-panel">
-    <div class="panel-head"><div><span class="mini-label">QUICK SPEC EXTRACTION</span><h3>Paste the listing details</h3></div><span class="pill">BETA</span></div>
+    <div class="panel-head"><div><span class="mini-label">QUICK SPEC EXTRACTION</span><h3>Paste the listing details</h3></div><span class="pill">LOCAL PARSER</span></div>
     <p class="fine">Open the product page, copy its title and description/specifications, then paste them here. PCCheck will look for known CPU, GPU, RAM, and storage names. It does not bypass site restrictions or automatically read private/dynamic pages.</p>
     <textarea id="listingText" rows="5" placeholder="Example: Gaming PC - Ryzen 5 5600X, GeForce RTX 3060 12GB, 16GB DDR4, 1TB NVMe SSD..."></textarea>
-    <div class="url-row"><button class="btn primary" id="extractSpecs" type="button">Extract hardware →</button><span class="fine" id="extractStatus" aria-live="polite"></span></div>
+    <div class="url-row"><button class="btn primary" id="extractSpecs" type="button">Extract hardware →</button><button class="btn ghost" id="pasteClipboard" type="button">Paste from clipboard</button><span class="fine" id="extractStatus" aria-live="polite"></span></div>
+  </div>
+  <div class="panel import-panel screenshot-panel">
+    <div class="panel-head"><div><span class="mini-label">SCREENSHOT ANALYZER</span><h3>Upload a listing screenshot</h3></div><span class="pill">ON-DEVICE OCR</span></div>
+    <p class="fine">Upload a screenshot of the listing title or specifications. PCCheck will attempt to read the text in your browser, then send the result through the same hardware parser. Clear, straight-on screenshots work best. Image processing happens on your device; the image is not sent to PCCheck servers.</p>
+    <label class="upload-label" for="listingImage">Choose screenshot (PNG, JPG, or WEBP)</label>
+    <input id="listingImage" type="file" accept="image/png,image/jpeg,image/webp">
+    <img id="imagePreview" class="image-preview" alt="Screenshot preview" hidden>
+    <div class="url-row"><button class="btn primary" id="analyzeScreenshot" type="button" disabled>Read screenshot →</button><span id="ocrStatus" class="fine" aria-live="polite">Choose an image to begin.</span></div>
+    <textarea id="ocrText" rows="4" placeholder="Recognized text will appear here. You can edit it before extracting specs."></textarea>
+    <button class="btn ghost" id="extractOcrText" type="button" disabled>Extract specs from recognized text</button>
   </div>
   <div class="or"><span>ENTER THE PC DETAILS</span></div>
   <form class="panel manual" id="manualForm">
@@ -51,13 +61,16 @@
       <label>RAM <input name="ram" required placeholder="16GB DDR4" list="ramSuggestions" autocomplete="off"><datalist id="ramSuggestions"><option value="16GB DDR4"><option value="32GB DDR4"><option value="16GB DDR5"><option value="32GB DDR5"><option value="64GB DDR5"></datalist></label>
       <label>Storage <input name="storage" required placeholder="1TB NVMe SSD" list="storageSuggestions" autocomplete="off"><datalist id="storageSuggestions"><option value="500GB SSD"><option value="1TB NVMe SSD"><option value="2TB NVMe SSD"><option value="1TB HDD"></datalist></label>
       <label>Asking price (USD) <input name="price" type="number" min="0" step="1" placeholder="650"></label>
+      <label>Comparable PC price #1 (USD) <input name="comp1" type="number" min="0" step="1" placeholder="Similar PC listing price"></label>
+      <label>Comparable PC price #2 (USD) <input name="comp2" type="number" min="0" step="1" placeholder="Similar PC listing price"></label>
+      <label>Comparable PC price #3 (USD) <input name="comp3" type="number" min="0" step="1" placeholder="Similar PC listing price"></label>
       <label>Power supply model <input name="psu" placeholder="Corsair RM650x 650W"></label>
       <label>Motherboard model <input name="motherboard" placeholder="MSI B550 Tomahawk"></label>
       <label>Approximate age <input name="age" placeholder="Built in 2022"></label>
       <label class="full-field">Condition / seller notes <textarea name="condition" rows="3" placeholder="Tested and working, no known issues, includes Wi-Fi... "></textarea></label>
     </div>
     <button class="btn primary" type="submit">Analyze this PC →</button>
-    <p class="fine">The assessment checks the information you provide and flags questions to ask. It does not test the computer or provide a live market valuation.</p>
+    <p class="fine">The assessment checks the information you provide and flags questions to ask. Price comparisons use similar listing prices you enter; PCCheck does not fetch live market prices.</p>
   </form>
   <div id="reportOutput" class="report-host" hidden aria-live="polite"></div>
 </section>
@@ -96,6 +109,7 @@
 <section class="workspace saved-section" id="saved">
   <div class="section-title"><div class="eyebrow">03 / YOUR WORKSPACE</div><h2>Saved reports</h2><p>Reports are saved in this browser on this device.</p></div>
   <div id="savedReports" class="saved-list"><div class="empty">No saved reports yet. Create and save a report above.</div></div>
+  <div class="saved-tools"><button class="btn ghost" id="exportAll" type="button">Export all reports</button><button class="btn ghost" id="clearSaved" type="button">Clear saved reports</button></div>
   <p class="storage-status" id="storageStatus">Local browser storage · No account or cloud sync yet</p>
 </section>
 
@@ -107,7 +121,7 @@
     <article class="guide-card"><span class="mini-label">CUSTOM BUILDS</span><h3>Compatibility checklist</h3><ul><li>Match the CPU socket and confirm the board supports that exact CPU and BIOS version.</li><li>Match DDR generation; DDR4 and DDR5 are not interchangeable.</li><li>Check motherboard form factor against the case's supported sizes.</li><li>Check GPU length, cooler height, radiator support, and slot clearance.</li><li>Confirm PSU wattage, quality, native connectors, and manufacturer guidance.</li><li>Check storage interface, M.2 slot sharing, and available SATA ports.</li></ul></article>
     <article class="guide-card"><span class="mini-label">UNDERSTAND THE REPORT</span><h3>What the labels mean</h3><ul><li><b>Conflict:</b> entered details contradict a basic compatibility rule.</li><li><b>Warning:</b> a risk needs more information or manufacturer verification.</li><li><b>Not checked:</b> required details were missing or outside the tool's reference data.</li><li><b>Pass:</b> the specific check passed; it does not certify the entire PC.</li><li><b>Completeness:</b> how many required listing fields you filled in, not a quality score.</li></ul></article>
   </div>
-  <div class="faq panel"><span class="mini-label">COMMON QUESTIONS</span><h3>Does PCCheck read marketplace listings automatically?</h3><p>Not in this version. It recognizes a URL's website and lets you enter the specifications manually. Automatic extraction needs an approved data source or marketplace API and must follow that site's rules.</p><h3>Does a green result guarantee compatibility?</h3><p>No. A pass only applies to the check shown. Exact part numbers, BIOS versions, dimensions, connectors, and manufacturer documentation still matter.</p><h3>Does PCCheck tell me if a used PC is worth the price?</h3><p>Not yet. It does not have verified live sale prices, regional pricing, or a current market database. Use the asking price as a note and compare recent similar listings yourself.</p><h3>Are saved reports available on all my devices?</h3><p>No. Reports are stored in this browser on this device. Cloud accounts and syncing are not connected.</p></div>
+  <div class="faq panel"><span class="mini-label">COMMON QUESTIONS</span><h3>Does PCCheck read marketplace listings automatically?</h3><p>Not in this version. It recognizes a URL's website and lets you enter the specifications manually. Automatic extraction needs an approved data source or marketplace API and must follow that site's rules.</p><h3>Does a green result guarantee compatibility?</h3><p>No. A pass only applies to the check shown. Exact part numbers, BIOS versions, dimensions, connectors, and manufacturer documentation still matter.</p><h3>Does PCCheck tell me if a used PC is worth the price?</h3><p>It can compare the asking price with up to three similar listings that you enter. This is a user-supplied comparison, not a live price feed or guaranteed valuation. Compare systems with similar GPUs, CPUs, condition, and included parts.</p><h3>Are saved reports available on all my devices?</h3><p>No. Reports are stored in this browser on this device. Cloud accounts and syncing are not connected.</p></div>
 </section>
 
 <section class="workspace about-section" id="about">
