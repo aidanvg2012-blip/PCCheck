@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="PCCheck helps you review used gaming PCs and check basic custom PC build compatibility.">
-<meta name="theme-color" content="#080b12"><meta name="application-name" content="PCCheck"><meta name="version" content="2.3.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#080b12"><meta name="application-name" content="PCCheck"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PCCheck"><link rel="apple-touch-icon" href="icon.svg"><meta name="version" content="2.4.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>PCCheck — PC buying and build checker</title>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -12,8 +12,15 @@
 <header class="topbar">
   <a class="brand" href="#top" aria-label="PCCheck home"><span class="logo">PC</span> PC<span>CHECK</span></a>
   <nav aria-label="Main navigation"><a href="#analyze">Used PC</a><a href="#build">Build checker</a><a href="#saved">Saved reports</a><a href="guides.html">Guides</a><a href="privacy.html">Privacy & limits</a></nav>
-  <div class="topbar-tools"><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="Turn interface sounds on or off"><span class="sound-icon" aria-hidden="true">♪</span><span id="soundLabel">Sound off</span></button><button class="profile" id="accountBtn" type="button">Local workspace <b>⌄</b></button></div>
+  
 </header>
+<nav class="mobile-tabs" aria-label="App navigation">
+  <button type="button" data-tab="home" class="active" aria-current="page"><span aria-hidden="true">⌂</span><small>Home</small></button>
+  <button type="button" data-tab="analyze"><span aria-hidden="true">◉</span><small>Used PC</small></button>
+  <button type="button" data-tab="build"><span aria-hidden="true">▦</span><small>Build</small></button>
+  <button type="button" data-tab="saved"><span aria-hidden="true">▤</span><small>Saved</small></button>
+  <button type="button" data-tab="guides"><span aria-hidden="true">⌘</span><small>Guides</small></button>
+</nav>
 <main id="top">
 <section class="hero">
   <div class="eyebrow"><i></i> PC BUYING TOOLKIT</div>
@@ -21,20 +28,25 @@
   <p>Review used gaming PC details, catch missing information, and check basic compatibility before you spend money on a build.</p>
   <div class="hero-actions"><a class="btn primary" href="#analyze">Check a used PC <b>↗</b></a><a class="btn ghost" href="#build">Check a build</a></div>
   <div class="hero-stats"><span>01 <small>USED PC REVIEW</small></span><span>02 <small>BUILD COMPATIBILITY</small></span><span>03 <small>SAVED REPORTS</small></span><span>04 <small>BUYER GUIDES</small></span></div>
+  <div class="pro-teaser">
+    <div><span class="mini-label">OPTIONAL / PCCHECK PLUS</span><h3>More insight. Better decisions.</h3><p>Preview upcoming tools for deeper PC comparisons and cleaner reports.</p></div>
+    <div class="pro-teaser-actions"><span class="pro-price">Planned test price <b>$4.99/mo</b></span><button class="btn ghost" id="proPreviewButton" type="button">Preview Plus ↗</button></div>
+  </div>
+  <div class="pro-preview" id="proPreview" hidden aria-live="polite">
+    <div class="pro-preview-head"><div><span class="mini-label">PLUS / PRODUCT PREVIEW</span><h3>What a paid plan could include</h3></div><span class="pill">DEMO ONLY</span></div>
+    <div class="pro-feature-grid">
+      <article><b>01 / Comparison workspace</b><p>Compare multiple saved PC assessments side by side.</p><small>Planned feature</small></article>
+      <article><b>02 / Expanded reports</b><p>More detailed risk explanations and printable report layouts.</p><small>Planned feature</small></article>
+      <article><b>03 / Build history</b><p>Keep versions of a build and review changes over time.</p><small>Planned feature</small></article>
+    </div>
+    <p class="pro-demo-note">This is a pricing and feature experiment only. No checkout, subscription, account, or payment collection is active.</p>
+    <button class="btn ghost" id="closeProPreview" type="button">Close preview</button>
+  </div>
   <div class="hero-art" aria-hidden="true"><div class="ring r1"></div><div class="ring r2"></div><div class="gpu"><div class="gpu-screen">PC<span>CHECK</span><small>HARDWARE INTELLIGENCE</small></div></div><div class="float f1">LOCAL CHECKS <b>● READY</b></div><div class="float f2">BUY SMARTER&nbsp; ✦ &nbsp;BUILD BETTER</div></div>
 </section>
 
 <section class="workspace" id="analyze">
-  <div class="section-title"><div class="eyebrow">01 / USED PC LISTING</div><h2>Review a used gaming PC</h2><p>Paste listing text or upload a screenshot, then compare the asking price with similar systems.</p></div>
-  <div class="panel">
-    <div class="panel-head"><div><span class="mini-label">LISTING SOURCE</span><h3>Start with a listing URL</h3></div><span class="pill">LINK RECOGNITION</span></div>
-    <form id="urlForm">
-      <label for="listingUrl">Public listing URL</label>
-      <div class="url-row"><span>↗</span><input id="listingUrl" type="url" placeholder="https://www.ebay.com/itm/..." autocomplete="url"><button class="btn primary" type="submit">Recognize link →</button></div>
-      <div class="marketplaces"><span>SITES PCHECK CAN RECOGNIZE</span><div class="chips"><b>Facebook Marketplace</b><b>eBay</b><b>Craigslist</b><b>OfferUp</b><b>Other websites</b></div></div>
-      <div id="linkMessage" class="message" role="status" hidden></div>
-    </form>
-  </div>
+  <div class="section-title"><div class="eyebrow">01 / USED PC LISTING</div><h2>Review a used gaming PC</h2><p>Paste listing details or upload a screenshot. PCCheck extracts likely specs for you to review before running a check.</p></div>
   <div class="panel import-panel">
     <div class="panel-head"><div><span class="mini-label">QUICK SPEC EXTRACTION</span><h3>Paste the listing details</h3></div><span class="pill">LOCAL PARSER</span></div>
     <p class="fine">Open the product page, copy its title and description/specifications, then paste them here. PCCheck will look for known CPU, GPU, RAM, and storage names. It does not bypass site restrictions or automatically read private/dynamic pages.</p>
@@ -54,7 +66,7 @@
   <div class="or"><span>ENTER THE PC DETAILS</span></div>
   <form class="panel manual" id="manualForm">
     <div class="panel-head"><div><span class="mini-label">USED PC ASSESSMENT</span><h3>What is the seller offering?</h3></div><span class="step">01 / 02</span></div>
-    <input type="hidden" name="sourceUrl" id="sourceUrl"><input type="hidden" name="sourceName" id="sourceName">
+    
     <div class="fields">
       <label>CPU <input name="cpu" required placeholder="Ryzen 5 5600X" list="cpuSuggestions" autocomplete="off"><datalist id="cpuSuggestions"></datalist></label>
       <label>GPU <input name="gpu" required placeholder="RTX 3060" list="gpuSuggestions" autocomplete="off"><datalist id="gpuSuggestions"></datalist></label>
@@ -131,8 +143,5 @@
 </main>
 <footer><a class="brand" href="#top"><span class="logo">PC</span> PC<span>CHECK</span></a><span>Independent PC evaluation tool · Early release</span><span class="footer-note"><a href="guides.html">Buyer guides</a> · <a href="privacy.html">Privacy & limits</a> · Not affiliated with any marketplace.</span></footer>
 
-<div class="modal-backdrop" id="accountModal" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="close" id="closeModal" type="button" aria-label="Close">×</button><div class="eyebrow">PCCHECK WORKSPACE</div><h2 id="modalTitle">Guest workspace</h2><p>PCCheck currently saves reports locally in this browser. There is no sign-in or cloud sync. A real account system requires a secure backend and privacy protections; it is not simulated here.</p><button class="btn primary" id="modalOk" type="button">Understood</button></div>
-</div>
 <script src="app.js" defer></script>
 </body></html>
