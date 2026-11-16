@@ -64,6 +64,7 @@
           $('accountPlusStatus').textContent = result.hasPlus
             ? 'PCCheck Plus is active.'
             : 'Free account · Plus is not active.';
+          $('accountManageBilling').hidden = !result.hasCustomer;
         } catch (error) {
           $('accountPlusStatus').textContent = 'Membership status is temporarily unavailable.';
         }
@@ -114,6 +115,25 @@
       setStatus(error.message || 'Account request failed. Please try again.', 'error');
     } finally {
       submit.disabled = false;
+    }
+  });
+  $('accountManageBilling')?.addEventListener('click', async () => {
+    const button = $('accountManageBilling');
+    button.disabled = true;
+    try {
+      const session = await getSession();
+      if (!session?.access_token) throw new Error('Sign in again to manage billing.');
+      const response = await fetch('/api/create-portal-session', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + session.access_token }
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.url) throw new Error(result.error || 'Billing management is unavailable.');
+      window.location.assign(result.url);
+    } catch (error) {
+      setStatus(error.message || 'Could not open billing management.', 'error');
+    } finally {
+      button.disabled = false;
     }
   });
   $('accountSignOut')?.addEventListener('click', async () => {
