@@ -191,6 +191,24 @@ function persistReports() {
   syncLayout();
 })();
 
+
+/* Non-payment Plus preview: measures interest without collecting payment data. */
+(() => {
+ const open = document.getElementById('proPreviewButton');
+ const close = document.getElementById('closeProPreview');
+ const panel = document.getElementById('proPreview');
+ if (!open || !close || !panel) return;
+ open.addEventListener('click', () => {
+   panel.hidden = false;
+   open.textContent = 'Preview open ✓';
+   panel.scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'nearest'});
+ });
+ close.addEventListener('click', () => {
+   panel.hidden = true;
+   open.textContent = 'Preview Plus ↗';
+ });
+})();
+
 renderReports();
 }
 function escapeHTML(value) {
