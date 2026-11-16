@@ -31,7 +31,7 @@ module.exports = async function handler(req, res) {
     });
     if (!userResponse.ok) return res.status(401).json({ error: 'Your session is invalid or expired. Sign in again.' });
     const user = await userResponse.json();
-    if (!user.id || !user.email) return res.status(401).json({ error: 'A verified account email is required for checkout.' });
+    if (!user.id || !user.email || !user.email_confirmed_at) return res.status(403).json({ error: 'Confirm your account email before starting checkout.' });
 
     const priceResponse = await fetch('https://api.stripe.com/v1/prices/' + encodeURIComponent(priceId), {
       headers: { Authorization: 'Bearer ' + secretKey }
