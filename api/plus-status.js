@@ -18,7 +18,7 @@ module.exports = async function handler(req, res) {
     const user = await userResponse.json();
     const query = new URLSearchParams({
       user_id: 'eq.' + user.id,
-      select: 'status,current_period_end,cancel_at_period_end',
+      select: 'status,current_period_end,cancel_at_period_end,stripe_customer_id',
       order: 'updated_at.desc',
       limit: '1'
     });
@@ -34,7 +34,7 @@ module.exports = async function handler(req, res) {
     const allowedStatus = row && ['active', 'trialing'].includes(row.status);
     const notExpired = !row?.current_period_end || new Date(row.current_period_end).getTime() > Date.now();
     return res.status(200).json({
-      hasPlus: Boolean(allowedStatus && notExpired),
+      hasPlus: Boolean(allowedStatus && notExpired),\n      hasCustomer: Boolean(row?.stripe_customer_id),
       status: row?.status || 'free',
       currentPeriodEnd: row?.current_period_end || null,
       cancelAtPeriodEnd: Boolean(row?.cancel_at_period_end)
