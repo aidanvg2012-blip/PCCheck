@@ -153,7 +153,8 @@ function persistReports() {
   } catch {
     $('storageStatus').textContent = 'Browser storage is full or unavailable';
   }
-  
+}
+
 /* Mobile app-style tab navigation. Desktop continues to show the complete dashboard. */
 (() => {
   const mobileQuery = window.matchMedia('(max-width: 700px)');
