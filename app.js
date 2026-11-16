@@ -2,11 +2,7 @@
 
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = 'pccheck_reports_v5';
-const APP_VERSION = '2.3.0';
-const knownHosts = [
-  ['facebook.com', 'Facebook Marketplace'], ['fb.com', 'Facebook'],
-  ['ebay.com', 'eBay'], ['craigslist.org', 'Craigslist'], ['offerup.com', 'OfferUp']
-];
+const APP_VERSION = '2.4.0';
 
 
 // Curated recognition catalog. Aliases are intentionally explicit to avoid guessing.
@@ -173,27 +169,6 @@ function showMessage(element, text, type='info') {
   element.className = `message ${type}`;
   element.textContent = text;
 }
-function detectMarketplace(raw) {
-  let url;
-  try { url = new URL(raw); } catch { return {error:'Enter a complete URL, including https://'}; }
-  if (!['http:', 'https:'].includes(url.protocol)) return {error:'Only http and https links are accepted.'};
-  const host = url.hostname.toLowerCase().replace(/^www\./, '');
-  const match = knownHosts.find(([domain]) => host === domain || host.endsWith(`.${domain}`));
-  return {url:url.href, host, source:match ? match[1] : 'Other website'};
-}
-
-$('urlForm').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const result = detectMarketplace($('listingUrl').value.trim());
-  const box = $('linkMessage');
-  if (result.error) { showMessage(box, result.error, 'error'); return; }
-  $('sourceUrl').value = result.url;
-  $('sourceName').value = result.source;
-  showMessage(box, `${result.source} link recognized. PCCheck cannot reliably read product pages directly because many sites block automated access. Copy the listing title/specifications into the Paste Listing Details box below, or enter them manually. The source link will be attached to your report.`, 'success');
-  $('manualForm').scrollIntoView({behavior:'smooth', block:'start'});
-});
-
-
 function recognizeField(type, value) {
   const match = findCatalogMatch(value, type);
   return match ? match.canonical : clean(value);
@@ -476,7 +451,6 @@ function reportMarkup(report) {
     body += `<p class="report-note">${report.passed} passed · ${report.failed} conflict(s) · ${report.warnings} warnings · ${report.unknown} not checked.</p>`;
     body += `<p class="report-note">These are basic checks only. They do not verify BIOS support, physical clearances, connector availability, cooler fit, or every model-specific requirement.</p>`;
   }
-  const source = report.input.sourceUrl ? `<p class="report-note">Listing source: <a href="${escapeHTML(report.input.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHTML(report.input.sourceName || 'Open listing')}</a></p>` : '';
   return `<div class="report-result"><div class="report-top"><div><span class="mini-label">PCHECK REPORT</span><h3>${escapeHTML(report.title)}</h3></div><span class="verdict ${tone}">${escapeHTML(status)}</span></div><p class="report-summary">${escapeHTML(report.summary)}</p>${body}${source}<div class="report-actions"><button class="btn ghost" type="button" id="saveCurrent">Save report</button><button class="btn ghost" type="button" id="printReport">Print / PDF</button><button class="btn ghost" type="button" id="exportReport">Export JSON</button><button class="text-button" type="button" id="closeReport">Close</button></div></div>`;
 }
 function openReport(report) {
@@ -538,60 +512,7 @@ $('clearSaved')?.addEventListener('click',()=>{
   if (confirm('Delete every saved PCCheck report from this browser? This cannot be undone.')) { reports=[]; persistReports(); }
 });
 
-const modal = $('accountModal');
-$('accountBtn').addEventListener('click', () => { modal.hidden = false; });
-$('closeModal').addEventListener('click', () => { modal.hidden = true; });
-$('modalOk').addEventListener('click', () => { modal.hidden = true; });
-modal.addEventListener('click', event => { if (event.target === modal) modal.hidden = true; });
-document.addEventListener('keydown', event => { if (event.key === 'Escape') modal.hidden = true; });
-// Small synthesized interface sounds. Audio is opt-in and starts only after a user gesture.
-const SOUND_KEY = 'pccheck_ui_sounds';
-let soundEnabled = false;
-try { soundEnabled = localStorage.getItem(SOUND_KEY) === 'on'; } catch {}
-let audioContext = null;
-function playUiSound(kind='tap') {
-  if (!soundEnabled || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-  try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-    audioContext ||= new AudioCtx();
-    if (audioContext.state === 'suspended') audioContext.resume();
-    const now = audioContext.currentTime;
-    const notes = kind === 'success' ? [660, 880] : kind === 'toggle' ? [520] : [420];
-    notes.forEach((frequency, index) => {
-      const oscillator = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(frequency, now + index * 0.075);
-      gain.gain.setValueAtTime(0.0001, now + index * 0.075);
-      gain.gain.exponentialRampToValueAtTime(kind === 'tap' ? 0.018 : 0.025, now + index * 0.075 + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.075 + 0.095);
-      oscillator.connect(gain); gain.connect(audioContext.destination);
-      oscillator.start(now + index * 0.075); oscillator.stop(now + index * 0.075 + 0.105);
-    });
-  } catch { /* Audio is decorative; never interrupt core app behavior. */ }
-}
-function syncSoundToggle() {
-  const button = $('soundToggle'), label = $('soundLabel');
-  if (!button || !label) return;
-  button.setAttribute('aria-pressed', String(soundEnabled));
-  label.textContent = soundEnabled ? 'Sound on' : 'Sound off';
-  button.title = soundEnabled ? 'Turn interface sounds off' : 'Turn interface sounds on';
-}
-$('soundToggle')?.addEventListener('click', () => {
-  soundEnabled = !soundEnabled;
-  try { localStorage.setItem(SOUND_KEY, soundEnabled ? 'on' : 'off'); } catch {}
-  syncSoundToggle();
-  if (soundEnabled) playUiSound('toggle');
-});
-document.addEventListener('click', event => {
-  const control = event.target.closest('button, .btn');
-  if (!control || control.id === 'soundToggle' || control.disabled) return;
-  playUiSound(control.id === 'saveCurrent' || control.id === 'extractSpecs' || control.id === 'analyzeScreenshot' ? 'success' : 'tap');
-});
-syncSoundToggle();
-
 renderReports();
 wireHardwareRecognition();
 
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !window.Capacitor?.isNativePlatform?.()) navigator.serviceWorker.register('./sw.js').catch(()=>{});
