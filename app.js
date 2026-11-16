@@ -210,18 +210,24 @@ function persistReports() {
  });
 })();
 
-/* Stripe Checkout: test mode only. Paid access is not granted by a redirect. */
+/* Stripe Checkout: authenticated test mode only. Paid access comes from verified webhook state. */
 (() => {
  const button = document.getElementById('plusCheckoutButton');
  const status = document.getElementById('plusCheckoutStatus');
  if (!button || !status) return;
  button.addEventListener('click', async () => {
    button.disabled = true;
-   status.textContent = 'Preparing secure test checkout…';
    try {
+     const session = await window.PCCheckAuth?.getSession();
+     if (!session?.access_token) {
+       status.textContent = 'Sign in or create a PCCheck account before trying test checkout.';
+       window.PCCheckAuth?.openModal();
+       return;
+     }
+     status.textContent = 'Preparing secure test checkout…';
      const response = await fetch('/api/create-checkout-session', {
        method: 'POST',
-       headers: {'Content-Type':'application/json'},
+       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
        body: JSON.stringify({})
      });
      const data = await response.json().catch(() => ({}));
@@ -229,6 +235,7 @@ function persistReports() {
      window.location.assign(data.url);
    } catch (error) {
      status.textContent = error.message || 'Unable to start checkout. Please try again.';
+   } finally {
      button.disabled = false;
    }
  });
