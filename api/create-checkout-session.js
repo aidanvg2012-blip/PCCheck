@@ -1,4 +1,5 @@
-// Vercel serverless function: creates a Stripe Checkout Session in TEST mode only.
+// Creates a Stripe Checkout Session for the currently authenticated PCCheck user.
+// Test mode only. The browser never supplies a user ID or Stripe customer ID.
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -7,30 +8,53 @@ module.exports = async function handler(req, res) {
 
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const priceId = process.env.STRIPE_TEST_PRICE_ID;
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const appUrl = (process.env.PCCHECK_APP_URL || 'https://pccheck.vercel.app').replace(/\/$/, '');
 
-  // Deliberately refuse live keys. Live billing requires a separate reviewed release.
-  if (!secretKey || !priceId) {
-    return res.status(503).json({ error: 'Stripe test checkout is not configured yet. Add the test-mode key and test Price ID in Vercel.' });
+  if (!secretKey || !priceId || !supabaseUrl || !serviceRoleKey) {
+    return res.status(503).json({ error: 'Checkout or account service is not configured.' });
   }
   if (!secretKey.startsWith('sk_test_')) {
-    return res.status(503).json({ error: 'Checkout is locked to Stripe test mode. A test-mode secret key is required.' });
+    return res.status(503).json({ error: 'Checkout is locked to Stripe test mode.' });
   }
   if (!priceId.startsWith('price_')) {
     return res.status(503).json({ error: 'The Stripe test Price ID is invalid.' });
   }
 
+  const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  if (!token || token.length > 10000) return res.status(401).json({ error: 'Sign in before starting checkout.' });
+
   try {
+    const userResponse = await fetch(supabaseUrl.replace(/\/$/, '') + '/auth/v1/user', {
+      headers: { apikey: serviceRoleKey, Authorization: 'Bearer ' + token }
+    });
+    if (!userResponse.ok) return res.status(401).json({ error: 'Your session is invalid or expired. Sign in again.' });
+    const user = await userResponse.json();
+    if (!user.id || !user.email) return res.status(401).json({ error: 'A verified account email is required for checkout.' });
+
     const priceResponse = await fetch('https://api.stripe.com/v1/prices/' + encodeURIComponent(priceId), {
       headers: { Authorization: 'Bearer ' + secretKey }
     });
     const price = await priceResponse.json();
-    if (!priceResponse.ok) {
-      return res.status(503).json({ error: 'Stripe could not verify the configured test Price ID.' });
-    }
-    if (price.livemode !== false || price.active !== true ||
-        price.type !== 'recurring' || price.recurring?.interval !== 'month') {
+    if (!priceResponse.ok) return res.status(503).json({ error: 'Stripe could not verify the configured test Price ID.' });
+    if (price.livemode !== false || price.active !== true || price.type !== 'recurring' || price.recurring?.interval !== 'month') {
       return res.status(400).json({ error: 'The configured Stripe Price must be an active monthly recurring TEST price.' });
+    }
+
+    const existingQuery = new URLSearchParams({
+      user_id: 'eq.' + user.id,
+      status: 'in.(active,trialing)',
+      select: 'stripe_subscription_id',
+      limit: '1'
+    });
+    const existingResponse = await fetch(supabaseUrl.replace(/\/$/, '') + '/rest/v1/subscriptions?' + existingQuery.toString(), {
+      headers: { apikey: serviceRoleKey, Authorization: 'Bearer ' + serviceRoleKey }
+    });
+    if (!existingResponse.ok) return res.status(502).json({ error: 'Could not verify your current membership.' });
+    const existing = await existingResponse.json();
+    if (Array.isArray(existing) && existing.length) {
+      return res.status(409).json({ error: 'This account already has an active Plus subscription.' });
     }
 
     const form = new URLSearchParams();
@@ -41,14 +65,14 @@ module.exports = async function handler(req, res) {
     form.set('cancel_url', appUrl + '/?checkout=cancelled');
     form.set('billing_address_collection', 'auto');
     form.set('allow_promotion_codes', 'true');
-    form.set('client_reference_id', 'pccheck-plus-test');
+    form.set('customer_email', user.email);
+    form.set('client_reference_id', user.id);
+    form.set('metadata[supabase_user_id]', user.id);
+    form.set('subscription_data[metadata][supabase_user_id]', user.id);
 
     const sessionResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + secretKey,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
+      headers: { Authorization: 'Bearer ' + secretKey, 'Content-Type': 'application/x-www-form-urlencoded' },
       body: form.toString()
     });
     const session = await sessionResponse.json();
