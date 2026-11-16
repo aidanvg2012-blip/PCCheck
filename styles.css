@@ -95,3 +95,20 @@ html{scroll-padding-top:76px}body{padding-bottom:env(safe-area-inset-bottom)}
 .pro-feature-grid article>b{font-size:11px;color:#e8f5fa}.pro-feature-grid article p{margin:8px 0 12px}.pro-feature-grid article small{font-size:9px;color:#9ce8ed;text-transform:uppercase;letter-spacing:.08em}
 .pro-demo-note{margin:16px 0!important;padding:10px 12px;border-left:2px solid #69d8e7;background:#69d8e70a}
 @media(max-width:700px){.pro-teaser{display:block;margin-top:26px;padding:16px}.pro-teaser-actions{align-items:flex-start;margin-top:13px}.pro-feature-grid{grid-template-columns:1fr}.pro-preview{padding:16px}.pro-preview-head{flex-wrap:wrap}}
+
+/* PCCheck account beta */
+.account-modal{width:min(100%,440px);max-height:min(90vh,760px);overflow:auto}
+.account-modal h2{margin:10px 0}
+.account-modal>p{line-height:1.65}
+#accountForm{display:grid;gap:14px;margin-top:18px}
+#accountForm label{display:grid;gap:7px}
+#accountForm input{width:100%;min-height:44px}
+#accountForm .account-consent{display:flex;flex-direction:row;align-items:flex-start;gap:10px;font-size:10px;line-height:1.6;font-weight:500}
+#accountForm .account-consent input{width:17px;min-width:17px;height:17px;min-height:17px;margin:1px 0 0;accent-color:var(--cyan)}
+#accountSubmit{width:100%;margin-top:2px}
+.account-toggle{margin-top:14px;padding:8px 0;color:var(--cyan)}
+.account-email{overflow-wrap:anywhere;color:#dce8f3;font-size:13px}
+.account-membership{margin:14px 0;padding:13px;border:1px solid #69d8e744;border-radius:7px;background:#69d8e70b;color:#c9f3f5;font-size:12px}
+.account-beta{margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
+#accountStatus:empty{display:none}
+@media(max-width:600px){.account-modal{padding:25px 18px}.account-backdrop{padding:12px}}
