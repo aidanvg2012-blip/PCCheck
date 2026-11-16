@@ -1,37 +1,35 @@
-PCCheck — expanded early release
-=================================
+PCCheck 2.1 — Hardware Recognition & Listing Text Import
+========================================================
 
-WHAT IS INCLUDED
-- Used gaming PC review form with missing-information checks, buyer warnings, and a specification completeness indicator.
-- Listing URL recognition for Facebook Marketplace, eBay, Craigslist, OfferUp, and other HTTP/HTTPS websites. The app does NOT scrape or import listing details.
-- Custom build checker: CPU / motherboard socket comparison, DDR generation, RAM capacity, motherboard / case size, user-entered power estimate, GPU length clearance, and CPU cooler height clearance.
-- Explicit warnings for items that still require exact manufacturer verification (CPU / BIOS support, PSU quality and connectors, storage slot details).
-- Saved reports in this browser, with view/delete, export-all JSON, single-report JSON export, and print / save-as-PDF.
-- Buyer guides, compatibility checklist, FAQ, privacy / limitations information.
-- PWA manifest, SVG icon, and service worker for an installable/offline app shell when hosted over HTTPS or localhost.
-- Responsive layout for mobile and desktop.
-
-RUN LOCALLY
-1. Extract the ZIP.
-2. Open the PCCheck folder in a code editor.
-3. For PWA testing, serve the folder from localhost (for example, VS Code Live Server). Opening index.html directly still runs the core app, but service workers do not run from file://.
-
-PUBLISHING
-- Upload the folder to a static host such as GitHub Pages, Netlify, or Vercel.
-- Use HTTPS. Test on desktop and phone before sharing publicly.
-- A static deployment does not create secure accounts or cloud storage.
+WHAT IS NEW IN 2.1
+- Curated CPU and GPU recognition catalog with common model aliases and shorthand.
+- CPU/GPU autocomplete suggestions in both checkers.
+- Canonicalizes recognized CPU/GPU names before assessment.
+- New listing-text extraction: copy a public product/listing title and specifications, paste them into PCCheck, and extract recognized CPU, GPU, RAM, and storage fields.
+- Service worker cache version updated so deployed browsers can receive the new app shell.
 
 IMPORTANT LIMITATIONS
-- No secure user accounts, server, cloud synchronization, analytics, payments, or subscription system.
-- No automatic marketplace listing extraction. Use only approved APIs / permitted integrations if adding this later; do not bypass login, CAPTCHA, or anti-bot controls.
-- No live market pricing, used-PC valuation, benchmark database, or complete hardware compatibility database.
-- Power figures are user-entered planning estimates. They do not evaluate PSU quality, transient behavior, or connectors.
-- Basic socket / RAM / size comparisons are not a complete compatibility guarantee. Check exact model numbers, motherboard CPU support lists, BIOS version, case / cooler / GPU dimensions, storage lane sharing, and manufacturer documentation.
-- Reports are stored only in the browser's local storage. They can be lost if browser data is cleared and are not available on other devices.
+- Pasting a URL only recognizes its website/source. It does not fetch or scrape the page.
+- Product pages often use scripts, login walls, anti-bot systems, and cross-origin restrictions. PCCheck does not bypass these.
+- Listing-text extraction uses a local, curated model catalog. It will not recognize every CPU/GPU or every typo. Always review the extracted values.
+- Unrecognized components should be entered manually. No unknown model is silently guessed.
+- Compatibility checks remain rule-based estimates, not a substitute for manufacturer specifications.
+- Saved reports are local to the current browser/device. There is no account system, cloud sync, or real subscription/payment processing.
 
-NEXT REAL PRODUCT MILESTONES
-1. Build and test a verified component specification catalog with exact model identifiers and sources.
-2. Add a backend for accounts, secure authentication, cloud reports, and user data deletion/export.
-3. Add marketplace integrations only where APIs and terms permit them.
-4. Add pricing data from a documented, licensed source and show dates, region, and confidence ranges.
-5. Add automated tests, accessibility review, error reporting, and privacy policy before public launch.
+RUN LOCALLY
+1. Extract this ZIP.
+2. Open the extracted folder in a code editor.
+3. For local PWA testing, run a local web server (for example, VS Code Live Server).
+4. Open the local HTTPS/localhost address in a supported browser.
+
+DEPLOY
+Upload the contents of this folder to the root of the GitHub repository.
+Vercel should deploy the static site automatically when the main branch changes.
+
+INSTALL
+On a supported browser, open the deployed site and use the browser's Install App / Install PCCheck option if offered.
+Service worker and manifest require HTTPS or localhost.
+
+PRIVACY
+The listing text parser runs in the browser. It does not send pasted text to an external service.
+Saved reports use localStorage on this device/browser.

@@ -2,10 +2,123 @@
 
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = 'pccheck_reports_v4';
+const APP_VERSION = '2.1.0';
 const knownHosts = [
   ['facebook.com', 'Facebook Marketplace'], ['fb.com', 'Facebook'],
   ['ebay.com', 'eBay'], ['craigslist.org', 'Craigslist'], ['offerup.com', 'OfferUp']
 ];
+
+
+// Curated recognition catalog. Aliases are intentionally explicit to avoid guessing.
+const HARDWARE_CATALOG = {
+  cpu: [
+    ['AMD Ryzen 7 7800X3D',['ryzen 7 7800x3d','7800x3d','r7 7800x3d']],
+    ['AMD Ryzen 7 9800X3D',['ryzen 7 9800x3d','9800x3d']],
+    ['AMD Ryzen 5 5600X',['ryzen 5 5600x','5600x','r5 5600x']],
+    ['AMD Ryzen 5 5600',['ryzen 5 5600','r5 5600']],
+    ['AMD Ryzen 5 7600',['ryzen 5 7600','r5 7600']],
+    ['AMD Ryzen 5 7600X',['ryzen 5 7600x','7600x']],
+    ['AMD Ryzen 7 5700X',['ryzen 7 5700x','5700x']],
+    ['AMD Ryzen 7 5800X3D',['ryzen 7 5800x3d','5800x3d']],
+    ['AMD Ryzen 7 7700X',['ryzen 7 7700x','7700x']],
+    ['AMD Ryzen 9 5900X',['ryzen 9 5900x','5900x']],
+    ['AMD Ryzen 9 7900X',['ryzen 9 7900x','7900x']],
+    ['AMD Ryzen 9 7950X',['ryzen 9 7950x','7950x']],
+    ['Intel Core i5-12400F',['core i5 12400f','i5 12400f','12400f']],
+    ['Intel Core i5-12600K',['core i5 12600k','i5 12600k','12600k']],
+    ['Intel Core i5-13400F',['core i5 13400f','i5 13400f','13400f']],
+    ['Intel Core i5-13600K',['core i5 13600k','i5 13600k','13600k']],
+    ['Intel Core i5-14600K',['core i5 14600k','i5 14600k','14600k']],
+    ['Intel Core i7-12700K',['core i7 12700k','i7 12700k','12700k']],
+    ['Intel Core i7-13700K',['core i7 13700k','i7 13700k','13700k']],
+    ['Intel Core i7-14700K',['core i7 14700k','i7 14700k','14700k']],
+    ['Intel Core i9-12900K',['core i9 12900k','i9 12900k','12900k']],
+    ['Intel Core i9-13900K',['core i9 13900k','i9 13900k','13900k']],
+    ['Intel Core i9-14900K',['core i9 14900k','i9 14900k','14900k']],
+    ['Intel Core Ultra 7 265K',['core ultra 7 265k','ultra 7 265k','265k']],
+    ['Intel Core Ultra 9 285K',['core ultra 9 285k','ultra 9 285k','285k']]
+  ],
+  gpu: [
+    ['NVIDIA GeForce RTX 5090',['rtx 5090','geforce rtx 5090']],
+    ['NVIDIA GeForce RTX 5080',['rtx 5080','geforce rtx 5080']],
+    ['NVIDIA GeForce RTX 5070 Ti',['rtx 5070 ti','5070ti']],
+    ['NVIDIA GeForce RTX 5070',['rtx 5070']],
+    ['NVIDIA GeForce RTX 5060 Ti',['rtx 5060 ti','5060ti']],
+    ['NVIDIA GeForce RTX 5060',['rtx 5060']],
+    ['NVIDIA GeForce RTX 4090',['rtx 4090']],
+    ['NVIDIA GeForce RTX 4080 Super',['rtx 4080 super','4080s']],
+    ['NVIDIA GeForce RTX 4080',['rtx 4080']],
+    ['NVIDIA GeForce RTX 4070 Ti Super',['rtx 4070 ti super','4070tis']],
+    ['NVIDIA GeForce RTX 4070 Ti',['rtx 4070 ti','4070ti']],
+    ['NVIDIA GeForce RTX 4070 Super',['rtx 4070 super','4070s']],
+    ['NVIDIA GeForce RTX 4070',['rtx 4070']],
+    ['NVIDIA GeForce RTX 4060 Ti',['rtx 4060 ti','4060ti']],
+    ['NVIDIA GeForce RTX 4060',['rtx 4060']],
+    ['NVIDIA GeForce RTX 3090',['rtx 3090']],
+    ['NVIDIA GeForce RTX 3080',['rtx 3080']],
+    ['NVIDIA GeForce RTX 3070',['rtx 3070']],
+    ['NVIDIA GeForce RTX 3060 Ti',['rtx 3060 ti','3060ti']],
+    ['NVIDIA GeForce RTX 3060',['rtx 3060']],
+    ['NVIDIA GeForce RTX 3050',['rtx 3050']],
+    ['NVIDIA GeForce GTX 1660 Super',['gtx 1660 super','1660s']],
+    ['NVIDIA GeForce GTX 1660 Ti',['gtx 1660 ti','1660ti']],
+    ['NVIDIA GeForce GTX 1660',['gtx 1660']],
+    ['NVIDIA GeForce GTX 1650',['gtx 1650']],
+    ['AMD Radeon RX 9070 XT',['rx 9070 xt','9070xt']],
+    ['AMD Radeon RX 9070',['rx 9070']],
+    ['AMD Radeon RX 7900 XTX',['rx 7900 xtx','7900xtx']],
+    ['AMD Radeon RX 7900 XT',['rx 7900 xt','7900xt']],
+    ['AMD Radeon RX 7800 XT',['rx 7800 xt','7800xt']],
+    ['AMD Radeon RX 7700 XT',['rx 7700 xt','7700xt']],
+    ['AMD Radeon RX 7600 XT',['rx 7600 xt','7600xt']],
+    ['AMD Radeon RX 7600',['rx 7600']],
+    ['AMD Radeon RX 6950 XT',['rx 6950 xt','6950xt']],
+    ['AMD Radeon RX 6900 XT',['rx 6900 xt','6900xt']],
+    ['AMD Radeon RX 6800 XT',['rx 6800 xt','6800xt']],
+    ['AMD Radeon RX 6700 XT',['rx 6700 xt','6700xt']],
+    ['AMD Radeon RX 6600 XT',['rx 6600 xt','6600xt']],
+    ['AMD Radeon RX 6600',['rx 6600']]
+  ]
+};
+function normalizeHardwareText(value) {
+  return clean(value).toLowerCase().replace(/\b(amd|intel|nvidia|geforce|radeon)\b/g,' ').replace(/[^a-z0-9]/g,'');
+}
+function findCatalogMatch(text, type) {
+  const normalized = normalizeHardwareText(text);
+  const entries = HARDWARE_CATALOG[type] || [];
+  const matches = [];
+  for (const [canonical, aliases] of entries) {
+    for (const alias of aliases) {
+      const key = normalizeHardwareText(alias);
+      if (key.length >= 4 && normalized.includes(key)) {
+        matches.push({canonical, alias, length:key.length});
+        break;
+      }
+    }
+  }
+  matches.sort((a,b)=>b.length-a.length);
+  return matches[0] || null;
+}
+function populateHardwareSuggestions() {
+  for (const type of ['cpu','gpu']) {
+    const list = $(`${type}Suggestions`);
+    if (list) list.innerHTML = HARDWARE_CATALOG[type].map(([name])=>`<option value="${escapeHTML(name)}">`).join('');
+  }
+}
+function extractListingSpecs(text) {
+  const cpu = findCatalogMatch(text,'cpu');
+  const gpu = findCatalogMatch(text,'gpu');
+  const ram = clean(text).match(/\b(8|16|24|32|48|64|96|128|256)\s*gb\s*(?:of\s*)?(ddr\s*[345])\b/i);
+  const storage = clean(text).match(/\b(256|500|512|1000|1024|2000|2048|4000|4096)\s*(gb|tb)\s*(?:m\.2\s*)?(nvme|ssd|hdd|hard\s*drive)\b/i)
+    || clean(text).match(/\b(\d+)\s*(tb|gb)\s*(nvme|ssd|hdd)\b/i);
+  return {
+    cpu:cpu?.canonical || '',
+    gpu:gpu?.canonical || '',
+    ram:ram ? `${ram[1]}GB ${ram[2].replace(/\s/g,'').toUpperCase()}` : '',
+    storage:storage ? `${storage[1]}${storage[2].toUpperCase()} ${storage[3].toUpperCase().replace(/\s/g,'')}` : '',
+    found:[cpu&&'CPU',gpu&&'GPU',ram&&'RAM',storage&&'Storage'].filter(Boolean)
+  };
+}
 
 let reports = loadReports();
 let activeReport = null;
@@ -57,9 +170,41 @@ $('urlForm').addEventListener('submit', (event) => {
   if (result.error) { showMessage(box, result.error, 'error'); return; }
   $('sourceUrl').value = result.url;
   $('sourceName').value = result.source;
-  showMessage(box, `${result.source} link recognized. This version does not extract listing details automatically. Enter the specifications below; the source link will be attached to your report.`, 'success');
+  showMessage(box, `${result.source} link recognized. PCCheck cannot reliably read product pages directly because many sites block automated access. Copy the listing title/specifications into the Paste Listing Details box below, or enter them manually. The source link will be attached to your report.`, 'success');
   $('manualForm').scrollIntoView({behavior:'smooth', block:'start'});
 });
+
+
+function recognizeField(type, value) {
+  const match = findCatalogMatch(value, type);
+  return match ? match.canonical : clean(value);
+}
+function wireHardwareRecognition() {
+  populateHardwareSuggestions();
+  const extractButton = $('extractSpecs');
+  if (extractButton) extractButton.addEventListener('click', () => {
+    const text = $('listingText').value;
+    const found = extractListingSpecs(text);
+    const fields = $('manualForm');
+    for (const key of ['cpu','gpu','ram','storage']) {
+      const input = fields.elements.namedItem(key);
+      if (found[key]) input.value = found[key];
+    }
+    const status = $('extractStatus');
+    status.textContent = found.found.length
+      ? `Found: ${found.found.join(', ')}. Review every field before analyzing.`
+      : 'No known components found. Try copying more of the listing description or enter details manually.';
+    status.className = found.found.length ? 'fine success-text' : 'fine';
+    $('manualForm').scrollIntoView({behavior:'smooth',block:'center'});
+  });
+  for (const type of ['cpu','gpu']) {
+    const input = $('manualForm').elements.namedItem(type);
+    input.addEventListener('change', () => {
+      const match = findCatalogMatch(input.value, type);
+      if (match) input.value = match.canonical;
+    });
+  }
+}
 
 function classifyRam(value) {
   const s = clean(value).toUpperCase();
@@ -273,11 +418,15 @@ $('manualForm').addEventListener('submit', event => {
   event.preventDefault();
   const d = formData(event.currentTarget);
   if (!d.cpu.trim() || !d.gpu.trim() || !d.ram.trim() || !d.storage.trim()) return;
+  d.cpu = recognizeField('cpu', d.cpu);
+  d.gpu = recognizeField('gpu', d.gpu);
   openReport(buildUsedAssessment(d));
 });
 $('buildForm').addEventListener('submit', event => {
   event.preventDefault();
   const d = formData(event.currentTarget);
+  d.cpu = recognizeField('cpu', d.cpu);
+  d.gpu = recognizeField('gpu', d.gpu);
   openReport(buildCompatibility(d));
 });
 
@@ -301,5 +450,6 @@ $('modalOk').addEventListener('click', () => { modal.hidden = true; });
 modal.addEventListener('click', event => { if (event.target === modal) modal.hidden = true; });
 document.addEventListener('keydown', event => { if (event.key === 'Escape') modal.hidden = true; });
 renderReports();
+wireHardwareRecognition();
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});

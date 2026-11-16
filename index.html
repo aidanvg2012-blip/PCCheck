@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="PCCheck helps you review used gaming PCs and check basic custom PC build compatibility.">
-<meta name="theme-color" content="#080b12"><meta name="application-name" content="PCCheck"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#080b12"><meta name="application-name" content="PCCheck"><meta name="version" content="2.1.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>PCCheck — PC buying and build checker</title>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -35,15 +35,21 @@
       <div id="linkMessage" class="message" role="status" hidden></div>
     </form>
   </div>
+  <div class="panel import-panel">
+    <div class="panel-head"><div><span class="mini-label">QUICK SPEC EXTRACTION</span><h3>Paste the listing details</h3></div><span class="pill">BETA</span></div>
+    <p class="fine">Open the product page, copy its title and description/specifications, then paste them here. PCCheck will look for known CPU, GPU, RAM, and storage names. It does not bypass site restrictions or automatically read private/dynamic pages.</p>
+    <textarea id="listingText" rows="5" placeholder="Example: Gaming PC - Ryzen 5 5600X, GeForce RTX 3060 12GB, 16GB DDR4, 1TB NVMe SSD..."></textarea>
+    <div class="url-row"><button class="btn primary" id="extractSpecs" type="button">Extract hardware →</button><span class="fine" id="extractStatus" aria-live="polite"></span></div>
+  </div>
   <div class="or"><span>ENTER THE PC DETAILS</span></div>
   <form class="panel manual" id="manualForm">
     <div class="panel-head"><div><span class="mini-label">USED PC ASSESSMENT</span><h3>What is the seller offering?</h3></div><span class="step">01 / 02</span></div>
     <input type="hidden" name="sourceUrl" id="sourceUrl"><input type="hidden" name="sourceName" id="sourceName">
     <div class="fields">
-      <label>CPU <input name="cpu" required placeholder="Ryzen 5 5600X"></label>
-      <label>GPU <input name="gpu" required placeholder="RTX 3060"></label>
-      <label>RAM <input name="ram" required placeholder="16GB DDR4"></label>
-      <label>Storage <input name="storage" required placeholder="1TB NVMe SSD"></label>
+      <label>CPU <input name="cpu" required placeholder="Ryzen 5 5600X" list="cpuSuggestions" autocomplete="off"><datalist id="cpuSuggestions"></datalist></label>
+      <label>GPU <input name="gpu" required placeholder="RTX 3060" list="gpuSuggestions" autocomplete="off"><datalist id="gpuSuggestions"></datalist></label>
+      <label>RAM <input name="ram" required placeholder="16GB DDR4" list="ramSuggestions" autocomplete="off"><datalist id="ramSuggestions"><option value="16GB DDR4"><option value="32GB DDR4"><option value="16GB DDR5"><option value="32GB DDR5"><option value="64GB DDR5"></datalist></label>
+      <label>Storage <input name="storage" required placeholder="1TB NVMe SSD" list="storageSuggestions" autocomplete="off"><datalist id="storageSuggestions"><option value="500GB SSD"><option value="1TB NVMe SSD"><option value="2TB NVMe SSD"><option value="1TB HDD"></datalist></label>
       <label>Asking price (USD) <input name="price" type="number" min="0" step="1" placeholder="650"></label>
       <label>Power supply model <input name="psu" placeholder="Corsair RM650x 650W"></label>
       <label>Motherboard model <input name="motherboard" placeholder="MSI B550 Tomahawk"></label>

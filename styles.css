@@ -11,3 +11,7 @@ textarea,select{width:100%;background:#080e18;color:var(--text);border:1px solid
 @media(max-width:600px){.guide-grid{grid-template-columns:1fr}.saved-tools{flex-direction:column;gap:8px}.saved-tools .btn{width:100%}}
 @media print{body{background:white!important;color:#111!important}.topbar,footer,.hero,.workspace:not(:has(.report-result)),.report-actions,.glow{display:none!important}.workspace{padding:0!important;max-width:none}.report-host{display:block!important}.report-result{background:white!important;color:#111!important;border:1px solid #aaa!important;box-shadow:none!important}.report-result p,.report-result li,.report-result h3,.report-result h4,.check-row p,.check-row b{color:#111!important}.check-row{background:white!important;border-color:#ccc!important}.verdict{color:#111!important;border-color:#777!important}.report-note{color:#333!important}}
 @media(max-width:600px){.topbar{height:auto;min-height:66px;flex-wrap:wrap;padding:12px 14px 8px}.topbar nav{display:flex;order:3;width:100%;overflow-x:auto;flex-wrap:nowrap;gap:16px;padding:5px 0 3px}.topbar nav a{font-size:10px}.brand{font-size:14px}.profile{margin-left:auto}}
+
+/* PCCheck 2.1 hardware import panel */
+.import-panel{margin-top:18px}.import-panel textarea{margin-top:12px;min-height:105px}.import-panel .url-row{background:transparent;border:0;padding:0;margin-top:12px}.success-text{color:var(--green)}
+@media(max-width:700px){.import-panel .url-row{align-items:flex-start;flex-direction:column}.import-panel .url-row .btn{width:100%}}
