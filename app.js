@@ -210,6 +210,30 @@ function persistReports() {
  });
 })();
 
+/* Stripe Checkout: test mode only. Paid access is not granted by a redirect. */
+(() => {
+ const button = document.getElementById('plusCheckoutButton');
+ const status = document.getElementById('plusCheckoutStatus');
+ if (!button || !status) return;
+ button.addEventListener('click', async () => {
+   button.disabled = true;
+   status.textContent = 'Preparing secure test checkout…';
+   try {
+     const response = await fetch('/api/create-checkout-session', {
+       method: 'POST',
+       headers: {'Content-Type':'application/json'},
+       body: JSON.stringify({})
+     });
+     const data = await response.json().catch(() => ({}));
+     if (!response.ok || !data.url) throw new Error(data.error || 'Checkout is not configured yet.');
+     window.location.assign(data.url);
+   } catch (error) {
+     status.textContent = error.message || 'Unable to start checkout. Please try again.';
+     button.disabled = false;
+   }
+ });
+})();
+
 renderReports();
 }
 function escapeHTML(value) {
