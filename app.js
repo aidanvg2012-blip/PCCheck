@@ -153,7 +153,45 @@ function persistReports() {
   } catch {
     $('storageStatus').textContent = 'Browser storage is full or unavailable';
   }
-  renderReports();
+  
+/* Mobile app-style tab navigation. Desktop continues to show the complete dashboard. */
+(() => {
+  const mobileQuery = window.matchMedia('(max-width: 700px)');
+  const tabButtons = [...document.querySelectorAll('.mobile-tabs [data-tab]')];
+  const tabTargets = {home: '.hero', analyze: '#analyze', build: '#build', saved: '#saved', guides: '#guides'};
+  const activateTab = (tab, updateHash = false) => {
+    if (!tabTargets[tab]) return;
+    document.body.classList.toggle('mobile-app-view', mobileQuery.matches);
+    document.body.dataset.mobileTab = tab;
+    tabButtons.forEach(button => {
+      const active = button.dataset.tab === tab;
+      button.classList.toggle('active', active);
+      if (active) button.setAttribute('aria-current', 'page');
+      else button.removeAttribute('aria-current');
+    });
+    if (updateHash && mobileQuery.matches) history.replaceState(null, '', tab === 'home' ? location.pathname : '#' + tab);
+    if (mobileQuery.matches) window.scrollTo({top: 0, behavior: 'smooth'});
+  };
+  tabButtons.forEach(button => button.addEventListener('click', () => activateTab(button.dataset.tab, true)));
+  document.querySelectorAll('a[href^="#"]').forEach(link => link.addEventListener('click', () => {
+    const tab = link.getAttribute('href').slice(1);
+    if (tab === 'top') activateTab('home');
+    else if (['analyze','build','saved','guides'].includes(tab)) activateTab(tab);
+  }));
+  const syncLayout = () => {
+    if (mobileQuery.matches) {
+      const requested = location.hash.slice(1);
+      activateTab(['analyze','build','saved','guides'].includes(requested) ? requested : 'home');
+    } else {
+      document.body.classList.remove('mobile-app-view');
+      document.body.removeAttribute('data-mobile-tab');
+    }
+  };
+  mobileQuery.addEventListener?.('change', syncLayout);
+  syncLayout();
+})();
+
+renderReports();
 }
 function escapeHTML(value) {
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
