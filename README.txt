@@ -1,4 +1,4 @@
-PCCheck 2.2 — Price Comparison & Screenshot Analyzer
+PCCheck 2.4 — Mobile-ready cleanup
 ========================================================
 
 WHAT IS NEW IN 2.2
@@ -51,3 +51,11 @@ PCCheck 2.3 — UI polish and reliability
 - Fixed screenshot preview URL cleanup and pinned the OCR library to a specific 5.x release.
 - Reworked service-worker caching so it does not cache external sites or return the app HTML for failed third-party requests; it also activates updates more reliably.
 - Removed the remote Google Fonts import. The interface now uses local system font stacks for faster loading and fewer external requests.
+
+
+PCCheck 2.4 — Mobile-ready cleanup
+- Removed the URL-only marketplace recognition panel. It only identified a host and never extracted listing data; paste text, screenshot OCR, and manual entry remain the supported workflows.
+- Removed the decorative sound toggle and guest-account modal because neither added essential functionality. Local reports remain available without implying cloud accounts.
+- Improved mobile navigation, form sizing, touch targets, and safe-area spacing.
+- Added a separate Capacitor scaffold in /mobile for Android/iOS device prototyping. Native projects are generated locally and are not store-ready.
+- Bumped the service-worker cache to v5 so browsers fetch the updated app shell.
