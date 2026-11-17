@@ -465,3 +465,11 @@ footer .brand{font-size:12px}
 }
 
 .brand>span:last-child{margin-left:0;color:inherit}.brand-name>span{color:#9deef0}
+
+
+.mobile-tabs button{font:600 9px var(--font-body);letter-spacing:.015em;gap:4px}
+.mobile-tabs button .tab-icon{width:21px;height:21px;display:grid;place-items:center}
+.mobile-tabs button .tab-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+.mobile-tabs button.active .tab-icon svg{stroke-width:1.9}
+.guide-card,.capability-card,.saved-card,.plus-tool{transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+.guide-card:hover,.saved-card:hover,.plus-tool:hover{transform:translateY(-2px);border-color:rgba(160,230,235,.28)!important;box-shadow:inset 0 1px rgba(255,255,255,.12),0 24px 55px rgba(0,0,0,.3)!important}
