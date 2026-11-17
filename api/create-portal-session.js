@@ -8,7 +8,9 @@ module.exports = async function handler(req, res) {
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const appUrl = (process.env.PCCHECK_APP_URL || 'https://pccheck.vercel.app').replace(/\/$/, '');
+  const appUrl = process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL
+    ? 'https://' + process.env.VERCEL_URL
+    : (process.env.PCCHECK_APP_URL || 'https://pccheck.vercel.app').replace(/\/$/, '');
   if (!secretKey || !supabaseUrl || !serviceRoleKey) return res.status(503).json({ error: 'Billing service is not configured.' });
   if (!secretKey.startsWith('sk_test_')) return res.status(503).json({ error: 'Billing management is locked to Stripe test mode.' });
 
