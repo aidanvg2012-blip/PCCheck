@@ -47,11 +47,12 @@ function subscription(status = 'active') {
   };
 }
 
-async function invoke(event, fetchStub, signatureSecret = SECRET) {
+async function invoke(event, fetchStub, signatureSecret = SECRET, mode = 'test') {
   process.env.STRIPE_WEBHOOK_SECRET = SECRET;
   process.env.SUPABASE_URL = 'https://example.supabase.co';
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'service_role_test';
-  process.env.STRIPE_SECRET_KEY = 'sk_test_example';
+  process.env.STRIPE_SECRET_KEY = mode === 'live' ? 'sk_live_example' : 'sk_test_example';
+  process.env.STRIPE_MODE = mode;
   const originalFetch = global.fetch;
   global.fetch = fetchStub;
   const res = responseRecorder();
@@ -88,6 +89,7 @@ test('stores a new active subscription', async () => {
   assert.equal(saved.status, 'active');
   assert.equal(saved.user_id, subscription().metadata.supabase_user_id);
   assert.equal(saved.stripe_subscription_id, 'sub_test_1');
+  assert.equal(saved.livemode, false);
 });
 
 test('stores failed-renewal state from the current Stripe subscription', async () => {
@@ -114,9 +116,21 @@ test('stores cancellation state', async () => {
   assert.equal(saved.status, 'canceled');
 });
 
-test('does not grant access from live-mode events', async () => {
+test('rejects live-mode events when configured for test mode', async () => {
   const res = await invoke(baseEvent('customer.subscription.created', subscription(), { livemode: true }), async () => {
     throw new Error('fetch should not be called');
   });
   assert.equal(res.code, 400);
+});
+
+test('stores live-mode subscription events separately', async () => {
+  let saved;
+  const liveEvent = baseEvent('customer.subscription.created', subscription(), { livemode: true });
+  const res = await invoke(liveEvent, async (url, options) => {
+    saved = JSON.parse(options.body);
+    return new Response('', { status: 201 });
+  }, SECRET, 'live');
+  assert.equal(res.code, 200);
+  assert.equal(saved.livemode, true);
+  assert.equal(saved.status, 'active');
 });
