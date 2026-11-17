@@ -538,7 +538,7 @@ function reportMarkup(report) {
     body += `<p class="report-note">${report.passed} passed · ${report.failed} conflict(s) · ${report.warnings} warnings · ${report.unknown} not checked.</p>`;
     body += `<p class="report-note">These are basic checks only. They do not verify BIOS support, physical clearances, connector availability, cooler fit, or every model-specific requirement.</p>`;
   }
-  return `<div class="report-result"><div class="report-top"><div><span class="mini-label">PCHECK REPORT</span><h3>${escapeHTML(report.title)}</h3></div><span class="verdict ${tone}">${escapeHTML(status)}</span></div><p class="report-summary">${escapeHTML(report.summary)}</p>${body}${source}<div class="report-actions"><button class="btn ghost" type="button" id="saveCurrent">Save report</button><button class="btn ghost" type="button" id="printReport">Print / PDF</button><button class="btn ghost" type="button" id="exportReport">Export JSON</button><button class="text-button" type="button" id="closeReport">Close</button></div></div>`;
+  return `<div class="report-result"><div class="report-top"><div><span class="mini-label">PCHECK REPORT</span><h3>${escapeHTML(report.title)}</h3></div><span class="verdict ${tone}">${escapeHTML(status)}</span></div><p class="report-summary">${escapeHTML(report.summary)}</p>${body}<div class="report-actions"><button class="btn ghost" type="button" id="saveCurrent">Save report</button><button class="btn ghost" type="button" id="printReport">Print / PDF</button><button class="btn ghost" type="button" id="exportReport">Export JSON</button><button class="text-button" type="button" id="closeReport">Close</button></div></div>`;
 }
 function openReport(report) {
   activeReport = report;
@@ -557,17 +557,81 @@ function saveReport(report) {
   persistReports();
   $('saveCurrent').textContent = 'Saved ✓';
   $('saveCurrent').disabled = true;
+  renderReports();
+}
+let plusToolsEnabled = false;
+const compareSelection = new Set();
+function reportDate(report) {
+  const date = new Date(report.savedAt || report.createdAt || Date.now());
+  return Number.isNaN(date.getTime()) ? 'Date unavailable' : date.toLocaleDateString();
+}
+function displayValue(value) {
+  if (value === null || value === undefined || value === '') return '—';
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
+function renderPlusWorkspace() {
+  const host = $('plusWorkspace');
+  if (!host) return;
+  if (!plusToolsEnabled) {
+    host.innerHTML = '<div class="plus-locked"><b>PCCheck Plus tools</b><p>Sign in with an active Plus account to unlock side-by-side comparisons, expanded reports, and build history. Saved reports remain on this device.</p><button class="btn ghost" type="button" id="plusWorkspaceSignIn">Sign in / account</button></div>';
+    $('plusWorkspaceSignIn')?.addEventListener('click', () => window.PCCheckAuth?.openModal());
+    return;
+  }
+  const selected = reports.filter(r => compareSelection.has(r.id));
+  const compareMarkup = selected.length < 2
+    ? '<div class="empty">Select two or three saved reports below to compare them.</div>'
+    : `<div class="comparison-scroll"><table class="comparison-table"><thead><tr><th>Detail</th>${selected.map(r=>`<th>${escapeHTML(r.title)}</th>`).join('')}</tr></thead><tbody>${comparisonRows(selected)}</tbody></table></div>`;
+  const builds = reports.filter(r=>r.kind==='build');
+  const historyMarkup = builds.length
+    ? `<div class="history-list">${builds.map((r,i)=>{const same=builds.filter(x=>x.title===r.title);const version=same.length-same.indexOf(r);return `<article class="history-item"><b>${escapeHTML(r.title)} · Version ${version}</b><span>${reportDate(r)} · ${escapeHTML(r.status)}</span><small>${escapeHTML(r.summary)}</small><button type="button" data-open="${escapeHTML(r.id)}">Open version</button></article>`;}).join('')}</div>`
+    : '<div class="empty">Save a custom build report to start its local version history.</div>';
+  host.innerHTML = `<div class="plus-tools-grid">
+    <section class="plus-tool"><div class="mini-label">01 / COMPARISON WORKSPACE</div><h3>Compare saved PCs</h3><p>Choose up to three saved reports. Compare their entered specifications and assessment results side by side.</p><div class="compare-actions"><span>${selected.length} of 3 selected</span><button type="button" class="text-button" id="clearCompare">Clear selection</button></div>${compareMarkup}</section>
+    <section class="plus-tool"><div class="mini-label">02 / EXPANDED REPORTS</div><h3>Full input details</h3><p>Use “Details” on any saved report to inspect every field entered for that assessment. Reports can still be printed or exported as JSON.</p></section>
+    <section class="plus-tool"><div class="mini-label">03 / BUILD HISTORY</div><h3>Saved build versions</h3><p>Each saved custom-build report is kept as a dated snapshot on this device. Save again after changing parts to record another version.</p>${historyMarkup}</section>
+  </div>`;
+  $('clearCompare')?.addEventListener('click',()=>{compareSelection.clear();renderReports();});
+  host.querySelectorAll('[data-open]').forEach(button=>button.addEventListener('click',()=>{const report=reports.find(r=>r.id===button.dataset.open);if(report)openReport(report);}));
+}
+function comparisonRows(selected) {
+  const keys = [...new Set(selected.flatMap(r=>Object.keys(r.input || {})))].slice(0,16);
+  const rows = [['Assessment',r=>r.status || r.verdict || '—'],['Summary',r=>r.summary || '—'],...keys.map(key=>[key.replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase()),r=>displayValue(r.input?.[key])])];
+  return rows.map(([label,get])=>`<tr><th>${escapeHTML(label)}</th>${selected.map(r=>`<td>${escapeHTML(get(r))}</td>`).join('')}</tr>`).join('');
 }
 function renderReports() {
   const host = $('savedReports');
-  if (!reports.length) { host.innerHTML = '<div class="empty">No saved reports yet. Create and save a report to see it here.</div>'; return; }
-  host.innerHTML = reports.map(r => `<article class="saved-card"><div><h4>${escapeHTML(r.title)}</h4><p>${escapeHTML(r.summary)} · ${new Date(r.savedAt || r.createdAt).toLocaleDateString()}</p></div><div class="saved-actions"><button type="button" data-open="${escapeHTML(r.id)}">View</button><button type="button" data-delete="${escapeHTML(r.id)}">Delete</button></div></article>`).join('');
+  if (!reports.length) {
+    host.innerHTML = '<div class="empty">No saved reports yet. Create and save a report to see it here.</div>';
+    renderPlusWorkspace();
+    return;
+  }
+  host.innerHTML = reports.map(r => {
+    const details = plusToolsEnabled ? `<button type="button" data-details="${escapeHTML(r.id)}">Details</button>` : '';
+    const selector = plusToolsEnabled ? `<label class="compare-check"><input type="checkbox" data-compare="${escapeHTML(r.id)}" ${compareSelection.has(r.id)?'checked':''} ${(!compareSelection.has(r.id)&&compareSelection.size>=3)?'disabled':''}> Compare</label>` : '';
+    const raw = plusToolsEnabled ? `<pre class="report-details" data-details-panel="${escapeHTML(r.id)}" hidden>${escapeHTML(JSON.stringify(r.input || {},null,2))}</pre>` : '';
+    return `<article class="saved-card"><div class="saved-card-main"><h4>${escapeHTML(r.title)}</h4><p>${escapeHTML(r.summary)} · ${reportDate(r)}</p>${raw}</div><div class="saved-actions">${selector}<button type="button" data-open="${escapeHTML(r.id)}">View</button>${details}<button type="button" data-delete="${escapeHTML(r.id)}">Delete</button></div></article>`;
+  }).join('');
+  renderPlusWorkspace();
 }
 $('savedReports').addEventListener('click', event => {
-  const openId = event.target.dataset.open;
-  const deleteId = event.target.dataset.delete;
+  const button = event.target.closest('button');
+  if (!button) return;
+  const openId = button.dataset.open;
+  const deleteId = button.dataset.delete;
+  const detailId = button.dataset.details;
   if (openId) { const report = reports.find(r=>r.id===openId); if (report) openReport(report); }
-  if (deleteId) { reports = reports.filter(r=>r.id!==deleteId); persistReports(); }
+  if (detailId) { const panel=$('savedReports').querySelector(`[data-details-panel="${CSS.escape(detailId)}"]`); if(panel) panel.hidden=!panel.hidden; }
+  if (deleteId) { reports = reports.filter(r=>r.id!==deleteId); compareSelection.delete(deleteId); persistReports(); renderReports(); }
+});
+$('savedReports').addEventListener('change', event => {
+  const id = event.target.dataset.compare;
+  if (!id || !plusToolsEnabled) return;
+  if (event.target.checked) {
+    if (compareSelection.size >= 3) { event.target.checked=false; return; }
+    compareSelection.add(id);
+  } else compareSelection.delete(id);
+  renderReports();
 });
 
 $('manualForm').addEventListener('submit', event => {
