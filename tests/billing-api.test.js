@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 
 const plusStatus = require('../api/plus-status.js');
 const portalSession = require('../api/create-portal-session.js');
+const checkoutSession = require('../api/create-checkout-session.js');
 
 function responseRecorder() {
   return {
@@ -18,7 +19,9 @@ async function call(handler, { method = 'GET', authorization = 'Bearer valid-use
   process.env.SUPABASE_URL = 'https://example.supabase.co';
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'service_role_test';
   process.env.STRIPE_SECRET_KEY = secretKey;
-  process.env.PCCHECK_APP_URL = 'https://preview.example.vercel.app';
+  process.env.PCCHECK_APP_URL = 'https://pccheck.vercel.app';
+  process.env.VERCEL_ENV = 'preview';
+  process.env.VERCEL_URL = 'preview.example.vercel.app';
   global.fetch = fetchStub;
   const req = { method, headers: authorization ? { authorization } : {} };
   const res = responseRecorder();
@@ -64,6 +67,34 @@ test('billing portal creates a session for the signed-in user customer', async (
   const stripeRequest = requests.find(item => item.url.includes('/v1/billing_portal/sessions'));
   assert.ok(stripeRequest);
   assert.match(stripeRequest.options.body, /customer=cus_test_1/);
+});
+
+test('billing portal returns to the current Preview deployment', async () => {
+  let portalBody;
+  const res = await call(portalSession, { method: 'POST', fetchStub: async (url, options = {}) => {
+    if (String(url).includes('/auth/v1/user')) return Response.json({ id: 'user-1' });
+    if (String(url).includes('/rest/v1/subscriptions')) return Response.json([{ stripe_customer_id: 'cus_test_1' }]);
+    portalBody = options.body;
+    return Response.json({ url: 'https://billing.stripe.test/session' });
+  }});
+  assert.equal(res.code, 200);
+  assert.match(portalBody, /return_url=https%3A%2F%2Fpreview.example.vercel.app/);
+});
+
+test('checkout returns to the current Preview deployment', async () => {
+  let checkoutBody;
+  const res = await call(checkoutSession, { method: 'POST', fetchStub: async (url, options = {}) => {
+    const target = String(url);
+    if (target.includes('/auth/v1/user')) return Response.json({ id: 'user-1', email: 'tester@example.com', email_confirmed_at: '2026-11-16T00:00:00Z' });
+    if (target.includes('/v1/prices/')) return Response.json({ livemode: false, active: true, type: 'recurring', recurring: { interval: 'month' } });
+    if (target.includes('/rest/v1/subscriptions')) return Response.json([]);
+    checkoutBody = options.body;
+    return Response.json({ url: 'https://checkout.stripe.test/session' });
+  }});
+  assert.equal(res.code, 200);
+  const form = new URLSearchParams(checkoutBody);
+  assert.match(form.get('success_url'), /^https:\/\/preview\.example\.vercel\.app\//);
+  assert.match(form.get('cancel_url'), /^https:\/\/preview\.example\.vercel\.app\//);
 });
 
 test('billing portal refuses live Stripe keys', async () => {
