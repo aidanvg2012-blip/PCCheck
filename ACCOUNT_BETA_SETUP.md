@@ -56,7 +56,7 @@ The lookup uses Pricify's weekly US retail dataset (CC BY 4.0), with attribution
 
 ## UI and navigation checks
 
-- [ ] Check sticky glass header, scroll progress indicator, active section link, and smooth anchor navigation on desktop.
+- [ ] Check the desktop tabbed workspace: each navigation item should show one focused destination without stacking every tool vertically. Verify the glass header, active tab, and scroll progress.
 - [ ] Check the mobile bottom navigation still switches between Home, Used PC, Build, Saved, and Guides.
 - [ ] Confirm quick import tools and advanced used-PC details start collapsed and can be expanded.
 - [ ] Check forms, comparison tables, report actions, and account modal at desktop and mobile widths.
