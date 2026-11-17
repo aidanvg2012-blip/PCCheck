@@ -387,33 +387,44 @@ function getPriceComparison(d) {
   return {available:true,asking,comps,median,low:Math.min(...comps),high:Math.max(...comps),ratio,verdict,detail};
 }
 function getPartsValue(d) {
+  const market = d.marketPrices || {};
   const fields = [
-    ['CPU', d.cpu, d.cpuMsrp],
-    ['GPU', d.gpu, d.gpuMsrp],
-    ['RAM', d.ram, d.ramMsrp],
-    ['Storage', d.storage, d.storageMsrp],
-    ['Motherboard', d.motherboard, d.motherboardMsrp],
-    ['Power supply', d.psu, d.psuMsrp]
+    ['CPU','cpu',d.cpu],['GPU','gpu',d.gpu],['RAM','ram',d.ram],
+    ['Storage','storage',d.storage],['Motherboard','motherboard',d.motherboard],
+    ['Power supply','psu',d.psu],['Case','case',d.case]
   ];
-  const parts = fields.map(([name, model, raw]) => ({
-    name, model: clean(model), msrp: Number(raw)
-  })).filter(part => part.msrp > 0 && Number.isFinite(part.msrp));
-  const totalMsrp = parts.reduce((sum, part) => sum + part.msrp, 0);
+  const parts = fields.map(([label,key,model]) => ({
+    label, key, model: clean(model), result: market.matches?.[key] || null
+  }));
+  const matched = parts.filter(part => part.result?.found && Number(part.result.typicalPrice) > 0);
+  const total = matched.reduce((sum,part) => sum + Number(part.result.typicalPrice),0);
   const asking = Number(d.price);
-  const difference = asking > 0 && totalMsrp > 0 ? asking - totalMsrp : null;
   return {
-    parts, totalMsrp, asking: asking > 0 ? asking : null, difference,
-    percentOfMsrp: asking > 0 && totalMsrp > 0 ? asking / totalMsrp * 100 : null,
-    complete: parts.length === fields.length
+    parts, matchedCount: matched.length, total,
+    asking: asking > 0 ? asking : null,
+    percentOfReplacement: asking > 0 && total > 0 ? asking / total * 100 : null,
+    difference: asking > 0 && total > 0 ? asking - total : null,
+    week: market.week || null, source: market.source || 'Pricify (pricify.ai)',
+    generated: market.generated || null, error: market.error || null
   };
 }
 function partsValueMarkup(value) {
-  if (!value.parts.length) return `<div class="parts-value"><h4>Parts MSRP breakdown</h4><p class="report-note">Add the original MSRP for each known component in the form to calculate the combined parts MSRP and compare it with the seller’s asking price.</p></div>`;
-  const rows = value.parts.map(part => `<tr><th>${escapeHTML(part.name)}</th><td>${escapeHTML(part.model || 'Model not entered')}</td><td>${money(part.msrp)}</td></tr>`).join('');
-  const difference = value.difference === null ? 'Enter an asking price to compare.' : value.difference <= 0
-    ? `Asking price is ${money(Math.abs(value.difference))} below the entered combined MSRP.`
-    : `Asking price is ${money(value.difference)} above the entered combined MSRP.`;
-  return `<div class="parts-value"><h4>Parts MSRP breakdown</h4><div class="parts-value-total"><span>Combined entered MSRP</span><b>${money(value.totalMsrp)}</b></div><div class="comparison-scroll"><table class="comparison-table"><thead><tr><th>Part</th><th>Model</th><th>Original MSRP</th></tr></thead><tbody>${rows}</tbody></table></div><div class="parts-value-result"><b>${value.percentOfMsrp === null ? 'Asking price not entered' : `${value.percentOfMsrp.toFixed(1)}% of entered MSRP`}</b><span>${escapeHTML(difference)}</span></div><p class="report-note">${value.parts.length} of 6 component prices entered. MSRP is the original launch price, not the part’s current used value. This total excludes any parts without an entered MSRP and does not account for depreciation, condition, warranty, age, or current market prices.</p></div>`;
+  const rows = value.parts.map(part => {
+    const result = part.result;
+    if (!part.model) return `<tr><th>${escapeHTML(part.label)}</th><td>Not entered</td><td>—</td><td>—</td></tr>`;
+    if (!result?.found) return `<tr><th>${escapeHTML(part.label)}</th><td>${escapeHTML(part.model)}</td><td><span class="market-unmatched">No exact match</span></td><td><small>${escapeHTML(result?.message || 'Not found in the tracked catalog')}</small></td></tr>`;
+    const source = result.sourceUrl && /^https:\/\//i.test(result.sourceUrl)
+      ? `<a href="${escapeHTML(result.sourceUrl)}" target="_blank" rel="noopener noreferrer">Source</a>` : '—';
+    const low = result.lowestPrice ? `${money(result.lowestPrice)} · ${escapeHTML(result.lowestRetailer || 'Tracked retailer')}` : '—';
+    return `<tr><th>${escapeHTML(part.label)}</th><td>${escapeHTML(result.name)}</td><td><b>${money(result.typicalPrice)}</b><small>Typical new retail</small></td><td>${low}<small>${source}</small></td></tr>`;
+  }).join('');
+  const priceCompare = value.difference === null ? 'Enter the seller’s asking price to compare.'
+    : value.difference <= 0 ? `Asking price is ${money(Math.abs(value.difference))} below the tracked new-part replacement cost.`
+    : `Asking price is ${money(value.difference)} above the tracked new-part replacement cost.`;
+  const freshness = value.week ? `Dataset ${escapeHTML(value.week)} · prices observed through ${escapeHTML(value.parts.find(p=>p.result?.asOf)?.result?.asOf || 'the published week')}` : 'Market dataset date unavailable';
+  const totalText = value.matchedCount ? money(value.total) : 'Not available';
+  const generated = value.generated ? new Date(value.generated).toLocaleString() : '';
+  return `<section class="parts-value market-value"><div class="market-value-heading"><div><span class="mini-label">LIVE MARKET REFERENCE</span><h4>Current part replacement cost</h4><p class="report-note">Matched ${value.matchedCount} of ${value.parts.length} entered component models.</p></div><div class="market-total"><span>Matched new-part total</span><b>${totalText}</b></div></div><div class="comparison-scroll"><table class="comparison-table market-table"><thead><tr><th>Part</th><th>Matched product</th><th>Typical current price</th><th>Lowest tracked price</th></tr></thead><tbody>${rows}</tbody></table></div><div class="parts-value-result"><b>${value.percentOfReplacement === null ? 'Asking price comparison unavailable' : `${value.percentOfReplacement.toFixed(1)}% of new-part replacement cost`}</b><span>${escapeHTML(priceCompare)}</span></div><p class="report-note">${freshness}${generated ? ` · published ${escapeHTML(generated)}` : ''}. Source: <a href="https://github.com/pricify-ai/pc-hardware-prices" target="_blank" rel="noopener noreferrer">Pricify (CC BY 4.0)</a>.</p><p class="market-disclaimer">This is a new retail replacement-cost benchmark, not a used resale valuation. Used prices depend on age, condition, warranty, local demand, and verified sold listings. The dataset tracks selected popular products; an unmatched part is left unpriced rather than guessed. Check the linked source before buying.</p>${value.error ? `<p class="report-note">${escapeHTML(value.error)}</p>` : ''}</section>`;
 }
 function priceChartMarkup(price) {
   if (!price.available) return `<div class="price-analysis"><h4>Price comparison</h4><p class="report-note">Enter an asking price and at least two comparable prices from similar PCs to generate a chart and recommendation. Compare similar specs, condition, and included accessories.</p></div>`;
@@ -421,6 +432,17 @@ function priceChartMarkup(price) {
   const max=Math.max(...values)*1.12;
   const rows=values.map((v,i)=>`<div class="price-bar-row"><span>${i===values.length-1?'This PC':`Comparable ${i+1}`}</span><div class="price-track"><i class="${i===values.length-1?'asking':''}" style="width:${Math.max(3,v/max*100)}%"></i></div><b>${money(v)}</b></div>`).join('');
   return `<div class="price-analysis"><h4>Price comparison</h4><div class="price-verdict"><b>${escapeHTML(price.verdict)}</b><span>Median comparable: ${money(price.median)}</span></div><p class="report-note">${escapeHTML(price.detail)} Comparable range: ${money(price.low)}–${money(price.high)}. Based on ${price.comps.length} asking prices you entered. Use closely matched systems and exclude listings with very different condition or parts.</p><div class="price-chart" role="img" aria-label="Bar chart comparing this PC price with comparable listing prices">${rows}</div><p class="report-note">This is a comparison of asking prices you supplied, not verified sold prices or an automatic live market valuation. It does not adjust for exact model, condition, warranty, or location.</p></div>`;
+}
+
+async function lookupMarketPrices(d) {
+  const keys = ['cpu','gpu','ram','storage','motherboard','psu','case'];
+  const params = new URLSearchParams();
+  for (const key of keys) if (clean(d[key])) params.set(key, clean(d[key]));
+  if (![...params.keys()].length) return { matches: {} };
+  const response = await fetch('/api/market-prices?' + params.toString(), { headers: { Accept: 'application/json' } });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Market price lookup failed.');
+  return data;
 }
 
 function buildUsedAssessment(d) {
@@ -669,12 +691,29 @@ $('savedReports').addEventListener('change', event => {
   renderReports();
 });
 
-$('manualForm').addEventListener('submit', event => {
+$('manualForm').addEventListener('submit', async event => {
   event.preventDefault();
-  const d = formData(event.currentTarget);
+  const form = event.currentTarget;
+  const d = formData(form);
   if (!d.cpu.trim() || !d.gpu.trim() || !d.ram.trim() || !d.storage.trim()) return;
   d.cpu = recognizeField('cpu', d.cpu);
   d.gpu = recognizeField('gpu', d.gpu);
+  const button = form.querySelector('[type="submit"]');
+  const status = $('marketLookupStatus');
+  const originalLabel = button.textContent;
+  button.disabled = true;
+  button.textContent = 'Checking current part prices…';
+  if (status) status.textContent = 'Matching exact models against current retailer data…';
+  try {
+    d.marketPrices = await lookupMarketPrices(d);
+    if (status) status.textContent = 'Market reference added to your report.';
+  } catch (error) {
+    d.marketPrices = { matches: {}, error: error.message || 'Market lookup unavailable.' };
+    if (status) status.textContent = 'Price source unavailable. Your PC assessment can still continue.';
+  } finally {
+    button.disabled = false;
+    button.textContent = originalLabel;
+  }
   openReport(buildUsedAssessment(d));
 });
 $('buildForm').addEventListener('submit', event => {
