@@ -58,7 +58,16 @@ module.exports = async function handler(req, res) {
     });
     if (!response.ok) {
       const detail = await response.text();
-      console.error('Supabase subscription upsert failed:', response.status, detail.slice(0, 300));
+      const diagnostic = {
+        status: response.status,
+        statusText: response.statusText,
+        detail: detail.slice(0, 1000),
+        allow: response.headers.get('allow'),
+        contentType: response.headers.get('content-type'),
+        server: response.headers.get('server'),
+        responseUrl: response.url
+      };
+      console.error('Supabase subscription upsert failed:', JSON.stringify(diagnostic));
       return res.status(500).json({ error: 'Could not store subscription state.' });
     }
     return res.status(200).json({ received: true });
