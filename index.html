@@ -75,6 +75,16 @@
       <label>RAM <input name="ram" required placeholder="16GB DDR4" list="ramSuggestions" autocomplete="off"><datalist id="ramSuggestions"><option value="16GB DDR4"><option value="32GB DDR4"><option value="16GB DDR5"><option value="32GB DDR5"><option value="64GB DDR5"></datalist></label>
       <label>Storage <input name="storage" required placeholder="1TB NVMe SSD" list="storageSuggestions" autocomplete="off"><datalist id="storageSuggestions"><option value="500GB SSD"><option value="1TB NVMe SSD"><option value="2TB NVMe SSD"><option value="1TB HDD"></datalist></label>
       <label>Asking price (USD) <input name="price" type="number" min="0" step="1" placeholder="650"></label>
+      <div class="full-field msrp-entry"><div><span class="mini-label">PART VALUE BREAKDOWN</span><p class="fine">Enter each part’s original MSRP from its manufacturer launch information, receipt, or a reliable source. Leave unknown prices blank.</p></div>
+        <div class="fields">
+          <label>CPU MSRP (USD) <input name="cpuMsrp" type="number" min="0" step="0.01" placeholder="e.g. 299"></label>
+          <label>GPU MSRP (USD) <input name="gpuMsrp" type="number" min="0" step="0.01" placeholder="e.g. 499"></label>
+          <label>RAM MSRP (USD) <input name="ramMsrp" type="number" min="0" step="0.01" placeholder="e.g. 89"></label>
+          <label>Storage MSRP (USD) <input name="storageMsrp" type="number" min="0" step="0.01" placeholder="e.g. 79"></label>
+          <label>Motherboard MSRP (USD) <input name="motherboardMsrp" type="number" min="0" step="0.01" placeholder="e.g. 159"></label>
+          <label>Power supply MSRP (USD) <input name="psuMsrp" type="number" min="0" step="0.01" placeholder="e.g. 99"></label>
+        </div>
+      </div>
       <label>Comparable PC price #1 (USD) <input name="comp1" type="number" min="0" step="1" placeholder="Similar PC listing price"></label>
       <label>Comparable PC price #2 (USD) <input name="comp2" type="number" min="0" step="1" placeholder="Similar PC listing price"></label>
       <label>Comparable PC price #3 (USD) <input name="comp3" type="number" min="0" step="1" placeholder="Similar PC listing price"></label>
