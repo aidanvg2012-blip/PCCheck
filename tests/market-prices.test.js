@@ -18,6 +18,8 @@ test('matches an exact CPU model and ignores generic descriptions', () => {
   ];
   assert.equal(handler._matchProduct('Ryzen 5 5600X', products).name, products[0].name);
   assert.equal(handler._matchProduct('16GB DDR4', products), null);
+  assert.equal(handler._matchProduct('1TB NVMe SSD', products), null);
+  assert.equal(handler._matchProduct('Ryzen 5', products), null);
 });
 
 test('returns sourced current retail benchmarks for an exact query', async () => {
