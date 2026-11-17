@@ -15,7 +15,7 @@ function normalize(value) {
 }
 function matchProduct(query, products) {
   const normalizedQuery = normalize(query);
-  const tokens = normalizedQuery.split(' ').filter(token => token && !STOP.has(token) && !/^\\d+(?:\\.\\d+)?(?:gb|tb|mb|w|mhz)$/.test(token));
+  const tokens = normalizedQuery.split(' ').filter(token => token && !STOP.has(token) && !/^[0-9]+(?:\.[0-9]+)?(?:gb|tb|mb|w|mhz)$/.test(token));
   if (!tokens.length) return null;
   const candidates = (products || []).map(product => {
     const text = normalize([product.name, product.maker, product.model, product.part_number, product.upc].filter(Boolean).join(' '));
@@ -77,7 +77,7 @@ module.exports = async function handler(req, res) {
         lowestRetailer: latestDay?.low_store || product.lowest_store_end || null,
         weekLow: Number(product.week_low || 0) || null,
         weekHigh: Number(product.week_high || 0) || null,
-        changePct: Number.isFinite(Number(product.change_vs_prev_week_pct)) ? Number(product.change_vs_prev_week_pct) : null,
+        changePct: product.change_vs_prev_week_pct === null || product.change_vs_prev_week_pct === undefined ? null : Number(product.change_vs_prev_week_pct),
         retailers: Number(product.retailers_in_stock_end || 0),
         daysInStock: Number(product.days_in_stock || 0),
         launchPrice: Number(product.launch_price || 0) || null,
