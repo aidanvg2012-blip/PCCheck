@@ -42,15 +42,25 @@ The current Preview branch implements the advertised Plus workspace:
 - [ ] Sign out or use a Free account. Plus controls should lock again.
 - [ ] Confirm saved reports and build history remain local to the current browser/device; they do not sync across devices or accounts.
 
-## Used-PC parts MSRP comparison
+## Current component market price reference
 
-- [ ] Enter a used PC listing with CPU, GPU, RAM, storage, and asking price.
-- [ ] Enter original MSRP values for the parts whose launch prices you can verify; leave unknown values blank.
-- [ ] Confirm the report lists each entered part, the combined MSRP, and the asking price as a percentage of that total.
-- [ ] Confirm the report clearly says MSRP is not current used-market value and that omitted components are excluded.
-- [ ] Save the report and reopen it to confirm the MSRP breakdown is retained.
+- [ ] Enter exact model names for the CPU and GPU (for example, the full model number, not just a product family).
+- [ ] Enter exact RAM, SSD/HDD, motherboard, power-supply, and case models where known.
+- [ ] Submit a used-PC assessment and confirm the report queries `/api/market-prices`.
+- [ ] Confirm exact matches show typical new-retail price, lowest tracked price, retailer, source link, and dataset week.
+- [ ] Confirm broad descriptions such as "16GB DDR4" do not receive a fabricated model price.
+- [ ] Confirm unmatched products remain unpriced and the report still works if the data source is unavailable.
+- [ ] Save and reopen a report; confirm the matched prices and source metadata are retained.
 
-The MSRP fields are user-supplied reference prices, not an automatic live price lookup. Use manufacturer launch pricing or reliable historical sources, and compare used systems with current used listings before deciding what a PC is worth.
+The lookup uses Pricify's weekly US retail dataset (CC BY 4.0), with attribution to Pricify (pricify.ai). It covers selected popular CPUs, GPUs, memory, SSDs, hard drives, motherboards, cases, and power supplies. It is not a complete catalog and prices are not minute-by-minute. The report compares the asking price with the current new-part replacement cost; it does not claim to know used resale value. Used value needs verified, recent sold listings and adjustments for age, condition, warranty, and local demand.
+
+## UI and navigation checks
+
+- [ ] Check sticky glass header, scroll progress indicator, active section link, and smooth anchor navigation on desktop.
+- [ ] Check the mobile bottom navigation still switches between Home, Used PC, Build, Saved, and Guides.
+- [ ] Confirm quick import tools and advanced used-PC details start collapsed and can be expanded.
+- [ ] Check forms, comparison tables, report actions, and account modal at desktop and mobile widths.
+- [ ] Check reduced-motion settings; animations should be minimized.
 
 ## Before any live payment launch
 
