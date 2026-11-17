@@ -14,11 +14,13 @@ function responseRecorder() {
   };
 }
 
-async function call(handler, { method = 'GET', authorization = 'Bearer valid-user-token', fetchStub, secretKey = 'sk_test_example' } = {}) {
+async function call(handler, { method = 'GET', authorization = 'Bearer valid-user-token', fetchStub, secretKey = 'sk_test_example', mode = 'test' } = {}) {
   const originalFetch = global.fetch;
   process.env.SUPABASE_URL = 'https://example.supabase.co';
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'service_role_test';
   process.env.STRIPE_SECRET_KEY = secretKey;
+  process.env.STRIPE_MODE = mode;
+  process.env.STRIPE_LIVE_PRICE_ID = 'price_live_monthly';
   process.env.STRIPE_TEST_PRICE_ID = 'price_test_monthly';
   process.env.PCCHECK_APP_URL = 'https://pccheck.vercel.app';
   process.env.VERCEL_ENV = 'preview';
@@ -87,7 +89,7 @@ test('checkout returns to the current Preview deployment', async () => {
   const res = await call(checkoutSession, { method: 'POST', fetchStub: async (url, options = {}) => {
     const target = String(url);
     if (target.includes('/auth/v1/user')) return Response.json({ id: 'user-1', email: 'tester@example.com', email_confirmed_at: '2026-11-16T00:00:00Z' });
-    if (target.includes('/v1/prices/')) return Response.json({ livemode: false, active: true, type: 'recurring', recurring: { interval: 'month' } });
+    if (target.includes('/v1/prices/')) return Response.json({ livemode: mode === 'live', active: true, type: 'recurring', recurring: { interval: 'month' } });
     if (target.includes('/rest/v1/subscriptions')) return Response.json([]);
     checkoutBody = options.body;
     return Response.json({ url: 'https://checkout.stripe.test/session' });
@@ -98,7 +100,27 @@ test('checkout returns to the current Preview deployment', async () => {
   assert.match(form.get('cancel_url'), /^https:\/\/preview\.example\.vercel\.app\//);
 });
 
-test('billing portal refuses live Stripe keys', async () => {
-  const res = await call(portalSession, { method: 'POST', secretKey: 'sk_live_not_allowed', fetchStub: async () => { throw new Error('fetch should not be called'); } });
+test('billing portal refuses a key that does not match the selected mode', async () => {
+  const res = await call(portalSession, { method: 'POST', secretKey: 'sk_live_not_allowed', mode: 'test', fetchStub: async () => { throw new Error('fetch should not be called'); } });
   assert.equal(res.code, 503);
+});
+
+test('live checkout uses only the live recurring price and live key', async () => {
+  let checkoutBody;
+  const res = await call(checkoutSession, { method: 'POST', secretKey: 'sk_live_example', mode: 'live', fetchStub: async (url, options = {}) => {
+    const target = String(url);
+    if (target.includes('/auth/v1/user')) return Response.json({ id: 'user-1', email: 'tester@example.com', email_confirmed_at: '2026-11-16T00:00:00Z' });
+    if (target.includes('/v1/prices/')) {
+      assert.match(target, /price_live_monthly/);
+      return Response.json({ livemode: true, active: true, type: 'recurring', recurring: { interval: 'month' } });
+    }
+    if (target.includes('/rest/v1/subscriptions')) {
+      assert.match(target, /livemode=eq.true/);
+      return Response.json([]);
+    }
+    checkoutBody = options.body;
+    return Response.json({ url: 'https://checkout.stripe.test/session' });
+  }});
+  assert.equal(res.code, 200);
+  assert.match(checkoutBody, /price_live_monthly/);
 });
