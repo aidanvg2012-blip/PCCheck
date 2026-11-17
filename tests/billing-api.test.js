@@ -19,6 +19,7 @@ async function call(handler, { method = 'GET', authorization = 'Bearer valid-use
   process.env.SUPABASE_URL = 'https://example.supabase.co';
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'service_role_test';
   process.env.STRIPE_SECRET_KEY = secretKey;
+  process.env.STRIPE_TEST_PRICE_ID = 'price_test_monthly';
   process.env.PCCHECK_APP_URL = 'https://pccheck.vercel.app';
   process.env.VERCEL_ENV = 'preview';
   process.env.VERCEL_URL = 'preview.example.vercel.app';
