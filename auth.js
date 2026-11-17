@@ -62,9 +62,20 @@
           });
           const result = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(result.error || 'Could not check membership.');
-          $('accountPlusStatus').textContent = result.hasPlus
-            ? 'PCCheck Plus is active.'
-            : 'Free account · Plus is not active.';
+          const periodEnd = result.currentPeriodEnd
+            ? new Date(result.currentPeriodEnd).toLocaleDateString()
+            : null;
+          if (result.hasPlus && result.cancelAtPeriodEnd) {
+            $('accountPlusStatus').textContent = 'Plus is active · cancellation scheduled' + (periodEnd ? ' for ' + periodEnd + '.' : '.');
+          } else if (result.hasPlus) {
+            $('accountPlusStatus').textContent = 'PCCheck Plus is active' + (periodEnd ? ' · next billing date ' + periodEnd + '.' : '.');
+          } else if (result.status === 'past_due' || result.status === 'unpaid') {
+            $('accountPlusStatus').textContent = 'Payment needs attention · Plus access is paused. Open billing management to review the test subscription.';
+          } else if (result.status === 'canceled') {
+            $('accountPlusStatus').textContent = 'Subscription canceled · Free account.';
+          } else {
+            $('accountPlusStatus').textContent = 'Free account · Plus is not active.';
+          }
           $('accountManageBilling').hidden = !result.hasCustomer;
         } catch (error) {
           $('accountPlusStatus').textContent = 'Membership status is temporarily unavailable.';
