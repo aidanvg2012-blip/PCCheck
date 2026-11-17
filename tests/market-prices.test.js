@@ -17,8 +17,12 @@ test('matches an exact CPU model and ignores generic descriptions', () => {
     { name: 'AMD Ryzen 5 5600GT', maker: 'AMD', model: 'Ryzen 5 5600GT' }
   ];
   assert.equal(handler._matchProduct('Ryzen 5 5600X', products).name, products[0].name);
-  assert.equal(handler._matchProduct('16GB DDR4', products), null);
-  assert.equal(handler._matchProduct('1TB NVMe SSD', products), null);
+  const genericParts = [
+    { name: 'PNY Performance 16GB DDR4-3200 CL22', maker: 'PNY' },
+    { name: 'Samsung 870 EVO 1TB 2.5 SATA', maker: 'Samsung' }
+  ];
+  assert.equal(handler._matchProduct('16GB DDR4', genericParts), null);
+  assert.equal(handler._matchProduct('1TB NVMe SSD', genericParts), null);
   assert.equal(handler._matchProduct('Ryzen 5', products), null);
 });
 
