@@ -8,14 +8,14 @@ const CATEGORIES = {
   psu: ['psu.live.json'],
   case: ['pccase.live.json']
 };
-const STOP = new Set(['amd','intel','nvidia','geforce','radeon','graphics','card','gpu','cpu','processor','ryzen','core','the','and','with','memory','ram','ddr3','ddr4','ddr5','gb','tb','ssd','nvme','hdd','drive','storage','motherboard','mainboard','board','psu','power','supply','atx','case','tower','mid','full','mini','itx','w','80','plus','gold','bronze','platinum','white','black','edition','series','kit']);
+const STOP = new Set(['amd','intel','nvidia','geforce','radeon','graphics','card','gpu','cpu','processor','ryzen','core','rtx','rx','arc','xt','the','and','with','memory','ram','ddr3','ddr4','ddr5','gb','tb','ssd','nvme','hdd','drive','storage','motherboard','mainboard','board','psu','power','supply','atx','case','tower','mid','full','mini','itx','w','80','plus','gold','bronze','platinum','white','black','edition','series','kit','1','3','5','7','9']);
 
 function normalize(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
 }
 function matchProduct(query, products) {
   const normalizedQuery = normalize(query);
-  const tokens = normalizedQuery.split(' ').filter(token => token && !STOP.has(token));
+  const tokens = normalizedQuery.split(' ').filter(token => token && !STOP.has(token) && !/^\\d+(?:\\.\\d+)?(?:gb|tb|mb|w|mhz)$/.test(token));
   if (!tokens.length) return null;
   const candidates = (products || []).map(product => {
     const text = normalize([product.name, product.maker, product.model, product.part_number, product.upc].filter(Boolean).join(' '));
