@@ -1,11 +1,11 @@
 # PCCheck account and billing beta test
 
-This is a test-only beta. It is not ready to accept real payments.
+This branch supports explicitly separated Stripe test and live modes. Keep Preview in test mode. Production must remain test mode until a parent/guardian completes the live-account setup and approves the launch.
 
 ## Safe setup
 
 1. Use the Vercel Preview deployment for this branch, not the public production URL. Checkout and Billing Portal return URLs automatically use the current Vercel Preview deployment.
-2. Keep Stripe in test mode. Never add a live key to Preview or Production.
+2. Keep Preview in test mode with `STRIPE_MODE=test`, an `sk_test_` key, and `STRIPE_TEST_PRICE_ID`. Never add live keys or live webhook secrets to Preview.
 3. Confirm the Supabase Preview environment values are configured in Vercel. Do not share secret values in chat.
 4. In Stripe test mode, configure the Billing Portal to allow viewing invoices and cancelling subscriptions. Leave payment-method updates disabled unless a parent/guardian has reviewed the flow.
 5. In Stripe test mode, configure the webhook endpoint to receive:
@@ -68,6 +68,6 @@ Do not switch live payments on as part of this Preview test. The current checkou
 
 A parent/guardian who owns the Stripe account must complete the financial and business setup directly in Stripe, including identity/business verification, payout bank details, tax information, customer support/refund arrangements, and review of Stripe's terms. Do not send secret keys or private financial information through chat.
 
-Before enabling live billing, the code needs a separate reviewed live-mode path, a live recurring price, a live webhook endpoint with its own signing secret, production-only live environment variables, and an end-to-end test plan. Preview must remain test-only. Also complete privacy/terms review, account deletion and data export, accessibility checks, security review, and a clear support contact.
+The code now separates test and live subscription rows using the `livemode` database column. Before enabling live billing, apply `supabase/migrations/202611170001_subscription_livemode.sql` to the production Supabase project. A parent/guardian must then create a live monthly recurring Stripe Price and a separate live webhook endpoint with its own signing secret. Configure Production only with `STRIPE_MODE=live`, an `sk_live_` value in `STRIPE_SECRET_KEY`, the live recurring Price ID in `STRIPE_LIVE_PRICE_ID`, and that live endpoint's signing secret in `STRIPE_WEBHOOK_SECRET`. Keep Preview on `STRIPE_MODE=test` with test-only credentials. Never reuse test webhook secrets in live mode or vice versa. Run a small, parent-supervised real purchase/refund test only after support, refund, cancellation, tax, and privacy arrangements are ready. Also complete privacy/terms review, account deletion and data export, accessibility checks, security review, and a clear support contact.
 
-A successful test checkout or webhook does not prove that live payments are ready.
+The live checkout path is code-supported but is not yet enabled on Production. A successful test checkout or webhook does not prove that live payments are ready.
