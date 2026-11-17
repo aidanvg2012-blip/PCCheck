@@ -9,6 +9,7 @@ module.exports = async function handler(req, res) {
   const signingSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
   if (!signingSecret || !supabaseUrl || !serviceRoleKey) {
     return res.status(503).json({ error: 'Webhook is not configured.' });
   }
@@ -21,15 +22,44 @@ module.exports = async function handler(req, res) {
     }
 
     const event = JSON.parse(rawBody.toString('utf8'));
-    if (!['customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted'].includes(event.type)) {
+    if (event.livemode === true) {
+      return res.status(400).json({ error: 'Live-mode events are disabled.' });
+    }
+
+    const subscriptionEvents = [
+      'customer.subscription.created',
+      'customer.subscription.updated',
+      'customer.subscription.deleted'
+    ];
+    const invoiceEvents = ['invoice.paid', 'invoice.payment_failed'];
+    if (!subscriptionEvents.includes(event.type) && !invoiceEvents.includes(event.type)) {
       return res.status(200).json({ received: true, ignored: true });
     }
 
-    const subscription = event.data && event.data.object;
+    let subscription = event.data && event.data.object;
+    if (invoiceEvents.includes(event.type)) {
+      const invoice = subscription;
+      const subscriptionId = invoice?.subscription ||
+        invoice?.parent?.subscription_details?.subscription ||
+        invoice?.lines?.data?.find(line => line.parent?.subscription_item_details?.subscription)
+          ?.parent?.subscription_item_details?.subscription;
+      if (!subscriptionId) return res.status(200).json({ received: true, ignored: true });
+      if (!stripeSecretKey || !stripeSecretKey.startsWith('sk_test_')) {
+        return res.status(503).json({ error: 'Test-mode Stripe lookup is not configured.' });
+      }
+      const lookup = await fetch('https://api.stripe.com/v1/subscriptions/' + encodeURIComponent(subscriptionId), {
+        headers: { Authorization: 'Bearer ' + stripeSecretKey }
+      });
+      const lookupBody = await lookup.json().catch(() => ({}));
+      if (!lookup.ok || !lookupBody.id) {
+        console.error('Stripe subscription lookup failed:', lookup.status);
+        return res.status(502).json({ error: 'Could not retrieve subscription state.' });
+      }
+      subscription = lookupBody;
+    }
+
     const userId = subscription?.metadata?.supabase_user_id;
     if (!subscription?.id || !userId) {
-      // Do not create an entitlement unless the subscription is linked to an
-      // authenticated PCCheck account.
       console.warn('Stripe subscription missing PCCheck user metadata.');
       return res.status(200).json({ received: true, ignored: true });
     }
