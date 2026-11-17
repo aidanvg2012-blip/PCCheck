@@ -386,6 +386,35 @@ function getPriceComparison(d) {
   else { verdict='Above comparable prices'; detail=`The asking price is ${Math.round((ratio-1)*100)}% above the median. Consider negotiating or comparing more closely matched systems.`; }
   return {available:true,asking,comps,median,low:Math.min(...comps),high:Math.max(...comps),ratio,verdict,detail};
 }
+function getPartsValue(d) {
+  const fields = [
+    ['CPU', d.cpu, d.cpuMsrp],
+    ['GPU', d.gpu, d.gpuMsrp],
+    ['RAM', d.ram, d.ramMsrp],
+    ['Storage', d.storage, d.storageMsrp],
+    ['Motherboard', d.motherboard, d.motherboardMsrp],
+    ['Power supply', d.psu, d.psuMsrp]
+  ];
+  const parts = fields.map(([name, model, raw]) => ({
+    name, model: clean(model), msrp: Number(raw)
+  })).filter(part => part.msrp > 0 && Number.isFinite(part.msrp));
+  const totalMsrp = parts.reduce((sum, part) => sum + part.msrp, 0);
+  const asking = Number(d.price);
+  const difference = asking > 0 && totalMsrp > 0 ? asking - totalMsrp : null;
+  return {
+    parts, totalMsrp, asking: asking > 0 ? asking : null, difference,
+    percentOfMsrp: asking > 0 && totalMsrp > 0 ? asking / totalMsrp * 100 : null,
+    complete: parts.length === fields.length
+  };
+}
+function partsValueMarkup(value) {
+  if (!value.parts.length) return `<div class="parts-value"><h4>Parts MSRP breakdown</h4><p class="report-note">Add the original MSRP for each known component in the form to calculate the combined parts MSRP and compare it with the seller’s asking price.</p></div>`;
+  const rows = value.parts.map(part => `<tr><th>${escapeHTML(part.name)}</th><td>${escapeHTML(part.model || 'Model not entered')}</td><td>${money(part.msrp)}</td></tr>`).join('');
+  const difference = value.difference === null ? 'Enter an asking price to compare.' : value.difference <= 0
+    ? `Asking price is ${money(Math.abs(value.difference))} below the entered combined MSRP.`
+    : `Asking price is ${money(value.difference)} above the entered combined MSRP.`;
+  return `<div class="parts-value"><h4>Parts MSRP breakdown</h4><div class="parts-value-total"><span>Combined entered MSRP</span><b>${money(value.totalMsrp)}</b></div><div class="comparison-scroll"><table class="comparison-table"><thead><tr><th>Part</th><th>Model</th><th>Original MSRP</th></tr></thead><tbody>${rows}</tbody></table></div><div class="parts-value-result"><b>${value.percentOfMsrp === null ? 'Asking price not entered' : `${value.percentOfMsrp.toFixed(1)}% of entered MSRP`}</b><span>${escapeHTML(difference)}</span></div><p class="report-note">${value.parts.length} of 6 component prices entered. MSRP is the original launch price, not the part’s current used value. This total excludes any parts without an entered MSRP and does not account for depreciation, condition, warranty, age, or current market prices.</p></div>`;
+}
 function priceChartMarkup(price) {
   if (!price.available) return `<div class="price-analysis"><h4>Price comparison</h4><p class="report-note">Enter an asking price and at least two comparable prices from similar PCs to generate a chart and recommendation. Compare similar specs, condition, and included accessories.</p></div>`;
   const values=[...price.comps,price.asking];
@@ -425,8 +454,9 @@ function buildUsedAssessment(d) {
     verdictText = 'The core specifications are present. This is not a guarantee of condition, performance, compatibility, or fair price.';
   }
   const priceComparison = getPriceComparison(d);
+  const partsValue = getPartsValue(d);
   return {
-    kind:'used', priceComparison, title:`Used PC · ${clean(d.gpu) || 'GPU not entered'}`,
+    kind:'used', priceComparison, partsValue, title:`Used PC · ${clean(d.gpu) || 'GPU not entered'}`,
     summary:`${clean(d.cpu)||'CPU unknown'} / ${clean(d.ram)||'RAM unknown'} / ${clean(d.storage)||'storage unknown'} · ${money(d.price)}`,
     input:d, verdict, verdictText, completeness, warnings, positives, missing,
     insights:[`CPU family: ${cpuFamily}`,`GPU generation guide: ${gpuTier}`,`Memory type: ${ramType || 'Not confirmed'}`],
@@ -531,7 +561,7 @@ function reportMarkup(report) {
     if (report.missing.length) body += `<h4>Missing core details</h4><ul>${report.missing.map(x=>`<li>${escapeHTML(x)} not entered</li>`).join('')}</ul>`;
     if (report.warnings.length) body += `<h4>Buyer checks</h4><ul class="warning-list">${report.warnings.map(x=>`<li>${escapeHTML(x)}</li>`).join('')}</ul>`;
     if (report.positives.length) body += `<h4>Potential positives to verify</h4><ul>${report.positives.map(x=>`<li>${escapeHTML(x)}</li>`).join('')}</ul>`;
-    body += `<p class="report-note">Asking price: <b>${money(report.input.price)}</b>.</p>${priceChartMarkup(report.priceComparison || getPriceComparison(report.input))}`;
+    body += `<p class="report-note">Asking price: <b>${money(report.input.price)}</b>.</p>${partsValueMarkup(report.partsValue || getPartsValue(report.input))}${priceChartMarkup(report.priceComparison || getPriceComparison(report.input))}`;
   } else {
     body += `<div class="check-list">${report.checks.map(c=>`<div class="check-row"><span class="check-dot ${c.status}">${c.status==='pass'?'✓':c.status==='fail'?'!':c.status==='warn'?'!':'?'}</span><div><b>${escapeHTML(c.name)}</b><p>${escapeHTML(c.detail)}</p></div></div>`).join('')}</div>`;
     if (report.issues.length) body += `<h4>Fix before buying parts</h4><ul class="warning-list">${report.issues.map(x=>`<li>${escapeHTML(x)}</li>`).join('')}</ul>`;
