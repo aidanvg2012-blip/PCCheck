@@ -53,6 +53,7 @@
       $('accountSignedOut').hidden = signedIn;
       $('accountSignedIn').hidden = !signedIn;
       $('accountOpenButton').textContent = signedIn ? 'My account' : 'Sign in';
+      if (!signedIn && window.PCCheckAuth) window.PCCheckAuth.hasPlus = false;
       if (signedIn) {
         $('accountEmailDisplay').textContent = session.user.email || 'Signed-in account';
         $('accountPlusStatus').textContent = 'Checking Plus access…';
@@ -62,6 +63,8 @@
           });
           const result = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(result.error || 'Could not check membership.');
+          if (window.PCCheckAuth) window.PCCheckAuth.hasPlus = Boolean(result.hasPlus);
+          window.dispatchEvent(new CustomEvent('pccheck:membership', { detail: { hasPlus: Boolean(result.hasPlus) } }));
           const periodEnd = result.currentPeriodEnd
             ? new Date(result.currentPeriodEnd).toLocaleDateString()
             : null;
@@ -78,6 +81,8 @@
           }
           $('accountManageBilling').hidden = !result.hasCustomer;
         } catch (error) {
+          if (window.PCCheckAuth) window.PCCheckAuth.hasPlus = false;
+          window.dispatchEvent(new CustomEvent('pccheck:membership', { detail: { hasPlus: false } }));
           $('accountPlusStatus').textContent = 'Membership status is temporarily unavailable.';
         }
       }
@@ -164,7 +169,7 @@
   client.auth.onAuthStateChange(() => {
     window.setTimeout(refreshAccount, 0);
   });
-  window.PCCheckAuth = { getSession, openModal, refreshAccount };
+  window.PCCheckAuth = { getSession, openModal, refreshAccount, hasPlus: false };
   setMode('signin');
   refreshAccount();
 })();
