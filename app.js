@@ -750,12 +750,15 @@ $('clearSaved')?.addEventListener('click',()=>{
   if (!modal) return;
   const title = $('hardwarePickerTitle'), hint = $('hardwarePickerHint');
   const search = $('hardwarePickerSearch'), options = $('hardwarePickerOptions');
-  const fieldLabels = {cpu:'Processor (CPU)',gpu:'Graphics card (GPU)',ram:'Memory (RAM)',storage:'Storage'};
+  const fieldLabels = {cpu:'Processor (CPU)',gpu:'Graphics card (GPU)',ram:'Memory (RAM)',storage:'Storage',motherboard:'Motherboard',psu:'Power supply (PSU)',case:'PC case'};
   const visualChoices = {
     cpu: HARDWARE_CATALOG.cpu.map(([name])=>name),
     gpu: HARDWARE_CATALOG.gpu.map(([name])=>name),
-    ram: ['8GB DDR4','16GB DDR4','32GB DDR4','16GB DDR5','32GB DDR5','48GB DDR5','64GB DDR5','Not sure — type unknown'],
-    storage: ['256GB SSD','500GB SSD','1TB SATA SSD','1TB NVMe SSD','2TB NVMe SSD','4TB NVMe SSD','1TB HDD','2TB HDD','Not sure — type unknown']
+    ram: ['8GB DDR4','16GB DDR4','32GB DDR4','16GB DDR5','32GB DDR5','48GB DDR5','64GB DDR5'],
+    storage: ['256GB SSD','500GB SSD','1TB SATA SSD','1TB NVMe SSD','2TB NVMe SSD','4TB NVMe SSD','1TB HDD','2TB HDD'],
+    motherboard: ['MSI B550 Tomahawk','MSI MAG B650 Tomahawk WiFi','ASUS TUF Gaming B650-Plus','Gigabyte B650 AORUS Elite AX','MSI PRO Z790-A WiFi','ASUS ROG Strix Z890-E Gaming WiFi'],
+    psu: ['Corsair RM650x','Corsair RM750e','Seasonic Focus GX-750','be quiet! Pure Power 12 M 850W','Corsair RM1000x'],
+    case: ['NZXT H5 Flow','Corsair 4000D Airflow','Fractal Design North','Lian Li Lancool 216','Montech Air 903 Max']
   };
   let activeType = '';
   let activeInput = null;
