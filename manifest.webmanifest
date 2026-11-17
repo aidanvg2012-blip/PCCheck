@@ -1,7 +1,7 @@
 {
   "name": "PCCheck \u2014 PC buying and build checker",
   "short_name": "PCCheck",
-  "description": "Compare PC component prices, analyze used listings, and check custom build compatibility.",
+  "description": "Compare PC component prices, analyze used listings, check builds, and plan upgrades, power, and storage.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#080d18",
