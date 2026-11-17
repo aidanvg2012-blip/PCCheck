@@ -49,6 +49,10 @@
     try {
       const session = await getSession();
       const signedIn = Boolean(session?.user);
+      if (!signedIn) {
+        if (window.PCCheckAuth) window.PCCheckAuth.hasPlus = false;
+        window.dispatchEvent(new CustomEvent('pccheck:membership', { detail: { hasPlus: false } }));
+      }
       $('accountManageBilling').hidden = true;
       $('accountSignedOut').hidden = signedIn;
       $('accountSignedIn').hidden = !signedIn;
@@ -87,6 +91,8 @@
         }
       }
     } catch (error) {
+      if (window.PCCheckAuth) window.PCCheckAuth.hasPlus = false;
+      window.dispatchEvent(new CustomEvent('pccheck:membership', { detail: { hasPlus: false } }));
       $('accountOpenButton').textContent = 'Sign in';
       setStatus('Could not check your session. Refresh the page and try again.', 'error');
     }
