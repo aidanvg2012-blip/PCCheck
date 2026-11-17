@@ -4,7 +4,7 @@ This is a test-only beta. It is not ready to accept real payments.
 
 ## Safe setup
 
-1. Use the Vercel Preview deployment for this branch, not the public production URL.
+1. Use the Vercel Preview deployment for this branch, not the public production URL. Checkout and Billing Portal return URLs automatically use the current Vercel Preview deployment.
 2. Keep Stripe in test mode. Never add a live key to Preview or Production.
 3. Confirm the Supabase Preview environment values are configured in Vercel. Do not share secret values in chat.
 4. In Stripe test mode, configure the Billing Portal to allow viewing invoices and cancelling subscriptions. Leave payment-method updates disabled unless a parent/guardian has reviewed the flow.
@@ -14,7 +14,7 @@ This is a test-only beta. It is not ready to accept real payments.
    - `customer.subscription.deleted`
    - `invoice.paid`
    - `invoice.payment_failed`
-6. The webhook URL should be the endpoint assigned to this environment. Production's existing endpoint is `https://pccheck.vercel.app/api/stripe-webhook`; use the Preview URL for a separate Preview webhook and its own signing secret if testing Preview callbacks directly.
+6. For this branch's lifecycle webhook code, configure a separate Stripe **test-mode** webhook to the stable branch alias `https://pccheck-git-feature-plus-billing-test-suite-aidanvg2012-8929.vercel.app/api/stripe-webhook`. Put that endpoint's own signing secret in Vercel Preview as `STRIPE_WEBHOOK_SECRET`. Do not reuse the Production endpoint's signing secret. Production's existing endpoint remains `https://pccheck.vercel.app/api/stripe-webhook`.
 7. Run `node --test tests/stripe-webhook.test.js` locally before merging code.
 
 ## Manual test sequence
