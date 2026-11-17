@@ -7,7 +7,9 @@ module.exports = async function handler(req, res) {
   }
 
   const secretKey = process.env.STRIPE_SECRET_KEY;
-  const priceId = process.env.STRIPE_TEST_PRICE_ID;
+  const stripeMode = process.env.STRIPE_MODE || 'test';
+  const isLive = stripeMode === 'live';
+  const priceId = isLive ? process.env.STRIPE_LIVE_PRICE_ID : process.env.STRIPE_TEST_PRICE_ID;
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const appUrl = process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL
@@ -17,8 +19,8 @@ module.exports = async function handler(req, res) {
   if (!secretKey || !priceId || !supabaseUrl || !serviceRoleKey) {
     return res.status(503).json({ error: 'Checkout or account service is not configured.' });
   }
-  if (!secretKey.startsWith('sk_test_')) {
-    return res.status(503).json({ error: 'Checkout is locked to Stripe test mode.' });
+  if (!['test', 'live'].includes(stripeMode) || !secretKey.startsWith(isLive ? 'sk_live_' : 'sk_test_')) {
+    return res.status(503).json({ error: 'Stripe mode and secret key do not match.' });
   }
   if (!priceId.startsWith('price_')) {
     return res.status(503).json({ error: 'The Stripe test Price ID is invalid.' });
@@ -40,13 +42,14 @@ module.exports = async function handler(req, res) {
     });
     const price = await priceResponse.json();
     if (!priceResponse.ok) return res.status(503).json({ error: 'Stripe could not verify the configured test Price ID.' });
-    if (price.livemode !== false || price.active !== true || price.type !== 'recurring' || price.recurring?.interval !== 'month') {
-      return res.status(400).json({ error: 'The configured Stripe Price must be an active monthly recurring TEST price.' });
+    if (price.livemode !== isLive || price.active !== true || price.type !== 'recurring' || price.recurring?.interval !== 'month') {
+      return res.status(400).json({ error: 'The configured Stripe Price must be an active monthly recurring price in the selected Stripe mode.' });
     }
 
     const existingQuery = new URLSearchParams({
       user_id: 'eq.' + user.id,
       status: 'in.(active,trialing)',
+      livemode: 'eq.' + String(isLive),
       select: 'stripe_subscription_id',
       limit: '1'
     });
