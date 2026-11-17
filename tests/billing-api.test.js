@@ -89,7 +89,7 @@ test('checkout returns to the current Preview deployment', async () => {
   const res = await call(checkoutSession, { method: 'POST', fetchStub: async (url, options = {}) => {
     const target = String(url);
     if (target.includes('/auth/v1/user')) return Response.json({ id: 'user-1', email: 'tester@example.com', email_confirmed_at: '2026-11-16T00:00:00Z' });
-    if (target.includes('/v1/prices/')) return Response.json({ livemode: mode === 'live', active: true, type: 'recurring', recurring: { interval: 'month' } });
+    if (target.includes('/v1/prices/')) return Response.json({ livemode: false, active: true, type: 'recurring', recurring: { interval: 'month' } });
     if (target.includes('/rest/v1/subscriptions')) return Response.json([]);
     checkoutBody = options.body;
     return Response.json({ url: 'https://checkout.stripe.test/session' });
