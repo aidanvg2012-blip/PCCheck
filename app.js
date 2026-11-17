@@ -770,7 +770,7 @@ $('clearSaved')?.addEventListener('click',()=>{
   }
   function open(type) {
     activeType = type;
-    activeInput = $('manualForm')?.elements.namedItem(type);
+    activeInput = $('manualForm')?.querySelector('[name="' + type + '"]');
     if (!activeInput) return;
     title.textContent = 'Choose ' + fieldLabels[type];
     hint.textContent = type === 'cpu' || type === 'gpu'
@@ -781,7 +781,7 @@ $('clearSaved')?.addEventListener('click',()=>{
     modal.hidden = false;
     search.focus();
   }
-  document.querySelectorAll('[data-open-picker]').forEach(button => button.addEventListener('click',()=>open(button.dataset.openPicker)));
+  document.addEventListener('click', event => {\n    const trigger = event.target.closest('[data-open-picker]');\n    if (!trigger) return;\n    event.preventDefault();\n    event.stopPropagation();\n    open(trigger.dataset.openPicker);\n  }, true);
   search.addEventListener('input',render);
   options.addEventListener('click',event=>{
     const button=event.target.closest('[data-hardware-value]');
