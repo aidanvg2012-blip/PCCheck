@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="PCCheck helps you review used gaming PCs and check basic custom PC build compatibility.">
-<meta name="theme-color" content="#080b12"><meta name="application-name" content="PCCheck"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PCCheck"><link rel="apple-touch-icon" href="icon.svg"><meta name="version" content="2.5.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0a1018"><meta name="application-name" content="PCCheck"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PCCheck"><link rel="apple-touch-icon" href="icon.svg"><meta name="version" content="2.6.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>PCCheck — PC buying and build checker</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="glow g1"></div><div class="glow g2"></div>
+<div class="scroll-progress" aria-hidden="true"><span id="scrollProgressBar"></span></div>
 <header class="topbar">
   <a class="brand" href="#top" aria-label="PCCheck home"><span class="logo">PC</span> PC<span>CHECK</span></a>
-  <nav aria-label="Main navigation"><a href="#analyze">Used PC</a><a href="#build">Build checker</a><a href="#saved">Saved reports</a><a href="guides.html">Guides</a><a href="privacy.html">Privacy & limits</a></nav>
+  <nav aria-label="Main navigation"><a href="#top">Overview</a><a href="#analyze">Used PC</a><a href="#build">Build checker</a><a href="#saved">Saved reports</a><a href="#guides">Guides</a></nav>
   <button class="profile" id="accountOpenButton" type="button">Sign in</button>
 </header>
 <nav class="mobile-tabs" aria-label="App navigation">
@@ -24,10 +25,10 @@
 <main id="top">
 <section class="hero">
   <div class="eyebrow"><i></i> PC BUYING TOOLKIT</div>
-  <h1>Know the PC.<br><em>Before you pay.</em></h1>
-  <p>Review used gaming PC details, catch missing information, and check basic compatibility before you spend money on a build.</p>
+  <h1>Buy smarter.<br><em>Build with confidence.</em></h1>
+  <p>Compare component prices, review used gaming PCs, and catch common build issues — all in one organized workspace.</p>
   <div class="hero-actions"><a class="btn primary" href="#analyze">Check a used PC <b>↗</b></a><a class="btn ghost" href="#build">Check a build</a></div>
-  <div class="hero-stats"><span>01 <small>USED PC REVIEW</small></span><span>02 <small>BUILD COMPATIBILITY</small></span><span>03 <small>SAVED REPORTS</small></span><span>04 <small>BUYER GUIDES</small></span></div>
+  <div class="hero-stats"><span>01 <small>MARKET PRICES</small></span><span>02 <small>USED PC CHECKS</small></span><span>03 <small>BUILD COMPATIBILITY</small></span><span>04 <small>REPORTS & GUIDES</small></span></div>
   <div class="pro-teaser">
     <div><span class="mini-label">OPTIONAL / PCCHECK PLUS</span><h3>More insight. Better decisions.</h3><p>Preview upcoming tools for deeper PC comparisons and cleaner reports.</p></div>
     <div class="pro-teaser-actions"><span class="pro-price">Planned test price <b>$4.99/mo</b></span><button class="btn ghost" id="proPreviewButton" type="button">Preview Plus ↗</button></div>
@@ -48,7 +49,8 @@
 </section>
 
 <section class="workspace" id="analyze">
-  <div class="section-title"><div class="eyebrow">01 / USED PC LISTING</div><h2>Review a used gaming PC</h2><p>Paste listing details or upload a screenshot. PCCheck extracts likely specs for you to review before running a check.</p></div>
+  <div class="section-title"><div class="eyebrow">01 / USED PC LISTING</div><h2>Review a used gaming PC</h2><p>Enter the exact component models to compare them with current new-retail prices. You can also import a listing to fill in the details faster.</p></div>
+  <details class="import-tools"><summary>Quick import tools · paste a listing or upload a screenshot</summary>
   <div class="panel import-panel">
     <div class="panel-head"><div><span class="mini-label">QUICK SPEC EXTRACTION</span><h3>Paste the listing details</h3></div><span class="pill">LOCAL PARSER</span></div>
     <p class="fine">Open the product page, copy its title and description/specifications, then paste them here. PCCheck will look for known CPU, GPU, RAM, and storage names. It does not bypass site restrictions or automatically read private/dynamic pages.</p>
@@ -65,6 +67,7 @@
     <textarea id="ocrText" rows="4" placeholder="Recognized text will appear here. You can edit it before extracting specs."></textarea>
     <button class="btn ghost" id="extractOcrText" type="button" disabled>Extract specs from recognized text</button>
   </div>
+  </details>
   <div class="or"><span>ENTER THE PC DETAILS</span></div>
   <form class="panel manual" id="manualForm">
     <div class="panel-head"><div><span class="mini-label">USED PC ASSESSMENT</span><h3>What is the seller offering?</h3></div><span class="step">01 / 02</span></div>
@@ -72,35 +75,28 @@
     <div class="fields">
       <label>CPU <input name="cpu" required placeholder="Ryzen 5 5600X" list="cpuSuggestions" autocomplete="off"><datalist id="cpuSuggestions"></datalist></label>
       <label>GPU <input name="gpu" required placeholder="RTX 3060" list="gpuSuggestions" autocomplete="off"><datalist id="gpuSuggestions"></datalist></label>
-      <label>RAM <input name="ram" required placeholder="16GB DDR4" list="ramSuggestions" autocomplete="off"><datalist id="ramSuggestions"><option value="16GB DDR4"><option value="32GB DDR4"><option value="16GB DDR5"><option value="32GB DDR5"><option value="64GB DDR5"></datalist></label>
-      <label>Storage <input name="storage" required placeholder="1TB NVMe SSD" list="storageSuggestions" autocomplete="off"><datalist id="storageSuggestions"><option value="500GB SSD"><option value="1TB NVMe SSD"><option value="2TB NVMe SSD"><option value="1TB HDD"></datalist></label>
+      <label>RAM <input name="ram" required placeholder="Corsair Vengeance 32GB DDR5-6000" list="ramSuggestions" autocomplete="off"><datalist id="ramSuggestions"><option value="16GB DDR4"><option value="32GB DDR4"><option value="16GB DDR5"><option value="32GB DDR5"><option value="64GB DDR5"></datalist></label>
+      <label>Storage <input name="storage" required placeholder="Samsung 990 Pro 2TB NVMe" list="storageSuggestions" autocomplete="off"><datalist id="storageSuggestions"><option value="500GB SSD"><option value="1TB NVMe SSD"><option value="2TB NVMe SSD"><option value="1TB HDD"></datalist></label>
       <label>Asking price (USD) <input name="price" type="number" min="0" step="1" placeholder="650"></label>
-      <div class="full-field msrp-entry"><div><span class="mini-label">PART VALUE BREAKDOWN</span><p class="fine">Enter each part’s original MSRP from its manufacturer launch information, receipt, or a reliable source. Leave unknown prices blank.</p></div>
-        <div class="fields">
-          <label>CPU MSRP (USD) <input name="cpuMsrp" type="number" min="0" step="0.01" placeholder="e.g. 299"></label>
-          <label>GPU MSRP (USD) <input name="gpuMsrp" type="number" min="0" step="0.01" placeholder="e.g. 499"></label>
-          <label>RAM MSRP (USD) <input name="ramMsrp" type="number" min="0" step="0.01" placeholder="e.g. 89"></label>
-          <label>Storage MSRP (USD) <input name="storageMsrp" type="number" min="0" step="0.01" placeholder="e.g. 79"></label>
-          <label>Motherboard MSRP (USD) <input name="motherboardMsrp" type="number" min="0" step="0.01" placeholder="e.g. 159"></label>
-          <label>Power supply MSRP (USD) <input name="psuMsrp" type="number" min="0" step="0.01" placeholder="e.g. 99"></label>
-        </div>
-      </div>
+      <details class="advanced-fields full-field"><summary>More details · motherboard, power supply, condition & comparisons</summary><div class="fields">
       <label>Comparable PC price #1 (USD) <input name="comp1" type="number" min="0" step="1" placeholder="Similar PC listing price"></label>
       <label>Comparable PC price #2 (USD) <input name="comp2" type="number" min="0" step="1" placeholder="Similar PC listing price"></label>
       <label>Comparable PC price #3 (USD) <input name="comp3" type="number" min="0" step="1" placeholder="Similar PC listing price"></label>
       <label>Power supply model <input name="psu" placeholder="Corsair RM650x 650W"></label>
       <label>Motherboard model <input name="motherboard" placeholder="MSI B550 Tomahawk"></label>
       <label>Approximate age <input name="age" placeholder="Built in 2022"></label>
+      <label>Case model <input name="case" placeholder="NZXT H5 Flow"></label>
       <label class="full-field">Condition / seller notes <textarea name="condition" rows="3" placeholder="Tested and working, no known issues, includes Wi-Fi... "></textarea></label>
+      </div></details>
     </div>
-    <button class="btn primary" type="submit">Analyze this PC →</button>
-    <p class="fine">The assessment checks the information you provide and flags questions to ask. Price comparisons use similar listing prices you enter; PCCheck does not fetch live market prices.</p>
+    <div class="assessment-submit"><button class="btn primary" type="submit">Analyze PC & check market prices →</button><span class="fine" id="marketLookupStatus" role="status" aria-live="polite">Exact model names give the best price matches.</span></div>
+    <p class="fine">Market lookup uses current tracked new-retail prices for exact matches. It is a replacement-cost reference, not a used resale valuation. Unmatched models are left blank rather than guessed.</p>
   </form>
   <div id="reportOutput" class="report-host" hidden aria-live="polite"></div>
 </section>
 
 <section class="workspace build-section" id="build">
-  <div class="section-title"><div class="eyebrow">02 / CUSTOM PC BUILD</div><h2>Check a custom build</h2><p>Enter the main component details to catch common compatibility problems.</p></div>
+  <div class="section-title"><div class="eyebrow">02 / CUSTOM PC BUILD</div><h2>Build compatibility</h2><p>Check sockets, memory, case fit, power, and other common compatibility details.</p></div>
   <form class="panel" id="buildForm">
     <div class="panel-head"><div><span class="mini-label">COMPATIBILITY CHECKER</span><h3>Your planned parts</h3></div><span class="step">BASIC CHECKS</span></div>
     <div class="fields">
@@ -131,7 +127,7 @@
 </section>
 
 <section class="workspace saved-section" id="saved">
-  <div class="section-title"><div class="eyebrow">03 / YOUR WORKSPACE</div><h2>Saved reports</h2><p>Reports are saved in this browser on this device.</p></div>
+  <div class="section-title"><div class="eyebrow">03 / YOUR WORKSPACE</div><h2>Your saved workspace</h2><p>Keep reports organized and compare your saved PCs.</p></div>
   <div id="plusWorkspace" class="plus-workspace" aria-live="polite"><div class="plus-locked"><b>PCCheck Plus tools</b><p>Sign in and activate Plus to unlock comparisons, expanded reports, and build history.</p><button class="btn ghost" type="button" id="plusWorkspaceSignIn">Sign in / account</button></div></div>
   <div id="savedReports" class="saved-list"><div class="empty">No saved reports yet. Create and save a report above.</div></div>
   <div class="saved-tools"><button class="btn ghost" id="exportAll" type="button">Export all reports</button><button class="btn ghost" id="clearSaved" type="button">Clear saved reports</button></div>
@@ -184,5 +180,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="auth.js" defer></script>
+<script src="ui.js" defer></script>
 <script src="app.js" defer></script>
 </body></html>
