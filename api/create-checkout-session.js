@@ -10,7 +10,9 @@ module.exports = async function handler(req, res) {
   const priceId = process.env.STRIPE_TEST_PRICE_ID;
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const appUrl = (process.env.PCCHECK_APP_URL || 'https://pccheck.vercel.app').replace(/\/$/, '');
+  const appUrl = process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL
+    ? 'https://' + process.env.VERCEL_URL
+    : (process.env.PCCHECK_APP_URL || 'https://pccheck.vercel.app').replace(/\/$/, '');
 
   if (!secretKey || !priceId || !supabaseUrl || !serviceRoleKey) {
     return res.status(503).json({ error: 'Checkout or account service is not configured.' });
