@@ -30,6 +30,24 @@ This is a test-only beta. It is not ready to accept real payments.
 - [ ] Restore a successful test payment if testing recovery; confirm the subscription returns to `active` and Plus returns.
 - [ ] Sign out and confirm the account modal returns to the signed-out state.
 
-## What these tests do not prove
+## Plus feature Preview checks
 
-A test clock and successful webhook delivery are useful integration checks, but they do not replace parent/guardian review, privacy/terms review, account deletion and data export, support/refund procedures, accessibility checks, or security review. Keep live payments disabled. The currently advertised Plus comparison, expanded-report, and build-history features are still marked as planned and must be implemented before charging anyone.
+The current Preview branch implements the advertised Plus workspace:
+
+- [ ] Sign in with an account whose verified subscription is active. The Plus workspace should unlock.
+- [ ] Save at least two used-PC reports. Select them in Saved reports and confirm the side-by-side comparison shows their entered fields and assessment.
+- [ ] Select a third report, then confirm a fourth cannot be selected.
+- [ ] Use Details on a saved report and confirm its entered fields expand safely.
+- [ ] Save a custom build report, change some build inputs, and save another report with the same title. Confirm both dated snapshots appear in Build history with version numbers.
+- [ ] Sign out or use a Free account. Plus controls should lock again.
+- [ ] Confirm saved reports and build history remain local to the current browser/device; they do not sync across devices or accounts.
+
+## Before any live payment launch
+
+Do not switch live payments on as part of this Preview test. The current checkout endpoint requires an sk_test_ key and the webhook rejects live-mode events by design.
+
+A parent/guardian who owns the Stripe account must complete the financial and business setup directly in Stripe, including identity/business verification, payout bank details, tax information, customer support/refund arrangements, and review of Stripe's terms. Do not send secret keys or private financial information through chat.
+
+Before enabling live billing, the code needs a separate reviewed live-mode path, a live recurring price, a live webhook endpoint with its own signing secret, production-only live environment variables, and an end-to-end test plan. Preview must remain test-only. Also complete privacy/terms review, account deletion and data export, accessibility checks, security review, and a clear support contact.
+
+A successful test checkout or webhook does not prove that live payments are ready.
