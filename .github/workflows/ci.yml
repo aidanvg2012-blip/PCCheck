@@ -18,7 +18,7 @@ jobs:
           node-version: 22
       - name: Check JavaScript syntax
         run: |
-          for file in app.js auth.js api/*.js tests/*.js; do
+          for file in app.js auth.js pc-lab.js api/*.js tests/*.js; do
             node --check "$file"
           done
       - name: Run billing tests
