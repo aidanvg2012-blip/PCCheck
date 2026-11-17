@@ -561,6 +561,11 @@ function saveReport(report) {
 }
 let plusToolsEnabled = false;
 const compareSelection = new Set();
+window.addEventListener('pccheck:membership', event => {
+  plusToolsEnabled = Boolean(event.detail?.hasPlus);
+  if (!plusToolsEnabled) compareSelection.clear();
+  renderReports();
+});
 function reportDate(report) {
   const date = new Date(report.savedAt || report.createdAt || Date.now());
   return Number.isNaN(date.getTime()) ? 'Date unavailable' : date.toLocaleDateString();
