@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="PCCheck is a premium PC buying and build intelligence workspace. Compare component prices, review used PCs, and check build compatibility.">
-<meta name="theme-color" content="#080d18"><meta name="application-name" content="PCCheck"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PCCheck"><link rel="apple-touch-icon" href="icon.svg"><meta name="version" content="2.7.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#080d18"><meta name="application-name" content="PCCheck"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PCCheck"><link rel="apple-touch-icon" href="icon.svg"><meta name="version" content="2.8.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>PCCheck — Hardware intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -119,13 +119,24 @@
     <button class="btn ghost" id="extractOcrText" type="button" disabled>Extract specs from recognized text</button>
   </div>
   </details>
-  <div class="or"><span>ENTER THE PC DETAILS</span></div>
+  <div class="visual-picker-panel panel">
+  <div class="panel-head"><div><span class="mini-label">NO HARDWARE KNOWLEDGE REQUIRED</span><h3>Pick parts by picture</h3></div><span class="pill">GUIDED MODE</span></div>
+  <p class="fine">Not sure what the names mean? Choose a component type, look at the illustration, then pick the closest option. You can also choose “I don't know” and PCCheck will flag it as missing instead of guessing.</p>
+  <div class="visual-picker-grid">
+    <button type="button" class="visual-pick-card" data-open-picker="cpu"><span class="part-art"><svg viewBox="0 0 100 74" aria-hidden="true"><rect x="24" y="7" width="52" height="60" rx="7"/><rect x="34" y="17" width="32" height="40" rx="3"/><path d="M39 23h22v28H39zM17 17h7m-7 12h7m-7 12h7m-7 12h7m52-36h7m-7 12h7m-7 12h7m-7 12h7M35 3v4m15-4v4m15-4v4M35 67v4m15-4v4m15-4v4"/></svg></span><b>Processor (CPU)</b><small>Small square chip</small><span class="pick-cta">Choose CPU ↗</span></button>
+    <button type="button" class="visual-pick-card" data-open-picker="gpu"><span class="part-art"><svg viewBox="0 0 100 74" aria-hidden="true"><rect x="7" y="14" width="86" height="43" rx="7"/><circle cx="34" cy="35" r="15"/><circle cx="68" cy="35" r="15"/><circle cx="34" cy="35" r="5"/><circle cx="68" cy="35" r="5"/><path d="M14 59h72M20 57v9m7-9v9m56-9v9M93 24h5m-5 9h5m-5 9h5"/></svg></span><b>Graphics card (GPU)</b><small>Long card with fans</small><span class="pick-cta">Choose GPU ↗</span></button>
+    <button type="button" class="visual-pick-card" data-open-picker="ram"><span class="part-art"><svg viewBox="0 0 100 74" aria-hidden="true"><rect x="9" y="20" width="82" height="34" rx="5"/><rect x="17" y="27" width="12" height="17" rx="2"/><rect x="34" y="27" width="12" height="17" rx="2"/><rect x="51" y="27" width="12" height="17" rx="2"/><rect x="68" y="27" width="12" height="17" rx="2"/><path d="M19 55v5m9-5v5m9-5v5m9-5v5m9-5v5m9-5v5m9-5v5m9-5v5"/></svg></span><b>Memory (RAM)</b><small>Thin memory sticks</small><span class="pick-cta">Choose RAM ↗</span></button>
+    <button type="button" class="visual-pick-card" data-open-picker="storage"><span class="part-art"><svg viewBox="0 0 100 74" aria-hidden="true"><rect x="10" y="20" width="80" height="34" rx="6"/><circle cx="27" cy="37" r="8"/><circle cx="27" cy="37" r="3"/><path d="M43 31h35M43 39h27M43 47h19M17 17v3m66-3v3m-66 34v4m66-4v4"/></svg></span><b>Storage (SSD / HDD)</b><small>Drive or small stick</small><span class="pick-cta">Choose storage ↗</span></button>
+  </div>
+  <p class="fine picker-footnote">Illustrations are shape guides, not exact product photos. For an accurate market-price match, use the exact model printed on the part or listing.</p>
+</div>
+<div class="or"><span>ENTER THE PC DETAILS</span></div>
   <form class="panel manual" id="manualForm">
     <div class="panel-head"><div><span class="mini-label">USED PC ASSESSMENT</span><h3>What is the seller offering?</h3></div><span class="step">01 / 02</span></div>
     
     <div class="fields">
-      <label>CPU <input name="cpu" required placeholder="Ryzen 5 5600X" list="cpuSuggestions" autocomplete="off"><datalist id="cpuSuggestions"></datalist></label>
-      <label>GPU <input name="gpu" required placeholder="RTX 3060" list="gpuSuggestions" autocomplete="off"><datalist id="gpuSuggestions"></datalist></label>
+      <label>CPU <input name="cpu" placeholder="Ryzen 5 5600X" list="cpuSuggestions" autocomplete="off"><datalist id="cpuSuggestions"></datalist></label>
+      <label>GPU <input name="gpu" placeholder="RTX 3060" list="gpuSuggestions" autocomplete="off"><datalist id="gpuSuggestions"></datalist></label>
       <label>RAM <input name="ram" required placeholder="Corsair Vengeance 32GB DDR5-6000 (exact kit)" list="ramSuggestions" autocomplete="off"><datalist id="ramSuggestions"></datalist></label>
       <label>Storage <input name="storage" required placeholder="Samsung 990 Pro 2TB NVMe (exact model)" list="storageSuggestions" autocomplete="off"><datalist id="storageSuggestions"></datalist></label>
       <label>Asking price (USD) <input name="price" type="number" min="0" step="1" placeholder="650"></label>
@@ -148,6 +159,25 @@
 
 <section class="workspace build-section" id="build">
   <div class="section-title"><div class="eyebrow">02 / CUSTOM PC BUILD</div><h2>Build compatibility</h2><p>Check sockets, memory, case fit, power, and other common compatibility details.</p></div>
+  <div class="build-explorer panel">
+    <div class="panel-head"><div><span class="mini-label">BUILD EXPLORER / INTERACTIVE EXAMPLES</span><h3>Start with a build idea</h3></div><span class="pill">TRY A SAMPLE</span></div>
+    <p class="fine">Explore three example PC configurations, then load one directly into the compatibility checker. These are educational starting points, not prebuilt recommendations or live-priced shopping lists.</p>
+    <div class="sample-build-grid">
+      <article class="sample-build-card">
+        <div class="sample-build-visual sample-value"><span class="build-orb"></span><svg viewBox="0 0 180 110" aria-hidden="true"><rect x="34" y="13" width="112" height="82" rx="10"/><circle cx="65" cy="54" r="24"/><circle cx="65" cy="54" r="8"/><circle cx="116" cy="54" r="24"/><circle cx="116" cy="54" r="8"/><path d="M44 101h92M52 95v6m76-6v6"/></svg><span class="build-tier">ENTRY / VALUE</span></div>
+        <div class="sample-build-content"><span class="mini-label">01 / 1080P STARTER</span><h4>Everyday gaming</h4><p>Balanced older-platform example for a first gaming build.</p><ul><li>Ryzen 5 5600X</li><li>Radeon RX 6600</li><li>32GB DDR4 · 1TB NVMe</li><li>650W PSU planning example</li></ul><button class="btn ghost" type="button" data-sample-build="starter">Load & check build ↗</button></div>
+      </article>
+      <article class="sample-build-card featured">
+        <div class="sample-build-visual sample-balanced"><span class="build-orb"></span><svg viewBox="0 0 180 110" aria-hidden="true"><rect x="34" y="13" width="112" height="82" rx="10"/><circle cx="65" cy="54" r="24"/><circle cx="65" cy="54" r="8"/><circle cx="116" cy="54" r="24"/><circle cx="116" cy="54" r="8"/><path d="M44 101h92M52 95v6m76-6v6"/></svg><span class="build-tier">MOST VERSATILE</span></div>
+        <div class="sample-build-content"><span class="mini-label">02 / 1440P BALANCED</span><h4>Modern all-rounder</h4><p>A newer platform with a stronger graphics-card example.</p><ul><li>Ryzen 5 7600</li><li>GeForce RTX 5070</li><li>32GB DDR5 · 2TB NVMe</li><li>750W PSU planning example</li></ul><button class="btn primary" type="button" data-sample-build="balanced">Load & check build ↗</button></div>
+      </article>
+      <article class="sample-build-card">
+        <div class="sample-build-visual sample-enthusiast"><span class="build-orb"></span><svg viewBox="0 0 180 110" aria-hidden="true"><rect x="34" y="13" width="112" height="82" rx="10"/><circle cx="65" cy="54" r="24"/><circle cx="65" cy="54" r="8"/><circle cx="116" cy="54" r="24"/><circle cx="116" cy="54" r="8"/><path d="M44 101h92M52 95v6m76-6v6"/></svg><span class="build-tier">ENTHUSIAST</span></div>
+        <div class="sample-build-content"><span class="mini-label">03 / HIGH PERFORMANCE</span><h4>Performance focused</h4><p>High-end example with extra headroom for demanding games.</p><ul><li>Ryzen 7 9800X3D</li><li>GeForce RTX 5080</li><li>64GB DDR5 · 2TB NVMe</li><li>1000W PSU planning example</li></ul><button class="btn ghost" type="button" data-sample-build="enthusiast">Load & check build ↗</button></div>
+      </article>
+    </div>
+    <p class="fine sample-build-note" id="sampleBuildStatus" role="status" aria-live="polite">Choose an example to automatically fill the checker and review its compatibility notes.</p>
+  </div>
   <form class="panel" id="buildForm">
     <div class="panel-head"><div><span class="mini-label">COMPATIBILITY CHECKER</span><h3>Your planned parts</h3></div><span class="step">BASIC CHECKS</span></div>
     <div class="fields">
@@ -203,6 +233,17 @@
 </main>
 <footer><a class="brand" href="#top"><span class="logo">PC</span> PC<span>CHECK</span></a><span>Independent PC evaluation tool · Early release</span><span class="footer-note"><a href="guides.html">Buyer guides</a> · <a href="privacy.html">Privacy & limits</a> · Not affiliated with any marketplace.</span></footer>
 
+<div class="modal-backdrop hardware-picker-backdrop" id="hardwarePickerModal" hidden>
+  <section class="modal hardware-picker-modal" role="dialog" aria-modal="true" aria-labelledby="hardwarePickerTitle">
+    <button class="close" id="hardwarePickerClose" type="button" aria-label="Close component picker">×</button>
+    <span class="mini-label">VISUAL HARDWARE GUIDE</span>
+    <h2 id="hardwarePickerTitle">Choose a component</h2>
+    <p class="fine" id="hardwarePickerHint">Pick the closest match. You can change it later.</p>
+    <input id="hardwarePickerSearch" type="search" placeholder="Search models or options…" autocomplete="off">
+    <div class="hardware-picker-options" id="hardwarePickerOptions"></div>
+    <button class="btn ghost" id="hardwarePickerUnknown" type="button">I don't know this part</button>
+  </section>
+</div>
 <div class="modal-backdrop account-backdrop" id="accountModal" hidden>
   <section class="modal account-modal" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
     <button class="close" id="accountCloseButton" type="button" aria-label="Close account window">×</button>
