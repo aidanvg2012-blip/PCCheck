@@ -16,8 +16,11 @@ module.exports = async function handler(req, res) {
     });
     if (!userResponse.ok) return res.status(401).json({ error: 'Your session is invalid or expired. Sign in again.' });
     const user = await userResponse.json();
+    const stripeMode = process.env.STRIPE_MODE || 'test';
+    if (!['test', 'live'].includes(stripeMode)) return res.status(503).json({ error: 'Stripe mode is not configured correctly.' });
     const query = new URLSearchParams({
       user_id: 'eq.' + user.id,
+      livemode: 'eq.' + String(stripeMode === 'live'),
       select: 'status,current_period_end,cancel_at_period_end,stripe_customer_id',
       order: 'updated_at.desc',
       limit: '1'
