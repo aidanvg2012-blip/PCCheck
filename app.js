@@ -2,7 +2,7 @@
 
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = 'pccheck_reports_v5';
-const APP_VERSION = '2.7.0';
+const APP_VERSION = '2.8.0';
 
 
 // Curated recognition catalog. Aliases are intentionally explicit to avoid guessing.
@@ -742,6 +742,79 @@ $('clearSaved')?.addEventListener('click',()=>{
   if (!reports.length) return;
   if (confirm('Delete every saved PCCheck report from this browser? This cannot be undone.')) { reports=[]; persistReports(); }
 });
+
+
+// Guided visual hardware picker: simple shape illustrations lead to a curated model list.
+(() => {
+  const modal = $('hardwarePickerModal');
+  if (!modal) return;
+  const title = $('hardwarePickerTitle'), hint = $('hardwarePickerHint');
+  const search = $('hardwarePickerSearch'), options = $('hardwarePickerOptions');
+  const fieldLabels = {cpu:'Processor (CPU)',gpu:'Graphics card (GPU)',ram:'Memory (RAM)',storage:'Storage'};
+  const visualChoices = {
+    cpu: HARDWARE_CATALOG.cpu.map(([name])=>name),
+    gpu: HARDWARE_CATALOG.gpu.map(([name])=>name),
+    ram: ['8GB DDR4','16GB DDR4','32GB DDR4','16GB DDR5','32GB DDR5','48GB DDR5','64GB DDR5','Not sure — type unknown'],
+    storage: ['256GB SSD','500GB SSD','1TB SATA SSD','1TB NVMe SSD','2TB NVMe SSD','4TB NVMe SSD','1TB HDD','2TB HDD','Not sure — type unknown']
+  };
+  let activeType = '';
+  let activeInput = null;
+  function close() { modal.hidden = true; activeType = ''; activeInput = null; }
+  function render() {
+    const query = search.value.trim().toLowerCase();
+    const list = (visualChoices[activeType] || []).filter(value => value.toLowerCase().includes(query));
+    options.innerHTML = list.map(value => '<button type="button" class="hardware-choice" data-hardware-value="'+escapeHTML(value)+'"><span class="choice-dot"></span><span>'+escapeHTML(value)+'</span><span class="choice-arrow">↗</span></button>').join('') || '<p class="fine">No matching models. Try a shorter search or leave this field unknown.</p>';
+  }
+  function open(type) {
+    activeType = type;
+    activeInput = $('manualForm')?.elements.namedItem(type);
+    if (!activeInput) return;
+    title.textContent = 'Choose ' + fieldLabels[type];
+    hint.textContent = type === 'cpu' || type === 'gpu'
+      ? 'These are common model names. Check the listing or part label before selecting one.'
+      : 'Choose the closest capacity and type. This is not an exact model match.';
+    search.value = '';
+    render();
+    modal.hidden = false;
+    search.focus();
+  }
+  document.querySelectorAll('[data-open-picker]').forEach(button => button.addEventListener('click',()=>open(button.dataset.openPicker)));
+  search.addEventListener('input',render);
+  options.addEventListener('click',event=>{
+    const button=event.target.closest('[data-hardware-value]');
+    if(!button || !activeInput) return;
+    activeInput.value=button.dataset.hardwareValue;
+    activeInput.dispatchEvent(new Event('input',{bubbles:true}));
+    activeInput.dispatchEvent(new Event('change',{bubbles:true}));
+    close();
+  });
+  $('hardwarePickerUnknown').addEventListener('click',()=>{
+    if(activeInput){activeInput.value='';activeInput.dispatchEvent(new Event('input',{bubbles:true}));}
+    close();
+  });
+  $('hardwarePickerClose').addEventListener('click',close);
+  modal.addEventListener('click',event=>{if(event.target===modal)close();});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!modal.hidden)close();});
+})();
+
+// Loadable example builds make the compatibility checker useful before users know their parts.
+(() => {
+  const form=$('buildForm'), status=$('sampleBuildStatus');
+  if(!form) return;
+  const samples = {
+    starter:{cpu:'AMD Ryzen 5 5600X',gpu:'AMD Radeon RX 6600',cpuSocket:'AM4',boardSocket:'AM4',ramType:'DDR4',boardRam:'DDR4',boardForm:'ATX',caseForm:'ATX',psuWatts:650,gpuPower:132,cpuPower:65,ramCapacity:32,boardMaxRam:128,storage:'1TB NVMe SSD'},
+    balanced:{cpu:'AMD Ryzen 5 7600',gpu:'NVIDIA GeForce RTX 5070',cpuSocket:'AM5',boardSocket:'AM5',ramType:'DDR5',boardRam:'DDR5',boardForm:'ATX',caseForm:'ATX',psuWatts:750,gpuPower:250,cpuPower:90,ramCapacity:32,boardMaxRam:192,storage:'2TB NVMe SSD'},
+    enthusiast:{cpu:'AMD Ryzen 7 9800X3D',gpu:'NVIDIA GeForce RTX 5080',cpuSocket:'AM5',boardSocket:'AM5',ramType:'DDR5',boardRam:'DDR5',boardForm:'ATX',caseForm:'ATX',psuWatts:1000,gpuPower:360,cpuPower:120,ramCapacity:64,boardMaxRam:192,storage:'2TB NVMe SSD'}
+  };
+  document.querySelectorAll('[data-sample-build]').forEach(button=>button.addEventListener('click',()=>{
+    const key=button.dataset.sampleBuild, sample=samples[key];
+    if(!sample) return;
+    Object.entries(sample).forEach(([name,value])=>{const field=form.elements.namedItem(name);if(field)field.value=String(value);});
+    if(status)status.textContent='Example loaded. PCCheck will now run the compatibility checks; review exact manufacturer specifications before using this as a real parts list.';
+    form.requestSubmit();
+    form.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  }));
+})();
 
 renderReports();
 wireHardwareRecognition();
