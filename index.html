@@ -2,16 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="PCCheck helps you review used gaming PCs and check basic custom PC build compatibility.">
-<meta name="theme-color" content="#0a1018"><meta name="application-name" content="PCCheck"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PCCheck"><link rel="apple-touch-icon" href="icon.svg"><meta name="version" content="2.6.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>PCCheck — PC buying and build checker</title>
+<meta name="description" content="PCCheck is a premium PC buying and build intelligence workspace. Compare component prices, review used PCs, and check build compatibility.">
+<meta name="theme-color" content="#080d18"><meta name="application-name" content="PCCheck"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PCCheck"><link rel="apple-touch-icon" href="icon.svg"><meta name="version" content="2.6.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>PCCheck — Hardware intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="glow g1"></div><div class="glow g2"></div>
 <div class="scroll-progress" aria-hidden="true"><span id="scrollProgressBar"></span></div>
 <header class="topbar">
-  <a class="brand" href="#top" aria-label="PCCheck home"><span class="logo">PC</span> PC<span>CHECK</span></a>
+  <a class="brand" href="#top" aria-label="PCCheck home"><span class="logo" aria-hidden="true"><svg viewBox="0 0 36 36" role="presentation"><path d="M7 8h12.5c6.5 0 10.5 3.8 10.5 9.8S26 27.5 19.5 27.5H7V8Zm7 6v7.5h5.2c2.6 0 4.1-1.3 4.1-3.8s-1.5-3.7-4.1-3.7H14Z" fill="currentColor"/><path d="M28.5 8H33v19.5h-4.5z" fill="#B8A8FF"/></svg></span><span class="brand-name">PC<span>CHECK</span></span></a>
   <nav aria-label="Main navigation"><a href="#top">Overview</a><a href="#analyze">Used PC</a><a href="#build">Build checker</a><a href="#saved">Saved reports</a><a href="#guides">Guides</a></nav>
   <button class="profile" id="accountOpenButton" type="button">Sign in</button>
 </header>
@@ -24,13 +27,13 @@
 </nav>
 <main id="top">
 <section class="hero">
-  <div class="eyebrow"><i></i> PC BUYING TOOLKIT</div>
-  <h1>Buy smarter.<br><em>Build with confidence.</em></h1>
-  <p>Compare component prices, review used gaming PCs, and catch common build issues — all in one organized workspace.</p>
-  <div class="hero-actions"><a class="btn primary" href="#analyze">Check a used PC <b>↗</b></a><a class="btn ghost" href="#build">Check a build</a></div>
-  <div class="hero-stats"><span>01 <small>MARKET PRICES</small></span><span>02 <small>USED PC CHECKS</small></span><span>03 <small>BUILD COMPATIBILITY</small></span><span>04 <small>REPORTS & GUIDES</small></span></div>
+  <div class="eyebrow"><i></i> HARDWARE INTELLIGENCE <span class="eyebrow-divider">/</span> BUILT FOR BETTER DECISIONS</div>
+  <h1>Know what<br>you're buying.<br><em>Build what's next.</em></h1>
+  <p>A clearer way to evaluate used PCs, understand component pricing, and plan a build that actually fits. Less guesswork. Better hardware decisions.</p>
+  <div class="hero-actions"><a class="btn primary" href="#analyze">Analyze a PC <b>↗</b></a><a class="btn ghost" href="#build">Check a build</a></div>
+  <div class="hero-stats"><span><b>01</b><small>MARKET INTELLIGENCE</small></span><span><b>02</b><small>LISTING ANALYSIS</small></span><span><b>03</b><small>BUILD VALIDATION</small></span><span><b>04</b><small>YOUR WORKSPACE</small></span></div>
   <div class="pro-teaser">
-    <div><span class="mini-label">OPTIONAL / PCCHECK PLUS</span><h3>More insight. Better decisions.</h3><p>Preview upcoming tools for deeper PC comparisons and cleaner reports.</p></div>
+    <div><span class="mini-label">THE PCHECK ADVANTAGE / PLUS PREVIEW</span><h3>Go deeper with PCCheck Plus.</h3><p>Preview upcoming tools for deeper PC comparisons and cleaner reports.</p></div>
     <div class="pro-teaser-actions"><span class="pro-price">Planned test price <b>$4.99/mo</b></span><button class="btn ghost" id="proPreviewButton" type="button">Preview Plus ↗</button></div>
   </div>
   <div class="pro-preview" id="proPreview" hidden aria-live="polite">
@@ -45,7 +48,47 @@
     <p class="fine" id="plusCheckoutStatus" role="status" aria-live="polite"></p>
     <button class="btn ghost" id="closeProPreview" type="button">Close preview</button>
   </div>
-  <div class="hero-art" aria-hidden="true"><div class="ring r1"></div><div class="ring r2"></div><div class="gpu"><div class="gpu-screen">PC<span>CHECK</span><small>HARDWARE INTELLIGENCE</small></div></div><div class="float f1">LOCAL CHECKS <b>● READY</b></div><div class="float f2">BUY SMARTER&nbsp; ✦ &nbsp;BUILD BETTER</div></div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div>
+    <svg class="hero-illustration" viewBox="0 0 560 470" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="boardGlass" x1="95" y1="45" x2="450" y2="410" gradientUnits="userSpaceOnUse"><stop stop-color="#D8F7FF" stop-opacity=".24"/><stop offset=".5" stop-color="#8D9DFF" stop-opacity=".12"/><stop offset="1" stop-color="#6EE7E0" stop-opacity=".04"/></linearGradient>
+        <linearGradient id="edge" x1="100" y1="50" x2="430" y2="390" gradientUnits="userSpaceOnUse"><stop stop-color="#A5F3FC"/><stop offset=".52" stop-color="#A5A6FF"/><stop offset="1" stop-color="#6EE7D8"/></linearGradient>
+        <linearGradient id="fan" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#C7F9FF" stop-opacity=".32"/><stop offset="1" stop-color="#8B8BFF" stop-opacity=".05"/></linearGradient>
+        <radialGradient id="fanCore"><stop stop-color="#D9FBFF"/><stop offset=".18" stop-color="#83E8EF"/><stop offset="1" stop-color="#526B9D" stop-opacity=".15"/></radialGradient>
+        <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>
+      </defs>
+      <ellipse cx="280" cy="246" rx="180" ry="130" fill="#5DE7E9" fill-opacity=".14" filter="url(#softGlow)"/>
+      <path d="M93 115 334 31l146 84-241 88L93 115Z" fill="#B8C7FF" fill-opacity=".07" stroke="url(#edge)" stroke-opacity=".55"/>
+      <path d="m93 115 146 88v173L93 291V115Z" fill="#8BE7F0" fill-opacity=".055" stroke="#8BE7F0" stroke-opacity=".32"/>
+      <path d="m239 203 241-88v173l-241 88V203Z" fill="#9D9BFF" fill-opacity=".09" stroke="#B7B5FF" stroke-opacity=".4"/>
+      <path d="m116 128 120 72v145l-120-72V128Z" fill="url(#boardGlass)" stroke="#B5F8FF" stroke-opacity=".36"/>
+      <path d="m252 212 204-74v137l-204 74V212Z" fill="#111B30" fill-opacity=".74" stroke="url(#edge)" stroke-opacity=".6"/>
+      <g transform="translate(272 235) skewY(-19)">
+        <rect width="164" height="103" rx="13" fill="#111D32" stroke="#B7B9FF" stroke-opacity=".75"/>
+        <rect x="10" y="10" width="144" height="83" rx="9" fill="url(#boardGlass)" stroke="#D7F7FF" stroke-opacity=".22"/>
+        <circle cx="52" cy="51" r="34" fill="#07111F" stroke="#91EAF0" stroke-opacity=".8" stroke-width="1.5"/>
+        <circle cx="52" cy="51" r="26" fill="url(#fan)" stroke="#A7F7F4" stroke-opacity=".6"/>
+        <circle cx="52" cy="51" r="7" fill="url(#fanCore)"/>
+        <path d="M52 26c9 5 13 12 9 19-9 1-16-5-17-13m33 19c-5 9-12 13-19 9-1-9 5-16 13-17M52 76c-9-5-13-12-9-19 9-1 16 5 17 13M27 51c5-9 12-13 19-9 1 9-5 16-13 17" fill="#B8F6FF" fill-opacity=".35"/>
+        <circle cx="111" cy="51" r="29" fill="#07111F" stroke="#B6B5FF" stroke-opacity=".85" stroke-width="1.5"/>
+        <circle cx="111" cy="51" r="22" fill="url(#fan)" stroke="#B8B6FF" stroke-opacity=".65"/>
+        <circle cx="111" cy="51" r="6" fill="url(#fanCore)"/>
+        <path d="M111 30c8 4 11 10 8 16-8 1-13-4-14-11m27 16c-4 8-10 11-16 8-1-8 4-13 11-14m-16 27c-8-4-11-10-8-16 8-1 13 4 14 11m-27-16c4-8 10-11 16-8 1 8-4 13-11 14" fill="#D3D1FF" fill-opacity=".35"/>
+      </g>
+      <g stroke="#8CEEF0" stroke-opacity=".55" stroke-width="1.3"><path d="m129 91 25-9 18 11 30-11"/><path d="m361 66 24-9 18 12 24-9"/><path d="m461 319 26-10 18 11"/><path d="m75 300-24 9-17-10"/></g>
+      <g fill="#B6F6F6"><circle cx="129" cy="91" r="3"/><circle cx="202" cy="82" r="3"/><circle cx="361" cy="66" r="3"/><circle cx="427" cy="60" r="3"/><circle cx="461" cy="319" r="3"/></g>
+      <g fill="#B8C5D8" fill-opacity=".72"><rect x="117" y="312" width="47" height="4" rx="2" transform="rotate(30 117 312)"/><rect x="126" y="328" width="32" height="4" rx="2" transform="rotate(30 126 328)"/><rect x="402" y="354" width="34" height="4" rx="2" transform="rotate(-20 402 354)"/></g>
+    </svg>
+    <div class="glass-float float-market"><span class="float-icon">↗</span><div><small>MARKET SIGNAL</small><b>Price intelligence</b></div><i>LIVE DATA</i></div>
+    <div class="glass-float float-build"><span class="float-icon">✳</span><div><small>BUILD CHECK</small><b>Compatibility insights</b></div><strong>01 / 03</strong></div>
+    <div class="glass-float float-chip"><span class="pulse-dot"></span> HARDWARE, DECODED</div>
+  </div>
+  <div class="home-capabilities">
+    <a href="#analyze" class="capability-card"><span class="cap-icon">⌁</span><div><small>01 / MARKET INTELLIGENCE</small><b>Know the component value</b><p>Compare tracked retail prices with matched parts.</p></div><span class="cap-arrow">↗</span></a>
+    <a href="#analyze" class="capability-card"><span class="cap-icon">◈</span><div><small>02 / USED PC ANALYSIS</small><b>Look past the listing</b><p>Spot missing details and questions to ask.</p></div><span class="cap-arrow">↗</span></a>
+    <a href="#build" class="capability-card"><span class="cap-icon">⌘</span><div><small>03 / BUILD VALIDATION</small><b>Check before you buy</b><p>Review fit, sockets, memory and power.</p></div><span class="cap-arrow">↗</span></a>
+  </div>
 </section>
 
 <section class="workspace" id="analyze">
@@ -155,7 +198,7 @@
 <div class="modal-backdrop account-backdrop" id="accountModal" hidden>
   <section class="modal account-modal" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
     <button class="close" id="accountCloseButton" type="button" aria-label="Close account window">×</button>
-    <span class="mini-label">PCCHECK ACCOUNT</span>
+    <span class="mini-label">YOUR PCHECK ID</span>
     <h2 id="accountTitle">Sign in to PCCheck</h2>
     <p>Sign in to manage your account and check your Plus membership. Saved reports still stay on this device for now.</p>
     <div id="accountSignedOut">
