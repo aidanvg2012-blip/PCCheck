@@ -1,40 +1,35 @@
-# PCCheck account beta setup
+# PCCheck account and billing beta test
 
-This branch adds Supabase email/password authentication and connects the Plus test checkout to the signed-in Supabase user.
+This is a test-only beta. It is not ready to accept real payments.
 
-## Before testing
+## Safe setup
 
-1. In Supabase, open **Authentication → Providers → Email** and make sure Email sign-in is enabled.
-2. Keep email confirmation enabled. Checkout rejects accounts whose email has not been confirmed.
-3. In **Authentication → URL Configuration**, set the Site URL to:
-   - `https://pccheck.vercel.app`
-4. Add the preview redirect pattern `https://*.vercel.app/**` as an allowed redirect URL, or add the exact preview URL you are testing. Vercel preview URLs can change after each deployment.
-5. In Supabase SQL Editor, run the additional migration in `supabase/migrations/202611160002_subscription_customer_index.sql`. It removes the unique constraint on Stripe customer IDs so one customer can have multiple subscriptions over time.
-6. In Stripe **test mode**, configure the Billing Portal to allow customers to view invoices and update/cancel subscriptions as appropriate. Keep the portal in test mode.
-7. Add the same test-mode variables to Vercel **Preview** (not only Production) so the preview can call the backend. Confirm the existing Vercel **Production** environment has:
-   - `SUPABASE_URL`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `STRIPE_SECRET_KEY` (must remain `sk_test_`)
-   - `STRIPE_TEST_PRICE_ID`
-   - `STRIPE_WEBHOOK_SECRET`
-   - `PCCHECK_APP_URL`
+1. Use the Vercel Preview deployment for this branch, not the public production URL.
+2. Keep Stripe in test mode. Never add a live key to Preview or Production.
+3. Confirm the Supabase Preview environment values are configured in Vercel. Do not share secret values in chat.
+4. In Stripe test mode, configure the Billing Portal to allow viewing invoices and cancelling subscriptions. Leave payment-method updates disabled unless a parent/guardian has reviewed the flow.
+5. In Stripe test mode, configure the webhook endpoint to receive:
+   - `customer.subscription.created`
+   - `customer.subscription.updated`
+   - `customer.subscription.deleted`
+   - `invoice.paid`
+   - `invoice.payment_failed`
+6. The webhook URL should be the endpoint assigned to this environment. Production's existing endpoint is `https://pccheck.vercel.app/api/stripe-webhook`; use the Preview URL for a separate Preview webhook and its own signing secret if testing Preview callbacks directly.
+7. Run `node --test tests/stripe-webhook.test.js` locally before merging code.
 
-The browser-side Supabase publishable key in `auth.js` is intended to be public. Never put the service-role key or Stripe secret key in browser code, GitHub, or chat.
+## Manual test sequence
 
-## Test flow (after parent/guardian review)
+- [ ] Create an account with an email address you control; confirm the email and sign in.
+- [ ] Open Account and verify the initial status is Free.
+- [ ] Open Plus preview and start a test checkout. Use Stripe's documented test card details only; never use a real card.
+- [ ] Complete checkout and wait for the webhook. Refresh Account; it should show Plus only after the subscription row is stored.
+- [ ] Open Manage subscription. Confirm the Stripe test Billing Portal loads and displays the test subscription.
+- [ ] Cancel from the portal. If configured for end-of-period cancellation, Plus should remain active until the period ends and the status should show cancellation scheduled.
+- [ ] Use Stripe's test subscription simulation/test clock to advance through renewal and cancellation. Confirm the webhook updates Supabase and the app reflects the latest state.
+- [ ] Test a failed renewal in a separate test customer/subscription. Confirm Stripe sends `invoice.payment_failed`, the webhook retrieves the subscription's latest state, and Plus is not granted when the subscription becomes `past_due`.
+- [ ] Restore a successful test payment if testing recovery; confirm the subscription returns to `active` and Plus returns.
+- [ ] Sign out and confirm the account modal returns to the signed-out state.
 
-1. Open the preview deployment and create a test account using an email inbox you control.
-2. Follow the Supabase confirmation email.
-3. Sign in and confirm the account modal shows a Free account.
-4. Test checkout only with Stripe test data. The checkout request must include the signed-in session; the server verifies the user with Supabase before creating a Stripe Checkout Session.
-5. The Checkout Session and subscription metadata include the verified `supabase_user_id`. The existing signed webhook uses that metadata to write the subscription record.
-6. After Stripe delivers a valid subscription event, reopen the account modal. Plus should appear only if the stored subscription status is `active` or `trialing`.
+## What these tests do not prove
 
-## Current limitations
-
-- This is a beta foundation, not a public-ready account or payment system.
-- Vercel Preview environment variables are not configured by this change; Preview API requests can return a configuration error. Production variables are separate.
-- Account deletion, report cloud sync, and complete data export are not implemented. A test-mode customer portal endpoint is included, but it cannot work until the Stripe test Billing Portal is configured and the webhook has linked a customer.
-- The Stripe webhook destination and its signing secret still need a successful delivery test.
-- Do not enable live Stripe keys or accept real payments. The endpoint code explicitly rejects live Stripe secret keys.
-- Have a parent/guardian review the privacy policy, terms, account lifecycle, and payment setup before broad public registration.
+A test clock and successful webhook delivery are useful integration checks, but they do not replace parent/guardian review, privacy/terms review, account deletion and data export, support/refund procedures, accessibility checks, or security review. Keep live payments disabled. The currently advertised Plus comparison, expanded-report, and build-history features are still marked as planned and must be implemented before charging anyone.
