@@ -1,6 +1,6 @@
 # PCCheck
 
-PCCheck is a responsive PC buying and build-checking workspace.
+PCCheck is a responsive, tabbed PC buying and build-checking workspace.
 
 ## Main tools
 
