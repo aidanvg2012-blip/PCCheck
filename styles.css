@@ -227,3 +227,20 @@ footer{max-width:1120px}
   html{scroll-behavior:auto}
   *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* Focused desktop workspaces: show one destination at a time */
+@media(min-width:701px){
+  body.desktop-app-view main>.hero,body.desktop-app-view main>.workspace{display:none}
+  body.desktop-app-view[data-desktop-tab="top"] main>.hero,
+  body.desktop-app-view[data-desktop-tab="analyze"] main>#analyze,
+  body.desktop-app-view[data-desktop-tab="build"] main>#build,
+  body.desktop-app-view[data-desktop-tab="saved"] main>#saved,
+  body.desktop-app-view[data-desktop-tab="guides"] main>#guides{display:block;animation:workspaceIn .28s ease both}
+  body.desktop-app-view main{min-height:calc(100vh - 150px)}
+  body.desktop-app-view .hero{min-height:calc(100vh - 150px);padding-top:72px}
+  body.desktop-app-view .workspace{min-height:calc(100vh - 150px);padding-top:48px}
+  body.desktop-app-view footer{margin-top:0}
+}
+@keyframes workspaceIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){body.desktop-app-view main>.hero,body.desktop-app-view main>.workspace{animation:none}}
