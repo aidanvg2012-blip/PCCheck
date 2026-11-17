@@ -463,3 +463,5 @@ footer .brand{font-size:12px}
 @media(prefers-reduced-motion:reduce){
   *,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+.brand>span:last-child{margin-left:0;color:inherit}.brand-name>span{color:#9deef0}
