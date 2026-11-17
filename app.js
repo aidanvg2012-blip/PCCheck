@@ -781,7 +781,13 @@ $('clearSaved')?.addEventListener('click',()=>{
     modal.hidden = false;
     search.focus();
   }
-  document.addEventListener('click', event => {\n    const trigger = event.target.closest('[data-open-picker]');\n    if (!trigger) return;\n    event.preventDefault();\n    event.stopPropagation();\n    open(trigger.dataset.openPicker);\n  }, true);
+  document.addEventListener('click', event => {
+    const trigger = event.target.closest('[data-open-picker]');
+    if (!trigger) return;
+    event.preventDefault();
+    event.stopPropagation();
+    open(trigger.dataset.openPicker);
+  }, true);
   search.addEventListener('input',render);
   options.addEventListener('click',event=>{
     const button=event.target.closest('[data-hardware-value]');
