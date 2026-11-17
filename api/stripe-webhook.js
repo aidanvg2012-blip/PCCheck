@@ -10,6 +10,8 @@ module.exports = async function handler(req, res) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  const stripeMode = process.env.STRIPE_MODE || 'test';
+  const isLive = stripeMode === 'live';
   if (!signingSecret || !supabaseUrl || !serviceRoleKey) {
     return res.status(503).json({ error: 'Webhook is not configured.' });
   }
@@ -22,8 +24,11 @@ module.exports = async function handler(req, res) {
     }
 
     const event = JSON.parse(rawBody.toString('utf8'));
-    if (event.livemode === true) {
-      return res.status(400).json({ error: 'Live-mode events are disabled.' });
+    if (!['test', 'live'].includes(stripeMode) || event.livemode !== isLive) {
+      return res.status(400).json({ error: 'Webhook event does not match the configured Stripe mode.' });
+    }
+    if (invoiceEventsForMode(event.type) && (!stripeSecretKey || !stripeSecretKey.startsWith(isLive ? 'sk_live_' : 'sk_test_'))) {
+      return res.status(503).json({ error: 'Stripe lookup key does not match the configured mode.' });
     }
 
     const subscriptionEvents = [
@@ -44,9 +49,6 @@ module.exports = async function handler(req, res) {
         invoice?.lines?.data?.find(line => line.parent?.subscription_item_details?.subscription)
           ?.parent?.subscription_item_details?.subscription;
       if (!subscriptionId) return res.status(200).json({ received: true, ignored: true });
-      if (!stripeSecretKey || !stripeSecretKey.startsWith('sk_test_')) {
-        return res.status(503).json({ error: 'Test-mode Stripe lookup is not configured.' });
-      }
       const lookup = await fetch('https://api.stripe.com/v1/subscriptions/' + encodeURIComponent(subscriptionId), {
         headers: { Authorization: 'Bearer ' + stripeSecretKey }
       });
@@ -67,6 +69,7 @@ module.exports = async function handler(req, res) {
     const priceId = subscription.items?.data?.[0]?.price?.id || null;
     const record = {
       user_id: userId,
+      livemode: isLive,
       stripe_customer_id: typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id,
       stripe_subscription_id: subscription.id,
       stripe_price_id: priceId,
@@ -108,6 +111,10 @@ module.exports = async function handler(req, res) {
 };
 
 module.exports.config = { api: { bodyParser: false } };
+
+function invoiceEventsForMode(type) {
+  return type === 'invoice.paid' || type === 'invoice.payment_failed';
+}
 
 function readRawBody(req) {
   return new Promise((resolve, reject) => {
