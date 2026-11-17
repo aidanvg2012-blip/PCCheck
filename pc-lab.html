@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080d18">
+<meta name="description" content="Free PC upgrade planning, power supply sizing, and storage planning tools from PCCheck.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pc-lab.css">
+<title>PCCheck — PC Lab</title>
+</head>
+<body class="pc-lab-page">
+<div class="glow g1"></div><div class="glow g2"></div>
+<header class="topbar">
+  <a class="brand" href="index.html" aria-label="PCCheck home"><span class="logo" aria-hidden="true"><svg viewBox="0 0 36 36" role="presentation"><path d="M7 8h12.5c6.5 0 10.5 3.8 10.5 9.8S26 27.5 19.5 27.5H7V8Zm7 6v7.5h5.2c2.6 0 4.1-1.3 4.1-3.8s-1.5-3.7-4.1-3.7H14Z" fill="currentColor"/><path d="M28.5 8H33v19.5h-4.5z" fill="#B8A8FF"/></svg></span><span class="brand-name">PC<span>CHECK</span></span></a>
+  <nav aria-label="Main navigation"><a href="index.html#top">Overview</a><a href="index.html#analyze">Used PC</a><a href="index.html#build">Build checker</a><a href="pc-lab.html" aria-current="page">PC Lab</a><a href="guides.html">Guides</a></nav>
+  <a class="btn ghost" href="index.html">Back to checker</a>
+</header>
+<main class="lab-shell">
+  <section class="lab-hero">
+    <div class="eyebrow"><i></i> PCHECK / FIELD TOOLS</div>
+    <div class="lab-hero-grid">
+      <div>
+        <span class="lab-kicker">THE PRACTICAL PC WORKBENCH</span>
+        <h1>Make your next<br><em>upgrade count.</em></h1>
+        <p>Three straightforward tools to plan an upgrade, estimate power needs, and size your next drive. No account required.</p>
+        <div class="lab-hero-actions"><a class="btn primary" href="#upgrade-tool">Plan an upgrade <b>↓</b></a><a class="btn ghost" href="index.html#build">Check compatibility</a></div>
+      </div>
+      <div class="lab-orbit-card" aria-hidden="true">
+        <div class="lab-orbit-ring"></div><div class="lab-chip"><span>PC</span><b>LAB</b><small>HARDWARE / PLANNING</small></div>
+        <div class="lab-float lab-float-a"><small>POWER</small><b>WATTS</b></div>
+        <div class="lab-float lab-float-b"><small>STORAGE</small><b>CAPACITY</b></div>
+      </div>
+    </div>
+    <div class="lab-stats"><span><b>03</b><small>FREE TOOLS</small></span><span><b>00</b><small>ACCOUNT REQUIRED</small></span><span><b>100%</b><small>USER CONTROLLED</small></span></div>
+  </section>
+
+  <section class="lab-section" id="upgrade-tool">
+    <div class="lab-section-head"><div><span class="lab-index">01 / UPGRADE ROADMAP</span><h2>What should you upgrade first?</h2><p>Describe what feels slow. Get a practical order of checks before spending money.</p></div><span class="lab-tag">GUIDED PLANNER</span></div>
+    <div class="lab-card upgrade-card">
+      <div class="lab-form-grid">
+        <label>What do you mainly use your PC for?
+          <select id="useCase"><option value="gaming">Gaming</option><option value="creator">Editing / creative work</option><option value="multitasking">Streaming / multitasking</option><option value="general">Everyday use</option></select>
+        </label>
+        <label>What is the biggest problem?
+          <select id="painPoint"><option value="fps">Low game frame rates</option><option value="stutter">Stutters or freezing</option><option value="loading">Slow boot or loading</option><option value="storage">Running out of storage</option><option value="heat">High temperatures or loud fans</option><option value="unsure">I'm not sure yet</option></select>
+        </label>
+        <label>How much memory (RAM) do you have?
+          <select id="ramAmount"><option value="8">8 GB</option><option value="16" selected>16 GB</option><option value="32">32 GB</option><option value="64">64 GB or more</option><option value="unknown">I don't know</option></select>
+        </label>
+        <label>What kind of main storage do you use?
+          <select id="driveType"><option value="hdd">Hard drive (HDD)</option><option value="sata">SATA SSD</option><option value="nvme">NVMe SSD</option><option value="mixed">A mix of drives</option><option value="unknown">I don't know</option></select>
+        </label>
+        <label class="lab-full">Approximate upgrade budget
+          <select id="upgradeBudget"><option value="low">Under $150</option><option value="mid">$150–$300</option><option value="high">$300–$600</option><option value="premium">$600+</option><option value="none">Just researching</option></select>
+        </label>
+      </div>
+      <button class="btn primary" id="makeUpgradePlan" type="button">Build my upgrade roadmap <b>↗</b></button>
+      <div class="lab-result" id="upgradeResult" hidden aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="lab-section" id="power-tool">
+    <div class="lab-section-head"><div><span class="lab-index">02 / POWER PLANNING</span><h2>Estimate PSU capacity</h2><p>Enter approximate component power draw to get a rough capacity target.</p></div><span class="lab-tag">WATTAGE ESTIMATE</span></div>
+    <div class="lab-card">
+      <div class="lab-form-grid">
+        <label>CPU power estimate (watts)
+          <input id="cpuWatts" type="number" min="15" max="500" value="120" inputmode="numeric">
+          <small>Use the CPU's maximum package power when available.</small>
+        </label>
+        <label>GPU power estimate (watts)
+          <input id="gpuWatts" type="number" min="20" max="1000" value="220" inputmode="numeric">
+          <small>Use the graphics card's board power, not its performance score.</small>
+        </label>
+        <label>Other components (watts)
+          <input id="otherWatts" type="number" min="20" max="300" value="80" inputmode="numeric">
+          <small>Motherboard, drives, fans, pumps, and accessories.</small>
+        </label>
+        <label>Extra planning headroom
+          <select id="powerHeadroom"><option value="20">20%</option><option value="25">25%</option><option value="30" selected>30%</option><option value="35">35%</option><option value="40">40%</option></select>
+        </label>
+      </div>
+      <button class="btn primary" id="estimatePsu" type="button">Calculate power target <b>↗</b></button>
+      <div class="lab-result" id="psuResult" hidden aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="lab-section" id="storage-tool">
+    <div class="lab-section-head"><div><span class="lab-index">03 / STORAGE PLANNING</span><h2>How much storage do you need?</h2><p>Plan for what you already use, what you want to install, and some free space.</p></div><span class="lab-tag">CAPACITY PLANNER</span></div>
+    <div class="lab-card">
+      <div class="lab-form-grid">
+        <label>Currently used storage (GB)
+          <input id="usedStorage" type="number" min="0" max="100000" value="420" inputmode="numeric">
+        </label>
+        <label>Extra games, apps, and files you plan to add (GB)
+          <input id="plannedStorage" type="number" min="0" max="100000" value="350" inputmode="numeric">
+        </label>
+        <label>Free space to keep available
+          <select id="freeSpace"><option value="10">10%</option><option value="15">15%</option><option value="20" selected>20%</option><option value="25">25%</option></select>
+        </label>
+      </div>
+      <button class="btn primary" id="estimateStorage" type="button">Find a sensible capacity <b>↗</b></button>
+      <div class="lab-result" id="storageResult" hidden aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="lab-disclaimer">
+    <span class="lab-index">A NOTE ON ACCURACY</span>
+    <p>These tools provide planning estimates, not hardware certifications or guaranteed recommendations. Actual power needs depend on exact models, transient loads, PSU quality, and manufacturer guidance. Storage needs vary by software and file sizes. Always verify exact specifications before buying.</p>
+    <a href="guides.html">Read the PCCheck buyer guides ↗</a>
+  </section>
+</main>
+<footer><a class="brand" href="index.html"><span class="logo">PC</span> PC<span>CHECK</span></a><span>Independent PC evaluation tools</span><span class="footer-note"><a href="privacy.html">Privacy & limits</a></span></footer>
+<script src="pc-lab.js" defer></script>
+</body>
+</html>
