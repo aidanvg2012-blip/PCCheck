@@ -15,7 +15,7 @@
 <div class="scroll-progress" aria-hidden="true"><span id="scrollProgressBar"></span></div>
 <header class="topbar">
   <a class="brand" href="#top" aria-label="PCCheck home"><span class="logo" aria-hidden="true"><svg viewBox="0 0 36 36" role="presentation"><path d="M7 8h12.5c6.5 0 10.5 3.8 10.5 9.8S26 27.5 19.5 27.5H7V8Zm7 6v7.5h5.2c2.6 0 4.1-1.3 4.1-3.8s-1.5-3.7-4.1-3.7H14Z" fill="currentColor"/><path d="M28.5 8H33v19.5h-4.5z" fill="#B8A8FF"/></svg></span><span class="brand-name">PC<span>CHECK</span></span></a>
-  <nav aria-label="Main navigation"><a href="#top">Overview</a><a href="#analyze">Used PC</a><a href="build-finder.html">Build Finder</a><a href="#build">Build checker</a><a href="pc-lab.html">PC Lab</a><a href="#saved">Saved reports</a><a href="#guides">Guides</a></nav>
+  <nav aria-label="Main navigation"><a href="#top">Overview</a><a href="#analyze">Used PC</a><a href="build-finder.html">Build Finder</a><a href="#build">Build checker</a><a href="#saved">Saved reports</a><a href="#guides">Guides</a></nav>
   <button class="profile" id="accountOpenButton" type="button">Sign in</button>
 </header>
 <nav class="mobile-tabs" aria-label="App navigation">
@@ -30,11 +30,11 @@
   <div class="eyebrow"><i></i> HARDWARE INTELLIGENCE <span class="eyebrow-divider">/</span> BUILT FOR BETTER DECISIONS</div>
   <h1>Know what<br>you're buying.<br><em>Build what's next.</em></h1>
   <p>A clearer way to evaluate used PCs, understand component pricing, and plan a build that actually fits. Less guesswork. Better hardware decisions.</p>
-  <div class="hero-actions"><a class="btn primary" href="#analyze">Analyze a PC <b>↗</b></a><a class="btn ghost" href="build-finder.html">Find my PC build ↗</a><a class="btn ghost" href="#build">Check a build</a><a class="btn ghost" href="pc-lab.html">Explore PC Lab</a></div>
+  <div class="hero-actions"><a class="btn primary" href="#analyze">Check a used PC <b>↗</b></a><a class="btn ghost" href="build-finder.html">Plan a new build ↗</a></div>
   <div class="hero-stats"><span><b>01</b><small>MARKET INTELLIGENCE</small></span><span><b>02</b><small>LISTING ANALYSIS</small></span><span><b>03</b><small>BUILD VALIDATION</small></span><span><b>04</b><small>YOUR WORKSPACE</small></span></div>
   <div class="pro-teaser">
-    <div><span class="mini-label">THE PCHECK ADVANTAGE / PLUS PREVIEW</span><h3>Go deeper with PCCheck Plus.</h3><p>Unlock a saved-PC overview, side-by-side comparisons, full report details, and build history.</p></div>
-    <div class="pro-teaser-actions"><span class="pro-price">Planned test price <b>$4.99/mo</b></span><button class="btn ghost" id="proPreviewButton" type="button">Preview Plus ↗</button></div>
+    <div><span class="mini-label">THE PCHECK ADVANTAGE / PLUS PREVIEW</span><h3>Go deeper with PCCheck Plus.</h3><p>Turn saved reports into a buying workspace: compare PCs, inspect full report details, and review build versions. Reports stay on this device.</p></div>
+    <div class="pro-teaser-actions"><span class="pro-price">PLUS <b>IN DEVELOPMENT</b></span><button class="btn ghost" id="proPreviewButton" type="button">Preview Plus ↗</button></div>
   </div>
   <div class="pro-preview" id="proPreview" hidden aria-live="polite">
     <div class="pro-preview-head"><div><span class="mini-label">PLUS / PRODUCT PREVIEW</span><h3>What a paid plan could include</h3></div><span class="pill">DEMO ONLY</span></div>
@@ -45,7 +45,7 @@
       <article><b>04 / Build history</b><p>Keep dated build snapshots and reopen earlier versions.</p><small>Plus workspace</small></article>
     </div>
     <p class="pro-demo-note">Stripe test checkout preview. No live payments are accepted. Account linking is in beta; Plus access is granted only after a verified Stripe webhook updates your subscription record.</p>
-    <button class="btn primary" id="plusCheckoutButton" type="button">Try test checkout — $4.99/mo</button>
+    <button class="btn primary" id="plusCheckoutButton" type="button">Preview test checkout (no real payment)</button>
     <p class="fine" id="plusCheckoutStatus" role="status" aria-live="polite"></p>
     <button class="btn ghost" id="closeProPreview" type="button">Close preview</button>
   </div>
@@ -81,12 +81,12 @@
       <g fill="#B6F6F6"><circle cx="129" cy="91" r="3"/><circle cx="202" cy="82" r="3"/><circle cx="361" cy="66" r="3"/><circle cx="427" cy="60" r="3"/><circle cx="461" cy="319" r="3"/></g>
       <g fill="#B8C5D8" fill-opacity=".72"><rect x="117" y="312" width="47" height="4" rx="2" transform="rotate(30 117 312)"/><rect x="126" y="328" width="32" height="4" rx="2" transform="rotate(30 126 328)"/><rect x="402" y="354" width="34" height="4" rx="2" transform="rotate(-20 402 354)"/></g>
     </svg>
-    <div class="glass-float float-market"><span class="float-icon">↗</span><div><small>MARKET SIGNAL</small><b>Price intelligence</b></div><i>LIVE DATA</i></div>
+    <div class="glass-float float-market"><span class="float-icon">↗</span><div><small>MARKET SIGNAL</small><b>Tracked price references</b></div><i>WEEKLY DATA</i></div>
     <div class="glass-float float-build"><span class="float-icon">✳</span><div><small>BUILD CHECK</small><b>Compatibility insights</b></div><strong>01 / 03</strong></div>
     <div class="glass-float float-chip"><span class="pulse-dot"></span> HARDWARE, DECODED</div>
   </div>
   <div class="home-capabilities">
-    <a href="#analyze" class="capability-card"><span class="cap-icon">⌁</span><div><small>01 / MARKET INTELLIGENCE</small><b>Know the component value</b><p>Compare tracked retail prices with matched parts.</p></div><span class="cap-arrow">↗</span></a>
+    <a href="#analyze" class="capability-card"><span class="cap-icon">⌁</span><div><small>01 / MARKET INTELLIGENCE</small><b>Compare part prices</b><p>See tracked weekly new-retail references for exact matches.</p></div><span class="cap-arrow">↗</span></a>
     <a href="#analyze" class="capability-card"><span class="cap-icon">◈</span><div><small>02 / USED PC ANALYSIS</small><b>Look past the listing</b><p>Spot missing details and questions to ask.</p></div><span class="cap-arrow">↗</span></a>
     <a href="#build" class="capability-card"><span class="cap-icon">⌘</span><div><small>03 / BUILD VALIDATION</small><b>Check before you buy</b><p>Review fit, sockets, memory and power.</p></div><span class="cap-arrow">↗</span></a>
   </div>
@@ -212,7 +212,7 @@
 </section>
 
 <section class="workspace saved-section" id="saved">
-  <div class="section-title"><div class="eyebrow">03 / YOUR WORKSPACE</div><h2>Your saved workspace</h2><p>Keep reports organized and compare your saved PCs.</p></div>
+  <div class="section-title"><div class="eyebrow">03 / YOUR WORKSPACE</div><h2>Your saved workspace</h2><p>Save reports on this device. Plus adds side-by-side comparison and build history.</p></div>
   <div id="plusWorkspace" class="plus-workspace" aria-live="polite"><div class="plus-locked"><b>PCCheck Plus tools</b><p>Sign in and activate Plus to unlock comparisons, expanded reports, and build history.</p><button class="btn ghost" type="button" id="plusWorkspaceSignIn">Sign in / account</button></div></div>
   <div id="savedReports" class="saved-list"><div class="empty">No saved reports yet. Create and save a report above.</div></div>
   <div class="saved-tools"><button class="btn ghost" id="exportAll" type="button">Export all reports</button><button class="btn ghost" id="clearSaved" type="button">Clear saved reports</button></div>
