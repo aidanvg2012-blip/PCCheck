@@ -178,4 +178,5 @@
   window.PCCheckAuth = { getSession, openModal, refreshAccount, hasPlus: false };
   setMode('signin');
   refreshAccount();
+  if (window.location.hash === '#account') openModal();
 })();
