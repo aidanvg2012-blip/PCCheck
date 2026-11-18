@@ -3,7 +3,7 @@
   const $ = id => document.getElementById(id);
   const SUPABASE_URL = 'https://rtssojyophcgybdhhqzz.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_kK8xaomzreBOVF4Dnvy4UQ_uuVvLWH3';
-  const FREE_LIMIT = 3;
+  const FREE_LIMIT = 1;
   let client = null, session = null, access = null, catalog = null, lastBuilds = [];
 
   const CPU_RANK = [
@@ -121,14 +121,18 @@
     });
   }
   function partMarkup(label,p) {
-    if(!p) return '<div class="build-part"><div class="build-part-top"><span>'+escape(label)+'</span><b>Not found</b></div><p class="part-unavailable">No exact tracked part price. Choose a verified model manually.</p></div>';
-    return '<div class="build-part"><div class="build-part-top"><span>'+escape(label)+'</span><b>'+money(p.lowestPrice)+'</b></div><p class="build-part-name">'+escape(p.name)+'</p><div class="build-part-prices"><span>Lowest tracked: <strong>'+escape(p.lowestRetailer||'Retailer not named')+'</strong></span><span>Typical: '+(p.typicalPrice?money(p.typicalPrice):'Not available')+'</span><span>'+Number(p.retailers||0)+' retailers tracked</span><span>As of '+escape(p.asOf||'date unavailable')+'</span></div>'+(p.sourceUrl?'<a href="'+escape(p.sourceUrl)+'" target="_blank" rel="noopener noreferrer">Compare retailer listings ↗</a>':'')+'</div>';
+    if(!p)return '<div class="build-part"><div class="build-part-top"><span>'+escape(label)+'</span><b>Not found</b></div><p class="part-unavailable">No exact tracked part price. Choose a verified model manually.</p></div>';
+    const live=p.livePrice||null,offers=Array.isArray(live?.offers)?live.offers:[];
+    const offerMarkup=offers.length?'<details class="live-offers"><summary>'+offers.length+' current retailer offers</summary><div>'+offers.map(offer=>'<div class="live-offer"><span><b>'+escape(offer.merchant)+'</b><small>'+escape(offer.availability||'Availability not confirmed')+(offer.shipping?' · '+escape(offer.shipping):'')+(offer.tax?' · tax '+escape(offer.tax):'')+'</small></span><strong>'+money(offer.price)+'</strong><a href="'+escape(offer.url)+'" target="_blank" rel="noopener noreferrer">Open ↗</a></div>').join('')+'</div></details>':'<p class="part-unavailable">'+(live?.found?'No current retailer offers were returned.':'No exact live retailer match; no current price assigned.')+'</p>';
+    const priceLabel=live?.lowestPrice?money(live.lowestPrice):'No live price';
+    return '<div class="build-part"><div class="build-part-top"><span>'+escape(label)+'</span><b>'+priceLabel+'</b></div><p class="build-part-name">'+escape(p.name)+'</p><div class="build-part-prices"><span>Live lowest: <strong>'+escape(live?.lowestRetailer||'Not available')+'</strong></span><span>Weekly reference: '+money(p.lowestPrice)+'</span><span>Checked: '+escape(live?.checkedAt?new Date(live.checkedAt).toLocaleString():'not checked')+'</span></div>'+(live?.productUrl?'<a href="'+escape(live.productUrl)+'" target="_blank" rel="noopener noreferrer">PCPartPicker product ↗</a>':p.sourceUrl?'<a href="'+escape(p.sourceUrl)+'" target="_blank" rel="noopener noreferrer">Weekly source ↗</a>':'')+offerMarkup+'</div>';
   }
   function optionMarkup(o,index) {
-    if(o.unavailable) return '<article class="build-option"><span class="mini-label">'+escape(o.title.toUpperCase())+'</span><h3>Not enough verified data</h3><p>'+escape(o.reason)+'</p></article>';
+    if(o.unavailable)return '<article class="build-option"><span class="mini-label">'+escape(o.title.toUpperCase())+'</span><h3>Not enough verified data</h3><p>'+escape(o.reason)+'</p></article>';
     const parts=o.parts.map(([label,p])=>partMarkup(label,p)).join('');
-    const warnings=['Exact motherboard CPU/BIOS support still needs checking.','Case and GPU/cooler physical clearance are not verified from this catalog.','PSU wattage is estimated; quality, connectors, and transient behavior must be checked against manufacturer guidance.','CPU cooler is not included in this parts subtotal. Check whether the selected CPU includes a stock cooler or budget for a compatible cooler.','Prices exclude shipping, tax, Windows, and peripherals.'];
-    return '<article class="build-option '+(index===1?'recommended':'')+'"><div class="build-option-head"><span>'+escape(o.title.toUpperCase())+'</span><span>'+(index===1?'BEST FIT':'ALTERNATIVE')+'</span></div><h3>'+escape(o.socket)+' platform</h3><p>'+escape(o.desc||'')+'</p><div class="build-total"><small>TRACKED PART SUBTOTAL</small><b>'+money(o.total)+'</b><em>'+(o.withinBudget?'Within target budget':'Above this option’s target budget')+'</em></div><div class="build-parts">'+parts+'</div><div class="build-warning">'+warnings.map(escape).join('<br>')+'</div><button class="btn ghost" type="button" data-export-option="'+index+'">Export this parts list ↓</button></article>';
+    const warnings=['Exact motherboard CPU/BIOS support still needs checking.','Case and GPU/cooler physical clearance are not verified from this catalog.','PSU wattage is estimated; quality, connectors, and transient behavior must be checked against manufacturer guidance.','CPU cooler is not included in this parts subtotal. Check whether the selected CPU includes a stock cooler or budget for a compatible cooler.','Retailer prices can change; shipping and tax may be missing.'];
+    const budgetNote=o.liveComplete?(o.withinBudget?'Within target budget':'Above this option’s target budget'):'Partial estimate — '+o.livePricedCount+' of '+o.parts.length+' parts priced; unpriced parts are excluded';
+    return '<article class="build-option '+(index===1?'recommended':'')+'"><div class="build-option-head"><span>'+escape(o.title.toUpperCase())+'</span><span>'+(index===1?'BEST FIT':'ALTERNATIVE')+'</span></div><h3>'+escape(o.socket)+' platform</h3><p>'+escape(o.desc||'')+'</p><div class="build-total"><small>LIVE PARTS ESTIMATE · '+o.livePricedCount+'/'+o.parts.length+' PRICED</small><b>'+money(o.liveSubtotal)+'</b><em>'+escape(budgetNote)+'</em></div><div class="build-parts">'+parts+'</div><div class="build-warning">'+warnings.map(escape).join('<br>')+'</div><button class="btn ghost" type="button" data-export-option="'+index+'">Export this parts list ↓</button></article>';
   }
   async function getUsage(method='GET') {
     const response=await fetch('/api/build-finder-usage',{method,headers:{Authorization:'Bearer '+session.access_token,Accept:'application/json'}});
@@ -138,16 +142,16 @@
   }
   function renderUsage(data) {
     access=data;
-    $('accessTitle').textContent=data.hasPlus?'PCCheck Plus · unlimited Build Finder':'Free account · trial access';
+    $('accessTitle').textContent=data.hasPlus?'PCCheck Plus · unlimited reviews':'Free account · one-time review';
     $('usageCount').textContent=data.hasPlus?'∞':String(data.remaining);
-    $('usageLabel').textContent=data.hasPlus?'unlimited plans':'free plans remaining';
-    $('accessCopy').textContent=data.hasPlus?'Your Plus membership unlocks unlimited researched build plans.':'Your account includes three full researched build plans. Plus removes the plan limit.';
+    $('usageLabel').textContent=data.hasPlus?'unlimited reviews':(data.remaining>0?'free review remaining':'free review used');
+    $('accessCopy').textContent=data.hasPlus?'Your Plus membership unlocks unlimited researched build reviews.':'Your account includes one full parts plan, live retailer price check, and compatibility review. Plus removes the limit.';
     $('accountLink').textContent='Account & membership ↗';
     $('accountLink').href='index.html#account';
     if(!data.hasPlus&&data.remaining<=0){
       $('finderWizard').hidden=true;
       $('finderResults').hidden=false;
-      $('buildOptions').innerHTML='<div class="finder-locked"><h3>Your free build plans are used</h3><p>You have used all three included build plans. PCCheck Plus is designed for unlimited research. Your existing saved/exported reports remain yours.</p><a class="btn ghost" href="index.html#account">View account and Plus information ↗</a></div>';
+      $('buildOptions').innerHTML='<div class="finder-locked"><h3>Your free build review has been used</h3><p>You have used your one included build review. PCCheck Plus is designed for unlimited research. Your existing saved/exported reports remain yours.</p><a class="btn ghost" href="index.html#account">View account and Plus information ↗</a></div>';
     } else $('finderWizard').hidden=false;
   }
   function readPrefs(){return {use:$('needUse').value,resolution:$('needResolution').value,budget:Number($('needBudget').value),priority:$('needPriority').value,ram:Number($('needRam').value),storage:Number($('needStorage').value),platform:$('needPlatform').value,size:$('needSize').value};}
@@ -157,24 +161,58 @@
     try{
       await ensureCatalog();
       let usage=await getUsage('GET');
-      if(!usage.hasPlus&&usage.remaining<=0){renderUsage(usage);throw new Error('You have used all three free Build Finder plans. Plus unlocks unlimited plans.');}
+      if(!usage.hasPlus&&usage.remaining<=0){renderUsage(usage);throw new Error('You have used your one free Build Finder review. Plus unlocks unlimited reviews.');}
+      const liveConfigResponse=await fetch('/api/live-part-prices',{headers:{Accept:'application/json'}});
+      const liveConfig=await liveConfigResponse.json().catch(()=>({}));
+      if(!liveConfigResponse.ok||!liveConfig.configured)throw new Error(liveConfig.error||'Live retailer pricing is not configured yet. A parent/guardian must add APISH_API_KEY to Vercel.');
       const prefs=readPrefs();lastBuilds=buildOptionsFor(prefs);
       const usable=lastBuilds.filter(x=>!x.unavailable);
-      if(!usable.length) throw new Error('The weekly catalog did not contain enough exact, compatible parts for this budget. Try a larger budget or another platform. No trial use was consumed.');
+      if(!usable.length)throw new Error('The weekly catalog did not contain enough exact, compatible parts for this budget. Try a larger budget or another platform. No free review was used.');
+      const uniqueParts=new Map();
+      lastBuilds.filter(x=>!x.unavailable).forEach(option=>option.parts.forEach(([label,part])=>{
+        if(!part)return;
+        const model=part.model||part.name;
+        const key=part.category+':'+(part.partNumber||model||part.name);
+        if(!uniqueParts.has(key))uniqueParts.set(key,{key,category:part.category,name:part.name,model});
+      }));
+      const liveResponse=await fetch('/api/live-part-prices',{
+        method:'POST',
+        headers:{Authorization:'Bearer '+session.access_token,'Content-Type':'application/json',Accept:'application/json'},
+        body:JSON.stringify({parts:[...uniqueParts.values()]})
+      });
+      const liveData=await liveResponse.json().catch(()=>({}));
+      if(!liveResponse.ok)throw new Error(liveData.error||'Live retailer prices could not be checked. Your free review was not used.');
+      const checkedAt=liveData.checkedAt||new Date().toISOString();
+      for(const option of lastBuilds.filter(x=>!x.unavailable)){
+        let subtotal=0,priced=0;
+        option.parts.forEach(([label,part])=>{
+          if(!part)return;
+          const model=part.model||part.name;
+          const key=part.category+':'+(part.partNumber||model||part.name);
+          const live=liveData.matches?.[key]||null;
+          part.livePrice=live;
+          if(live?.lowestPrice){subtotal+=Number(live.lowestPrice);priced++;}
+        });
+        option.liveSubtotal=subtotal;
+        option.livePricedCount=priced;
+        option.liveComplete=priced===option.parts.length;
+        option.total=subtotal;
+        option.withinBudget=option.liveComplete?subtotal<=option.budget:null;
+      }
       usage=await getUsage('POST');
-      if(!usage.allowed&&!usage.hasPlus){renderUsage(usage);throw new Error(usage.error||'Your free build plans are used.');}
+      if(!usage.allowed&&!usage.hasPlus){renderUsage(usage);throw new Error(usage.error||'Your one free build review has already been used.');}
       renderUsage(usage);
-      $('resultsSummary').textContent=prefs.use+' · '+(prefs.resolution==='none'?'general workloads':prefs.resolution+'p target')+' · '+money(prefs.budget)+' parts budget. The three options are ranked from lower cost to higher performance.';
+      $('resultsSummary').textContent=prefs.use+' · '+(prefs.resolution==='none'?'general workloads':prefs.resolution+'p target')+' · '+money(prefs.budget)+' parts budget. Each option includes exact-model retailer checks and a price subtotal for the offers found.';
       $('buildOptions').innerHTML=lastBuilds.map(optionMarkup).join('');
-      $('datasetStamp').textContent='Source: '+catalog.source+' · '+catalog.week+' · generated '+catalog.generated+' · CC BY 4.0';
+      $('datasetStamp').textContent='Live retailer check: '+liveData.source+' · checked '+new Date(checkedAt).toLocaleString()+' · candidate catalog: '+catalog.source+' '+catalog.week;
       $('finderResults').hidden=false;$('finderResults').scrollIntoView({behavior:'smooth',block:'start'});
-      status.textContent=usage.hasPlus?'Plus access verified.':'Plan generated. '+usage.remaining+' free plans remain.';
+      status.textContent=usage.hasPlus?'Plus access verified. Your live parts review is ready.':'Your one free build review is ready.';
     }catch(error){status.textContent=error.message||'Could not generate a build.';}
     finally{button.disabled=false;button.innerHTML='Research my PC builds <b>↗</b>';}
   }
   function exportOption(index){
     const o=lastBuilds[index];if(!o||o.unavailable)return;
-    const payload={title:o.title,createdAt:new Date().toISOString(),source:catalog.source,week:catalog.week,parts:o.parts.map(([category,p])=>({category,product:p?.name||null,lowestPrice:p?.lowestPrice||null,lowestRetailer:p?.lowestRetailer||null,typicalPrice:p?.typicalPrice||null,retailers:p?.retailers||0,asOf:p?.asOf||null,sourceUrl:p?.sourceUrl||null})),subtotal:o.total,notes:['Weekly retail dataset prices are not guaranteed current checkout prices.','Shipping, tax, Windows, and peripherals excluded.','Verify exact CPU support, BIOS, dimensions, PSU quality/connectors, and manufacturer requirements.']};
+    const payload={title:o.title,createdAt:new Date().toISOString(),priceSource:'PCPartPicker via API.SH',parts:o.parts.map(([category,p])=>({category,product:p?.name||null,weeklyReferencePrice:p?.lowestPrice||null,livePrice:p?.livePrice?.lowestPrice||null,lowestRetailer:p?.livePrice?.lowestRetailer||null,checkedAt:p?.livePrice?.checkedAt||null,offers:p?.livePrice?.offers||[],productUrl:p?.livePrice?.productUrl||null})),liveSubtotal:o.liveSubtotal,priceEstimateComplete:o.liveComplete,notes:['Retailer prices are refreshed when the report is generated but can change before checkout.','Totals use returned retailer offer totals where provided; shipping or tax may be missing.','Unpriced components are excluded from partial subtotals, not estimated.','Windows, peripherals, and CPU cooler may be additional.','Verify exact CPU support, BIOS, dimensions, PSU quality/connectors, and manufacturer requirements.']};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='pccheck-build-research.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
   async function ensureCatalog(){
@@ -216,7 +254,7 @@
     client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
     client.auth.getSession().then(async({data,error})=>{
       if(error)throw error;session=data.session;
-      if(!session?.access_token){$('accessTitle').textContent='Sign in to start your free trial';$('accessCopy').textContent='Create a free PCCheck account or sign in on the main site. Your account includes three full build plans.';$('usageCount').textContent='3';$('usageLabel').textContent='plans after sign-in';$('finderWizard').hidden=true;return;}
+      if(!session?.access_token){$('accessTitle').textContent='Sign in for your one free build review';$('accessCopy').textContent='Create a free PCCheck account or sign in on the main site. Your account includes one full build review.';$('usageCount').textContent='1';$('usageLabel').textContent='review after sign-in';$('finderWizard').hidden=true;return;}
       const usage=await getUsage('GET');renderUsage(usage);
     }).catch(error=>{$('accessTitle').textContent='Could not verify account';$('accessCopy').textContent=error.message||'Please sign in again.';$('finderWizard').hidden=true;});
   }
