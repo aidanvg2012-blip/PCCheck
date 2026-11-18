@@ -141,7 +141,7 @@
     if(!data.hasPlus&&data.remaining<=0){
       $('finderWizard').hidden=true;
       $('finderResults').hidden=false;
-      $('buildOptions').innerHTML='<div class="finder-locked"><h3>Your free build plans are used</h3><p>You have used all three included build plans. PCCheck Plus is designed for unlimited research. Your existing saved/exported reports remain yours.</p><a class="btn ghost" href="index.html#top">View account and Plus information ↗</a></div>';
+      $('buildOptions').innerHTML='<div class="finder-locked"><h3>Your free build plans are used</h3><p>You have used all three included build plans. PCCheck Plus is designed for unlimited research. Your existing saved/exported reports remain yours.</p><a class="btn ghost" href="index.html#account">View account and Plus information ↗</a></div>';
     } else $('finderWizard').hidden=false;
   }
   function readPrefs(){return {use:$('needUse').value,resolution:$('needResolution').value,budget:Number($('needBudget').value),priority:$('needPriority').value,ram:Number($('needRam').value),storage:Number($('needStorage').value),platform:$('needPlatform').value,size:$('needSize').value};}
