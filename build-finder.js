@@ -131,9 +131,11 @@
     if(o.unavailable)return '<article class="build-option"><span class="mini-label">'+escape(o.title.toUpperCase())+'</span><h3>Not enough verified data</h3><p>'+escape(o.reason)+'</p></article>';
     const parts=o.parts.map(([label,p])=>partMarkup(label,p)).join('');
     const warnings=['Exact motherboard CPU/BIOS support still needs checking.','Case and GPU/cooler physical clearance are not verified from this catalog.','PSU wattage is estimated; quality, connectors, and transient behavior must be checked against manufacturer guidance.','CPU cooler is not included in this parts subtotal. Check whether the selected CPU includes a stock cooler or budget for a compatible cooler.','Retailer prices can change; shipping and tax may be missing.'];
-    const budgetNote=o.liveComplete?(o.withinBudget?'Within target budget':'Above this option’s target budget'):'Partial estimate — '+o.livePricedCount+' of '+o.parts.length+' parts priced; unpriced parts are excluded';
-    const liveTotalText=o.livePricedCount?money(o.liveSubtotal):'No live prices';
-    return '<article class="build-option '+(index===1?'recommended':'')+'"><div class="build-option-head"><span>'+escape(o.title.toUpperCase())+'</span><span>'+(index===1?'BEST FIT':'ALTERNATIVE')+'</span></div><h3>'+escape(o.socket)+' platform</h3><p>'+escape(o.desc||'')+'</p><div class="build-total"><small>LIVE PARTS ESTIMATE · '+o.livePricedCount+'/'+o.parts.length+' PRICED</small><b>'+liveTotalText+'</b><em>'+escape(budgetNote)+'</em></div><div class="build-parts">'+parts+'</div><div class="build-warning">'+warnings.map(escape).join('<br>')+'</div><button class="btn ghost" type="button" data-export-option="'+index+'">Export this parts list ↓</button></article>';
+    const hasLivePrices=Number(o.livePricedCount)>0;
+    const budgetNote=hasLivePrices?(o.liveComplete?(o.withinBudget?'Within target budget':'Above this option’s target budget'):'Partial live estimate — '+o.livePricedCount+' of '+o.parts.length+' parts priced; unpriced parts are excluded'):(o.withinBudget?'Within target budget using weekly references':'Above target budget using weekly references')+' · live offers unavailable';
+    const liveTotalText=hasLivePrices?money(o.liveSubtotal):money(o.total);
+    const estimateLabel=hasLivePrices?'LIVE PARTS ESTIMATE · '+o.livePricedCount+'/'+o.parts.length+' PRICED':'WEEKLY REFERENCE ESTIMATE';
+    return '<article class="build-option '+(index===1?'recommended':'')+'"><div class="build-option-head"><span>'+escape(o.title.toUpperCase())+'</span><span>'+(index===1?'BEST FIT':'ALTERNATIVE')+'</span></div><h3>'+escape(o.socket)+' platform</h3><p>'+escape(o.desc||'')+'</p><div class="build-total"><small>'+estimateLabel+'</small><b>'+liveTotalText+'</b><em>'+escape(budgetNote)+'</em></div><div class="build-parts">'+parts+'</div><div class="build-warning">'+warnings.map(escape).join('<br>')+'</div><button class="btn ghost" type="button" data-export-option="'+index+'">Export this parts list ↓</button></article>';
   }
   async function getUsage(method='GET') {
     const response=await fetch('/api/build-finder-usage',{method,headers:{Authorization:'Bearer '+session.access_token,Accept:'application/json'}});
@@ -158,58 +160,67 @@
   function readPrefs(){return {use:$('needUse').value,resolution:$('needResolution').value,budget:Number($('needBudget').value),priority:$('needPriority').value,ram:Number($('needRam').value),storage:Number($('needStorage').value),platform:$('needPlatform').value,size:$('needSize').value};}
   async function generate(){
     const button=$('generateBuilds'), status=$('finderStatus');
-    button.disabled=true;button.textContent='Researching component catalog…';status.textContent='Loading tracked parts and checking your free-plan access…';
+    button.disabled=true;button.textContent='Researching component catalog…';status.textContent='Loading tracked parts and checking your account access…';
     try{
       await ensureCatalog();
       let usage=await getUsage('GET');
-      if(!usage.hasPlus&&usage.remaining<=0){renderUsage(usage);throw new Error('You have used your one free Build Finder review. Plus unlocks unlimited reviews.');}
-      const liveConfigResponse=await fetch('/api/live-part-prices',{headers:{Accept:'application/json'}});
-      const liveConfig=await liveConfigResponse.json().catch(()=>({}));
-      if(!liveConfigResponse.ok||!liveConfig.configured)throw new Error(liveConfig.error||'Live retailer pricing is not configured yet. A parent/guardian must add APISH_API_KEY to Vercel.');
+      if(!usage.hasPlus&&usage.remaining<=0){renderUsage(usage);throw new Error('You have used your one free Build Finder review. Plus unlocks unlimited live-price reviews.');}
       const prefs=readPrefs();lastBuilds=buildOptionsFor(prefs);
       const usable=lastBuilds.filter(x=>!x.unavailable);
       if(!usable.length)throw new Error('The weekly catalog did not contain enough exact, compatible parts for this budget. Try a larger budget or another platform. No free review was used.');
       const uniqueParts=new Map();
-      lastBuilds.filter(x=>!x.unavailable).forEach(option=>option.parts.forEach(([label,part])=>{
+      usable.forEach(option=>option.parts.forEach(([label,part])=>{
         if(!part)return;
         const model=part.model||part.name;
         const key=part.category+':'+(part.partNumber||model||part.name);
         if(!uniqueParts.has(key))uniqueParts.set(key,{key,category:part.category,name:part.name,model});
       }));
-      const liveResponse=await fetch('/api/live-part-prices',{
-        method:'POST',
-        headers:{Authorization:'Bearer '+session.access_token,'Content-Type':'application/json',Accept:'application/json'},
-        body:JSON.stringify({parts:[...uniqueParts.values()]})
-      });
-      const liveData=await liveResponse.json().catch(()=>({}));
-      if(!liveResponse.ok)throw new Error(liveData.error||'Live retailer prices could not be checked. Your free review was not used.');
-      const liveMatches=Object.values(liveData.matches||{});
-      if(!liveMatches.some(match=>match?.lowestPrice))throw new Error('No exact live retailer offers matched the selected parts. Check the component models and try again; your free review was not used.');
-      const checkedAt=liveData.checkedAt||new Date().toISOString();
-      for(const option of lastBuilds.filter(x=>!x.unavailable)){
+      let liveData=null;
+      let liveUnavailable='Live retailer pricing is not configured. Showing weekly reference prices instead.';
+      try{
+        const liveConfigResponse=await fetch('/api/live-part-prices',{headers:{Accept:'application/json'}});
+        const liveConfig=await liveConfigResponse.json().catch(()=>({}));
+        if(liveConfigResponse.ok&&liveConfig.configured){
+          const liveResponse=await fetch('/api/live-part-prices',{
+            method:'POST',
+            headers:{Authorization:'Bearer '+session.access_token,'Content-Type':'application/json',Accept:'application/json'},
+            body:JSON.stringify({parts:[...uniqueParts.values()]})
+          });
+          const result=await liveResponse.json().catch(()=>({}));
+          if(liveResponse.ok&&Object.values(result.matches||{}).some(match=>match?.lowestPrice)){
+            liveData=result;
+          }else liveUnavailable=result.error||'No exact live retailer offers matched these parts.';
+        }else liveUnavailable=liveConfig.error||liveUnavailable;
+      }catch(error){liveUnavailable=error.message||liveUnavailable;}
+      const checkedAt=liveData?.checkedAt||new Date().toISOString();
+      for(const option of usable){
         let subtotal=0,priced=0;
         option.parts.forEach(([label,part])=>{
           if(!part)return;
           const model=part.model||part.name;
           const key=part.category+':'+(part.partNumber||model||part.name);
-          const live=liveData.matches?.[key]||null;
+          const live=liveData?.matches?.[key]||null;
           part.livePrice=live;
           if(live?.lowestPrice){subtotal+=Number(live.lowestPrice);priced++;}
         });
         option.liveSubtotal=subtotal;
         option.livePricedCount=priced;
-        option.liveComplete=priced===option.parts.length;
-        option.total=subtotal;
-        option.withinBudget=option.liveComplete?subtotal<=option.budget:null;
+        option.liveComplete=Boolean(liveData)&&priced===option.parts.length;
+        if(priced){
+          option.total=subtotal;
+          option.withinBudget=option.liveComplete?subtotal<=option.budget:null;
+        }
       }
-      usage=await getUsage('POST');
-      if(!usage.allowed&&!usage.hasPlus){renderUsage(usage);throw new Error(usage.error||'Your one free build review has already been used.');}
-      renderUsage(usage);
-      $('resultsSummary').textContent=prefs.use+' · '+(prefs.resolution==='none'?'general workloads':prefs.resolution+'p target')+' · '+money(prefs.budget)+' parts budget. Each option includes exact-model retailer checks and a price subtotal for the offers found.';
+      if(liveData){
+        usage=await getUsage('POST');
+        if(!usage.allowed&&!usage.hasPlus){renderUsage(usage);throw new Error(usage.error||'Your one free build review has already been used.');}
+        renderUsage(usage);
+      }
+      $('resultsSummary').textContent=prefs.use+' · '+(prefs.resolution==='none'?'general workloads':prefs.resolution+'p target')+' · '+money(prefs.budget)+' parts budget. '+(liveData?'Exact-model live retailer offers are included.':'Weekly catalog prices are shown; no free live-price review was used.');
       $('buildOptions').innerHTML=lastBuilds.map(optionMarkup).join('');
-      $('datasetStamp').textContent='Live retailer check: '+liveData.source+' · checked '+new Date(checkedAt).toLocaleString()+' · candidate catalog: '+catalog.source+' '+catalog.week;
+      $('datasetStamp').textContent=(liveData?'Live retailer check: '+liveData.source+' · checked '+new Date(checkedAt).toLocaleString():'Weekly reference prices only · '+liveUnavailable)+' · candidate catalog: '+catalog.source+' '+catalog.week;
       $('finderResults').hidden=false;$('finderResults').scrollIntoView({behavior:'smooth',block:'start'});
-      status.textContent=usage.hasPlus?'Plus access verified. Your live parts review is ready.':'Your one free build review is ready.';
+      status.textContent=liveData?(usage.hasPlus?'Plus access verified. Your live parts review is ready.':'Your one free live-price review is ready.'):'Weekly build shortlist ready. Live retailer checking is unavailable, and your free review was not used.';
     }catch(error){status.textContent=error.message||'Could not generate a build.';}
     finally{button.disabled=false;button.innerHTML='Research my PC builds <b>↗</b>';}
   }
