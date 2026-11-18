@@ -683,7 +683,7 @@ function exportComparisonCSV(selected) {
     ['Saved date', ...selected.map(reportDate)],
     ...keys.map(key=>[key, ...selected.map(r=>displayValue(r.input?.[key]))])
   ];
-  const quote = value => { const raw=String(value ?? ''); const safe=/^\\s*[=+\\-@]/.test(raw) ? "'"+raw : raw; return '"'+safe.replace(/"/g,'""')+'"'; };
+  const quote = value => { const raw=String(value ?? ''); const safe=/^\s*[=+\-@]/.test(raw) ? "'"+raw : raw; return '"'+safe.replace(/"/g,'""')+'"'; };
   const csv = '\uFEFF' + rows.map(row=>row.map(quote).join(',')).join('\r\n');
   const url = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   const link = document.createElement('a');
