@@ -585,3 +585,32 @@ input:hover,textarea:hover,select:hover{border-color:rgba(156,214,230,.35)}
 input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid rgba(133,231,236,.85);outline-offset:3px}
 button:disabled{opacity:.48;cursor:not-allowed;transform:none!important}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+
+/* PCCheck 2.9.1 — fluid motion and refined glass depth */
+:root{--motion-fast:180ms;--motion-smooth:420ms;--ease-fluid:cubic-bezier(.22,1,.36,1)}
+html{scroll-behavior:smooth}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.topbar,.mobile-tabs,.modal,.pro-preview,.plus-tool,.visual-picker-panel,.build-explorer,.workflow-rail{-webkit-backdrop-filter:blur(24px) saturate(155%);backdrop-filter:blur(24px) saturate(155%)}
+.panel,.report-result,.guide-card,.saved-card,.plus-tool,.capability-card,.workflow-step,.sample-build-card,.visual-pick-card{transition:transform var(--motion-smooth) var(--ease-fluid),border-color var(--motion-fast) ease,box-shadow var(--motion-smooth) var(--ease-fluid),background var(--motion-fast) ease}
+@media(hover:hover) and (pointer:fine){.panel:hover,.guide-card:hover,.plus-tool:hover,.capability-card:hover,.sample-build-card:hover,.visual-pick-card:hover{transform:translate3d(0,-3px,0);border-color:rgba(140,236,240,.3);box-shadow:inset 0 1px rgba(255,255,255,.1),0 24px 65px rgba(0,0,0,.24),0 0 26px rgba(112,214,231,.045)}.btn:hover,.profile:hover,.saved-actions button:hover{transform:translate3d(0,-2px,0)}}
+.btn:active,.visual-pick-card:active,.sample-build-card:active{transform:scale(.985)}
+.btn,.profile,.saved-actions button,.text-button,.hardware-choice{transition:transform var(--motion-fast) var(--ease-fluid),color var(--motion-fast) ease,border-color var(--motion-fast) ease,background var(--motion-fast) ease,box-shadow var(--motion-fast) ease}
+.report-host:not([hidden]),.pro-preview:not([hidden]),.history-item,.plus-metric{animation:glassReveal .48s var(--ease-fluid) both}
+@keyframes glassReveal{from{opacity:0;transform:translate3d(0,10px,0);filter:blur(3px)}to{opacity:1;transform:translate3d(0,0,0);filter:blur(0)}}
+.plus-tool{overflow:hidden}
+.plus-tool:after,.pro-teaser:after,.pro-preview:after{content:"";position:absolute;inset:-1px;pointer-events:none;border-radius:inherit;background:linear-gradient(115deg,transparent 18%,rgba(220,250,255,.055) 42%,transparent 68%);opacity:0;transform:translate3d(-18%,0,0);transition:opacity .35s ease,transform .8s var(--ease-fluid)}
+@media(hover:hover) and (pointer:fine){.plus-tool:hover:after,.pro-teaser:hover:after,.pro-preview:hover:after{opacity:1;transform:translate3d(18%,0,0)}}
+.plus-metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:17px 0 10px}
+.plus-metric{min-width:0;padding:14px 12px;border:1px solid rgba(185,207,255,.13);border-radius:13px;background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));box-shadow:inset 0 1px rgba(255,255,255,.07)}
+.plus-metric span{display:block;color:#91a9c0;font:500 8px var(--font-mono,'DM Mono',monospace);letter-spacing:.09em;line-height:1.5}
+.plus-metric b{display:block;margin:8px 0 4px;color:#b7f5f2;font:700 clamp(17px,2vw,24px) var(--font-display,'Manrope',sans-serif);overflow-wrap:anywhere}
+.plus-metric small{display:block;color:var(--muted);font-size:9px;line-height:1.45}
+.compare-actions>div{display:flex;gap:12px;align-items:center}
+.text-button:disabled{opacity:.35;cursor:not-allowed}
+.comparison-scroll{scrollbar-width:thin;scrollbar-color:#587287 transparent}
+.comparison-scroll::-webkit-scrollbar{height:7px}
+.comparison-scroll::-webkit-scrollbar-thumb{background:#405a70;border-radius:9px}
+@media(max-width:900px){.plus-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.plus-metric-grid{gap:8px}.plus-metric{padding:12px 10px}.compare-actions{align-items:flex-start;gap:8px;flex-direction:column}.compare-actions>div{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.panel:hover,.guide-card:hover,.plus-tool:hover,.capability-card:hover,.sample-build-card:hover,.visual-pick-card:hover{transform:none}}
