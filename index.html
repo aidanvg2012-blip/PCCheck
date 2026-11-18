@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="PCCheck helps you evaluate used PCs, check build compatibility, plan upgrades, and estimate PC power and storage needs.">
-<meta name="theme-color" content="#080d18"><meta name="application-name" content="PCCheck"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PCCheck"><link rel="apple-touch-icon" href="icon.svg"><meta name="version" content="2.12.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#080d18"><meta name="application-name" content="PCCheck"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PCCheck"><link rel="apple-touch-icon" href="icon.svg"><meta name="version" content="2.13.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>PCCheck — Hardware intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,9 +27,9 @@
 </nav>
 <main id="top">
 <section class="hero">
-  <div class="eyebrow"><i></i> HARDWARE INTELLIGENCE <span class="eyebrow-divider">/</span> BUILT FOR BETTER DECISIONS</div>
-  <h1>Know what<br>you're buying.<br><em>Build what's next.</em></h1>
-  <p>A clearer way to evaluate used PCs, understand component pricing, and plan a build that actually fits. Less guesswork. Better hardware decisions.</p>
+  <div class="eyebrow"><i></i> INDEPENDENT PC BUYING TOOLS</div>
+  <h1>Know the specs.<br><em>Then decide.</em></h1>
+  <p>Evaluate used PC listings, compare exact hardware, and check custom builds before you spend. Clear information, practical checks, and no fake hardware certifications.</p>
   <div class="hero-actions"><a class="btn primary" href="#analyze">Check a used PC <b>↗</b></a><a class="btn ghost" href="build-finder.html">Plan a new build ↗</a></div>
   <div class="hero-stats"><span><b>01</b><small>MARKET INTELLIGENCE</small></span><span><b>02</b><small>LISTING ANALYSIS</small></span><span><b>03</b><small>BUILD VALIDATION</small></span><span><b>04</b><small>YOUR WORKSPACE</small></span></div>
   <div class="pro-teaser">
@@ -152,7 +152,14 @@
       <label>Motherboard model <input name="motherboard" placeholder="MSI B550 Tomahawk"></label>
       <label>Approximate age <input name="age" placeholder="Built in 2022"></label>
       <label>Case model <input name="case" placeholder="NZXT H5 Flow"></label>
-      <label class="full-field">Condition / seller notes <textarea name="condition" rows="3" placeholder="Tested and working, no known issues, includes Wi-Fi... "></textarea></label>
+      <label>Listing platform <select name="sellerPlatform"><option value="">Not specified</option><option>Facebook Marketplace</option><option>eBay</option><option>OfferUp</option><option>Craigslist</option><option>Local retailer</option><option>Other</option></select></label>
+      <label>Overall condition <select name="conditionGrade"><option value="">Not assessed</option><option value="excellent">Excellent</option><option value="good">Good</option><option value="fair">Fair / visible wear</option><option value="poor">Poor / damaged</option><option value="for-parts">For parts only</option></select></label>
+      <label>What has been tested? <select name="testStatus"><option value="">Not confirmed</option><option value="untested">Not tested</option><option value="boots">Boots to desktop only</option><option value="gaming">Game tested</option><option value="stress">Stress tested</option></select></label>
+      <label>CPU temperature under load (°C) <input name="cpuTemp" type="number" min="0" max="150" placeholder="Optional"></label>
+      <label>GPU temperature under load (°C) <input name="gpuTemp" type="number" min="0" max="150" placeholder="Optional"></label>
+      <label>Warranty status <select name="warranty"><option value="">Not known</option><option value="active">Warranty remaining</option><option value="expired">Expired</option><option value="none">No warranty</option></select></label>
+      <label class="full-field">Included items / accessories <textarea name="included" rows="2" placeholder="Wi-Fi antenna, power cable, original box, keyboard..."></textarea></label>
+      <label class="full-field">Condition / seller notes <textarea name="condition" rows="3" placeholder="Visible wear, fan noise, repairs, crashes, missing parts, or other seller claims..."></textarea></label>
       </div></details>
     </div>
     <div class="assessment-submit"><button class="btn primary" type="submit">Analyze PC & check latest market prices →</button><span class="fine" id="marketLookupStatus" role="status" aria-live="polite">Exact model names give the best price matches.</span></div>
@@ -231,7 +238,7 @@
 </section>
 
 <section class="workspace about-section" id="about">
-  <div class="section-title"><div class="eyebrow">ABOUT PCCHECK</div><h2>Make better PC decisions.</h2><p>PCCheck is an independent decision-support tool for people buying used gaming PCs or planning a custom build.</p></div>
+  <div class="section-title"><div class="eyebrow">ABOUT THE PROJECT</div><h2>About PCCheck</h2><p>PCCheck is an independent decision-support tool for people buying used gaming PCs or planning a custom build.</p></div>
   <div class="panel about-panel"><h3>Accuracy before hype</h3><p>PCCheck uses transparent rule-based checks, not an AI claim or a hidden certification. It can help organize details and surface common issues, but it cannot physically test hardware, verify seller claims, guarantee performance, or replace manufacturer specifications.</p><h3>Privacy and data</h3><p>In this prototype, reports stay in your browser's local storage. Account sign-in is currently a beta feature handled by Supabase. Saved reports remain in this browser and are not synced to an account. PCCheck does not provide marketplace account connections or automatic listing scraping. Clearing browser data may remove saved reports. Do not enter passwords, payment details, or other sensitive information.</p><h3>Independent project</h3><p>PCCheck is not affiliated with Facebook Marketplace, eBay, Craigslist, OfferUp, AMD, Intel, NVIDIA, or any PC manufacturer. Product and brand names are used only to identify hardware or listing sources.</p><p class="fine">This is an early product release. Always verify critical details with the manufacturer and inspect a used computer in person before buying.</p></div>
 </section>
 </main>
