@@ -118,7 +118,7 @@
         if (password.length < 10) throw new Error('Use a password with at least 10 characters.');
         const { data, error } = await client.auth.signUp({
           email, password,
-          options: { emailRedirectTo: window.location.origin + '/' }
+          options: { emailRedirectTo: window.location.origin + (new URLSearchParams(window.location.search).get('returnTo') === 'build-finder.html' ? '/?returnTo=build-finder.html#account' : '/') }
         });
         if (error) throw error;
         if (!data.session) {
