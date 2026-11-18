@@ -637,7 +637,7 @@ function renderPlusWorkspace() {
   const host = $('plusWorkspace');
   if (!host) return;
   if (!plusToolsEnabled) {
-    host.innerHTML = '<div class="plus-locked"><b>PCCheck Plus tools</b><p>Sign in with an active Plus account to unlock side-by-side comparisons, expanded reports, and build history. Saved reports remain on this device.</p><button class="btn ghost" type="button" id="plusWorkspaceSignIn">Sign in / account</button></div>';
+    host.innerHTML = '<div class="plus-locked"><b>PCCheck Plus tools</b><p>Sign in with an active Plus account to unlock PC shortlist insights, side-by-side comparisons, expanded reports, and build history. Saved reports remain on this device.</p><button class="btn ghost" type="button" id="plusWorkspaceSignIn">Sign in / account</button></div>';
     $('plusWorkspaceSignIn')?.addEventListener('click', () => window.PCCheckAuth?.openModal());
     return;
   }
@@ -645,17 +645,50 @@ function renderPlusWorkspace() {
   const compareMarkup = selected.length < 2
     ? '<div class="empty">Select two or three saved reports below to compare them.</div>'
     : `<div class="comparison-scroll"><table class="comparison-table"><thead><tr><th>Detail</th>${selected.map(r=>`<th>${escapeHTML(r.title)}</th>`).join('')}</tr></thead><tbody>${comparisonRows(selected)}</tbody></table></div>`;
+  const usedReports = reports.filter(r=>r.kind==='used');
+  const prices = usedReports.map(r=>Number(r.input?.price)).filter(v=>Number.isFinite(v)&&v>0).sort((a,b)=>a-b);
+  const medianPrice = prices.length ? (prices.length%2 ? prices[(prices.length-1)/2] : (prices[prices.length/2-1]+prices[prices.length/2])/2) : null;
+  const completenessValues = usedReports.map(r=>Number(r.completeness)).filter(v=>Number.isFinite(v));
+  const averageCompleteness = completenessValues.length ? Math.round(completenessValues.reduce((a,b)=>a+b,0)/completenessValues.length) : null;
+  const cautionCount = usedReports.filter(r=>r.verdict==='High caution').length;
+  const shortlistMarkup = usedReports.length
+    ? `<div class="plus-metric-grid">
+        <article class="plus-metric"><span>SAVED USED PCS</span><b>${usedReports.length}</b><small>Across this browser</small></article>
+        <article class="plus-metric"><span>MEDIAN ASKING PRICE</span><b>${medianPrice===null?'—':money(medianPrice)}</b><small>${prices.length} listing price${prices.length===1?'':'s'} entered</small></article>
+        <article class="plus-metric"><span>AVG. SPEC COMPLETENESS</span><b>${averageCompleteness===null?'—':averageCompleteness+'%'}</b><small>Core CPU, GPU, RAM and storage fields</small></article>
+        <article class="plus-metric"><span>HIGH-CAUTION REPORTS</span><b>${cautionCount}</b><small>Review these before deciding</small></article>
+      </div><p class="fine">These figures summarize only the reports saved in this browser. Asking prices are user-entered, not verified sale prices or market valuations.</p>`
+    : '<div class="empty">Save used-PC assessments to build your shortlist overview.</div>';
   const builds = reports.filter(r=>r.kind==='build');
   const historyMarkup = builds.length
-    ? `<div class="history-list">${builds.map((r,i)=>{const same=builds.filter(x=>x.title===r.title);const version=same.length-same.indexOf(r);return `<article class="history-item"><b>${escapeHTML(r.title)} · Version ${version}</b><span>${reportDate(r)} · ${escapeHTML(r.status)}</span><small>${escapeHTML(r.summary)}</small><button type="button" data-open="${escapeHTML(r.id)}">Open version</button></article>`;}).join('')}</div>`
+    ? `<div class="history-list">${builds.map(r=>{const same=builds.filter(x=>x.title===r.title);const version=same.length-same.indexOf(r);return `<article class="history-item"><b>${escapeHTML(r.title)} · Version ${version}</b><span>${reportDate(r)} · ${escapeHTML(r.status || r.verdict || 'Saved')}</span><small>${escapeHTML(r.summary)}</small><button type="button" data-open="${escapeHTML(r.id)}">Open version</button></article>`;}).join('')}</div>`
     : '<div class="empty">Save a custom build report to start its local version history.</div>';
   host.innerHTML = `<div class="plus-tools-grid">
-    <section class="plus-tool"><div class="mini-label">01 / COMPARISON WORKSPACE</div><h3>Compare saved PCs</h3><p>Choose up to three saved reports. Compare their entered specifications and assessment results side by side.</p><div class="compare-actions"><span>${selected.length} of 3 selected</span><button type="button" class="text-button" id="clearCompare">Clear selection</button></div>${compareMarkup}</section>
-    <section class="plus-tool"><div class="mini-label">02 / EXPANDED REPORTS</div><h3>Full input details</h3><p>Use “Details” on any saved report to inspect every field entered for that assessment. Reports can still be printed or exported as JSON.</p></section>
-    <section class="plus-tool"><div class="mini-label">03 / BUILD HISTORY</div><h3>Saved build versions</h3><p>Each saved custom-build report is kept as a dated snapshot on this device. Save again after changing parts to record another version.</p>${historyMarkup}</section>
+    <section class="plus-tool"><div class="mini-label">01 / SHORTLIST INSIGHTS</div><h3>Your saved PC overview</h3><p>A quick snapshot of the used-PC reports you have saved, so you can spot missing information and compare asking prices at a glance.</p>${shortlistMarkup}</section>
+    <section class="plus-tool"><div class="mini-label">02 / COMPARISON WORKSPACE</div><h3>Compare saved PCs</h3><p>Choose up to three saved reports. Compare their entered specifications and assessment results side by side.</p><div class="compare-actions"><span>${selected.length} of 3 selected</span><div><button type="button" class="text-button" id="exportCompare" ${selected.length<2?'disabled':''}>Export CSV</button> <button type="button" class="text-button" id="clearCompare">Clear selection</button></div></div>${compareMarkup}</section>
+    <section class="plus-tool"><div class="mini-label">03 / EXPANDED REPORTS</div><h3>Full input details</h3><p>Use “Details” on any saved report to inspect every field entered for that assessment. Reports can still be printed or exported as JSON.</p></section>
+    <section class="plus-tool"><div class="mini-label">04 / BUILD HISTORY</div><h3>Saved build versions</h3><p>Each saved custom-build report is kept as a dated snapshot on this device. Save again after changing parts to record another version.</p>${historyMarkup}</section>
   </div>`;
   $('clearCompare')?.addEventListener('click',()=>{compareSelection.clear();renderReports();});
+  $('exportCompare')?.addEventListener('click',()=>exportComparisonCSV(selected));
   host.querySelectorAll('[data-open]').forEach(button=>button.addEventListener('click',()=>{const report=reports.find(r=>r.id===button.dataset.open);if(report)openReport(report);}));
+}
+function exportComparisonCSV(selected) {
+  if (!plusToolsEnabled || selected.length < 2 || selected.length > 3) return;
+  const keys = [...new Set(selected.flatMap(r=>Object.keys(r.input || {})))].slice(0,40);
+  const rows = [
+    ['Detail', ...selected.map(r=>r.title)],
+    ['Assessment', ...selected.map(r=>r.verdict || r.status || '—')],
+    ['Summary', ...selected.map(r=>r.summary || '—')],
+    ['Saved date', ...selected.map(reportDate)],
+    ...keys.map(key=>[key, ...selected.map(r=>displayValue(r.input?.[key]))])
+  ];
+  const quote = value => '"' + String(value ?? '').replace(/"/g,'""') + '"';
+  const csv = '\uFEFF' + rows.map(row=>row.map(quote).join(',')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  const link = document.createElement('a');
+  link.href=url; link.download='pccheck-pc-comparison.csv'; link.click();
+  window.setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function comparisonRows(selected) {
   const keys = [...new Set(selected.flatMap(r=>Object.keys(r.input || {})))].slice(0,16);
