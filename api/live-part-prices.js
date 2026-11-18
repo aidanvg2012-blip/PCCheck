@@ -75,6 +75,7 @@ module.exports=async function handler(req,res){
       if(seen.has(part.key))return send(res,400,{error:'Duplicate selected part key.'});seen.add(part.key);
     }
     const results=await mapLimit(parts,3,async part=>{try{return await priceOne(part,key);}catch(error){console.error('Live price lookup failed for',part.category,error.message);return{key:part.key,found:false,requested:part.model||part.name,offers:[],error:'Live price lookup failed for this exact part.'};}});
+    if(results.length&&results.every(result=>result.error))return send(res,502,{error:'The live price provider failed for every selected part. Your free review was not used; try again later.'});
     return send(res,200,{source:'PCPartPicker via API.SH',checkedAt:new Date().toISOString(),matches:Object.fromEntries(results.map(result=>[result.key,result]))});
   }catch(error){const status=Number(error.status)||502;console.error('Live retailer price endpoint failed:',error.message);return send(res,status,{error:error.message||'Live retailer pricing is temporarily unavailable.'});}
 };
