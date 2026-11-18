@@ -155,7 +155,7 @@
     const button=$('generateBuilds'), status=$('finderStatus');
     button.disabled=true;button.textContent='Researching component catalog…';status.textContent='Loading tracked parts and checking your free-plan access…';
     try{
-      if(!catalog){const response=await fetch('/api/build-catalog',{headers:{Accept:'application/json'}});catalog=await response.json();if(!response.ok)throw new Error(catalog.error||'Price catalog unavailable.');}
+      await ensureCatalog();
       let usage=await getUsage('GET');
       if(!usage.hasPlus&&usage.remaining<=0){renderUsage(usage);throw new Error('You have used all three free Build Finder plans. Plus unlocks unlimited plans.');}
       const prefs=readPrefs();lastBuilds=buildOptionsFor(prefs);
@@ -177,8 +177,38 @@
     const payload={title:o.title,createdAt:new Date().toISOString(),source:catalog.source,week:catalog.week,parts:o.parts.map(([category,p])=>({category,product:p?.name||null,lowestPrice:p?.lowestPrice||null,lowestRetailer:p?.lowestRetailer||null,typicalPrice:p?.typicalPrice||null,retailers:p?.retailers||0,asOf:p?.asOf||null,sourceUrl:p?.sourceUrl||null})),subtotal:o.total,notes:['Weekly retail dataset prices are not guaranteed current checkout prices.','Shipping, tax, Windows, and peripherals excluded.','Verify exact CPU support, BIOS, dimensions, PSU quality/connectors, and manufacturer requirements.']};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='pccheck-build-research.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
+  async function ensureCatalog(){
+    if(catalog) return catalog;
+    const response=await fetch('/api/build-catalog',{headers:{Accept:'application/json'}});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(data.error||'The component catalog is unavailable.');
+    catalog=data;
+    return catalog;
+  }
+  function renderPartsExplorer(){
+    if(!catalog) return;
+    const category=$('partsCategory').value, query=$('partsSearch').value.trim().toLowerCase(), order=$('partsSort').value;
+    const labels={cpu:'CPU',gpu:'GPU',motherboard:'MOTHERBOARD',ram:'MEMORY',storage:'STORAGE',psu:'POWER SUPPLY',case:'CASE'};
+    let rows=Object.values(catalog.products||{}).flat();
+    if(category!=='all') rows=rows.filter(p=>p.category===category);
+    if(query) rows=rows.filter(p=>[p.name,p.maker,p.model,p.partNumber].filter(Boolean).join(' ').toLowerCase().includes(query));
+    rows.sort((a,b)=>order==='asc'?a.lowestPrice-b.lowestPrice:b.lowestPrice-a.lowestPrice);
+    const total=rows.length;
+    rows=rows.slice(0,24);
+    $('partsExplorerStatus').textContent=total+' matching products · '+catalog.week+' dataset · showing '+rows.length;
+    $('partsExplorerResults').innerHTML=rows.map(p=>'<article class="parts-result"><div class="parts-result-top"><span>'+escape(labels[p.category]||p.category)+'</span><b>'+money(p.lowestPrice)+'</b></div><h3>'+escape(p.name)+'</h3><p>Typical tracked price: '+(p.typicalPrice?money(p.typicalPrice):'Not available')+'</p><div class="parts-result-meta"><span>Lowest: '+escape(p.lowestRetailer||'Retailer not named')+'</span><span>'+Number(p.retailers||0)+' retailers</span><span>As of '+escape(p.asOf||'date unavailable')+'</span></div>'+(p.sourceUrl?'<a href="'+escape(p.sourceUrl)+'" target="_blank" rel="noopener noreferrer">View retailer price page ↗</a>':'')+'</article>').join('')||'<div class="finder-locked"><b>No matching parts found</b><p>Try a shorter model name or choose another category.</p></div>';
+  }
+  async function loadPartsExplorer(){
+    const button=$('loadPartsCatalog');
+    button.disabled=true;button.textContent='Loading tracked parts…';
+    try{await ensureCatalog();renderPartsExplorer();}
+    catch(error){$('partsExplorerStatus').textContent=error.message||'Could not load the parts catalog.';}
+    finally{button.disabled=false;button.textContent='Refresh parts catalog ↗';}
+  }
   function init(){
     $('generateBuilds').addEventListener('click',generate);
+    $('loadPartsCatalog').addEventListener('click',loadPartsExplorer);
+    ['partsCategory','partsSearch','partsSort'].forEach(id=>$(id).addEventListener(id==='partsSearch'?'input':'change',()=>{if(catalog)renderPartsExplorer();}));
     $('newSearch').addEventListener('click',()=>{$('finderResults').hidden=true;$('finderWizard').scrollIntoView({behavior:'smooth'});});
     $('buildOptions').addEventListener('click',e=>{const b=e.target.closest('[data-export-option]');if(b)exportOption(Number(b.dataset.exportOption));});
     $('downloadBuilds').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({generatedAt:new Date().toISOString(),source:catalog?.source,week:catalog?.week,options:lastBuilds},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='pccheck-build-research.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
