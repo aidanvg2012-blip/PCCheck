@@ -31,7 +31,7 @@
   </section>
 
   <section class="finder-access panel">
-    <div><span class="mini-label">BUILD FINDER ACCESS</span><h2 id="accessTitle">Checking your account…</h2><p id="accessCopy" class="fine">Sign in to use your free build plans. Plus members get unlimited build research.</p></div>
+    <div><span class="mini-label">BUILD FINDER ACCESS</span><h2 id="accessTitle">Checking your account…</h2><p id="accessCopy" class="fine">Sign in for one free full build review. Plus members get unlimited build research.</p></div>
     <div class="finder-usage"><b id="usageCount">—</b><span id="usageLabel">plans remaining</span></div>
     <a class="btn ghost" id="accountLink" href="index.html#account">Sign in on PCCheck ↗</a>
   </section>
@@ -72,7 +72,7 @@
   <section class="finder-results" id="finderResults" hidden aria-live="polite">
     <div class="finder-results-head"><div><span class="eyebrow">02 / YOUR RESEARCH SHORTLIST</span><h2>Build options for your needs</h2><p id="resultsSummary"></p></div><button class="btn ghost" id="newSearch" type="button">Edit preferences</button></div>
     <div id="buildOptions" class="build-options"></div>
-    <div class="finder-data-note panel"><b>How to read these prices</b><p>Prices are from Pricify’s weekly public US hardware dataset. PCCheck shows the lowest recorded retailer price, the dataset’s typical price, the retailer name, and the number of retailers tracked. The “Compare retailer listings” link opens the product’s tracker page, where available retailer offers can be reviewed. The weekly dataset does not provide every individual retailer offer inside PCCheck, so we do not invent a lowest-to-highest store table.</p><p>Prices can change. Check the retailer page, shipping, tax, seller, stock, exact part number, and return policy before buying.</p><small id="datasetStamp"></small></div>
+    <div class="finder-data-note panel"><b>How to read these prices</b><p>Candidate parts are selected from Pricify’s weekly public US hardware dataset. Before the report is shown, PCCheck checks each selected model against current PCPartPicker retailer listings through API.SH and displays matched retailer offers, availability notes, and the lowest listed price. If a model cannot be matched exactly or has no current offers, it is marked unpriced rather than guessed.</p><p>Live lookups are refreshed when the report is generated. Retailer stock, shipping, tax, seller, exact part number, and return policy can still change; verify the checkout page before buying.</p><small id="datasetStamp"></small></div>
     <div class="finder-results-actions"><button class="btn ghost" id="downloadBuilds" type="button">Export research report ↓</button><a class="btn ghost" href="index.html#build">Run detailed compatibility checks ↗</a></div>
   </section>
 
