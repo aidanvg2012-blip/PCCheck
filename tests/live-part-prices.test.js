@@ -4,7 +4,7 @@ const handler=require('../api/live-part-prices.js');
 function recorder(){return{code:200,body:null,headers:{},setHeader(k,v){this.headers[k]=v;},status(n){this.code=n;return this;},json(v){this.body=v;return this;}};}
 async function call({method='POST',authorization='Bearer user-token',body,fetchStub,key='ash_test_key'}={}){
  const originalFetch=global.fetch,saved={...process.env};
- process.env.APISH_API_KEY=key;process.env.SUPABASE_URL='https://example.supabase.co';process.env.SUPABASE_SERVICE_ROLE_KEY='service-role';process.env.STRIPE_MODE='test';global.fetch=fetchStub||async()=>{throw new Error('Unexpected fetch');};
+ process.env.APISH_API_KEY=key;process.env.SUPABASE_URL='https://example.supabase.co';process.env.SUPABASE_SERVICE_ROLE_KEY='service-role';process.env.STRIPE_MODE='test';global.fetch=fetchStub||(async()=>{throw new Error('Unexpected fetch');});
  const req={method,headers:authorization?{authorization}:{},body},res=recorder();
  try{await handler(req,res);return res;}finally{global.fetch=originalFetch;for(const k of Object.keys(process.env))if(!(k in saved))delete process.env[k];Object.assign(process.env,saved);}
 }
