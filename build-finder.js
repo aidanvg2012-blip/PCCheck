@@ -148,7 +148,7 @@
     $('usageLabel').textContent=data.hasPlus?'unlimited reviews':(data.remaining>0?'free review remaining':'free review used');
     $('accessCopy').textContent=data.hasPlus?'Your Plus membership unlocks unlimited researched build reviews.':'Your account includes one full parts plan, live retailer price check, and compatibility review. Plus removes the limit.';
     $('accountLink').textContent='Account & membership ↗';
-    $('accountLink').href='index.html#account';
+    $('accountLink').href='index.html?returnTo=build-finder.html#account';
     if(!data.hasPlus&&data.remaining<=0){
       $('finderWizard').hidden=true;
       $('finderResults').hidden=false;
@@ -246,6 +246,28 @@
     catch(error){$('partsExplorerStatus').textContent=error.message||'Could not load the parts catalog.';}
     finally{button.disabled=false;button.textContent='Refresh parts catalog ↗';}
   }
+  async function refreshAccess(){
+    try{
+      const {data,error}=await client.auth.getSession();
+      if(error)throw error;
+      session=data.session;
+      if(!session?.access_token){
+        $('accessTitle').textContent='Sign in for your included build review';
+        $('accessCopy').textContent='Your free account includes one full researched build review. Sign in to check your allowance and continue.';
+        $('usageCount').textContent='1';$('usageLabel').textContent='review after sign-in';
+        $('accountLink').textContent='Sign in to continue ↗';
+        $('accountLink').href='index.html?returnTo=build-finder.html#account';
+        $('finderWizard').hidden=true;
+        return;
+      }
+      const usage=await getUsage('GET');
+      renderUsage(usage);
+    }catch(error){
+      $('accessTitle').textContent='Could not verify account';
+      $('accessCopy').textContent=error.message||'Please sign in again.';
+      $('finderWizard').hidden=true;
+    }
+  }
   function init(){
     $('generateBuilds').addEventListener('click',generate);
     $('loadPartsCatalog').addEventListener('click',loadPartsExplorer);
@@ -255,11 +277,11 @@
     $('downloadBuilds').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({generatedAt:new Date().toISOString(),source:catalog?.source,week:catalog?.week,options:lastBuilds},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='pccheck-build-research.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
     if(!window.supabase?.createClient){$('accessTitle').textContent='Account service unavailable';$('accessCopy').textContent='Refresh the page or sign in from the main PCCheck site.';return;}
     client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-    client.auth.getSession().then(async({data,error})=>{
-      if(error)throw error;session=data.session;
-      if(!session?.access_token){$('accessTitle').textContent='Sign in for your one free build review';$('accessCopy').textContent='Create a free PCCheck account or sign in on the main site. Your account includes one full build review.';$('usageCount').textContent='1';$('usageLabel').textContent='review after sign-in';$('finderWizard').hidden=true;return;}
-      const usage=await getUsage('GET');renderUsage(usage);
-    }).catch(error=>{$('accessTitle').textContent='Could not verify account';$('accessCopy').textContent=error.message||'Please sign in again.';$('finderWizard').hidden=true;});
+    client.auth.onAuthStateChange((_event,nextSession)=>{
+      session=nextSession;
+      window.setTimeout(refreshAccess,0);
+    });
+    refreshAccess();
   }
   init();
 })();
