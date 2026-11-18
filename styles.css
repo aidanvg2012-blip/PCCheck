@@ -629,3 +629,26 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 .parts-catalog-details>summary span{color:#8fa6bb;font:500 9px var(--font-mono,'DM Mono',monospace);letter-spacing:.08em;text-transform:uppercase}
 .parts-catalog-details .parts-explorer{margin:0;border:0;border-top:1px solid rgba(185,207,255,.1);border-radius:0}
 @media(max-width:600px){.hero-actions{display:grid;grid-template-columns:1fr}.hero-actions .btn{width:100%}.parts-catalog-details>summary{align-items:flex-start;flex-direction:column;gap:7px}}
+
+
+/* PCCheck 2.13 — restrained hardware editorial theme */
+:root{--bg:#101416;--panel:#191f20;--line:#303a38;--text:#edf0e9;--muted:#a1aaa2;--cyan:#b9ce91;--purple:#c8a987;--green:#c1d89c}
+html{background:var(--bg)}body{background:var(--bg);color:var(--text);font-family:'DM Sans',Inter,system-ui,sans-serif}
+.glow{display:none!important}
+.topbar{max-width:1320px;background:rgba(16,20,22,.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:#ffffff14;box-shadow:none}
+.topbar nav{gap:10px;font-size:12px}.topbar nav a{padding:8px 11px;color:#aab3ab}.topbar nav a:hover,.topbar nav a.active{background:#ffffff09;color:#d7e4c3}
+.brand{font-family:'Manrope',sans-serif;letter-spacing:-.02em}.logo{border-color:#8fa875;color:#c5d6a2;box-shadow:none;border-radius:6px}
+.hero{max-width:1320px;min-height:500px;padding-top:82px}.hero h1{font-family:'Manrope',sans-serif;font-weight:750;letter-spacing:-.055em;line-height:1.02}.hero h1 em{background:none;color:#c5d69e}.hero>p{color:#aeb7af;max-width:500px}.eyebrow,.mini-label{color:#c0d39a;letter-spacing:.13em}.eyebrow i{background:#c0d39a;box-shadow:none}
+.hero-art{opacity:.82;filter:saturate(.55)}.hero-illustration{filter:none}.glass-float{background:#1b2322;border:1px solid #3a4640;box-shadow:none;backdrop-filter:none}.glass-float small{color:#a5b19f}.glass-float b{color:#dce7cf}.glass-float i,.glass-float strong{color:#c3d49c}
+.hero-stats{color:#c4d69e}.hero-stats small{color:#87928a}.hero-actions .primary,.btn.primary{background:#c4d69e;color:#1b241b;box-shadow:none}.btn.primary:hover{background:#d0dfb2;box-shadow:none;transform:translateY(-1px)}.btn.ghost,.profile{background:#202726;color:#e1e7df;border:1px solid #3b4742;box-shadow:none}.btn{border-radius:7px;transition:background .18s,border-color .18s,transform .18s}.btn.ghost:hover,.profile:hover{background:#29312d;border-color:#81946f}
+.workspace{max-width:1120px}.section-title{text-align:left}.section-title h2{font-family:'Manrope',sans-serif;letter-spacing:-.04em}.section-title p{max-width:680px;color:#a8b1aa;line-height:1.7}
+.panel,.guide-card,.report-result,.saved-card,.plus-tool,.visual-picker-panel,.build-explorer,.workflow-rail,.pro-teaser,.pro-preview{background:#191f20;border:1px solid #303a38;border-radius:10px;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.panel{padding:24px}.panel h3,.guide-card h3,.faq h3,.about-panel h3{font-family:'Manrope',sans-serif}.pill,.step{border-color:#4c5a46;color:#c4d69e;background:#c4d69e0c;border-radius:5px}
+input,select,textarea{background:#111718;color:#edf0e9;border-color:#36413d;border-radius:6px}input:focus,select:focus,textarea:focus{border-color:#a6bd7d;box-shadow:0 0 0 3px #b9ce9118}
+.visual-pick-card,.sample-build-card,.capability-card,.workflow-step,.guide-card{background:#1b2222;border-color:#303a38;box-shadow:none;border-radius:9px}.visual-pick-card:hover,.sample-build-card:hover,.capability-card:hover,.guide-card:hover{transform:translateY(-2px);border-color:#71845f;box-shadow:0 12px 30px #0002}.part-art svg,.sample-build-visual svg{filter:none}.part-art{background:#202927;border-radius:8px}.part-art svg{stroke:#c2d39e}
+.workflow-step p,.guide-card p,.about-panel p,.faq p{color:#aab4ac}.workflow-number,.workflow-symbol,.cap-icon,.cap-arrow{color:#c4d69e}.report-result{border-color:#4b5b49}.verdict.good{color:#c5d99b;border-color:#72875a;background:#c5d99b10}.verdict.bad{color:#e4a49a}.verdict.neutral{color:#d9c3a6}.meter i{background:#b9ce91}.saved-card{background:#1b2222}.saved-card button,.saved-actions button{background:#232b29;color:#e3e9e1;border-color:#3a4540}.empty{border-color:#3a4540;color:#a5afa7}
+.pro-teaser,.pro-preview{position:relative}.pro-price b{color:#c4d69e}.pro-demo-note,.fine{color:#9ca79e}.modal-backdrop{background:#080c0bd9}.modal{background:#1a2221;border-color:#46524b;box-shadow:0 24px 70px #0008}.modal h2{font-family:'Manrope',sans-serif}.profile b{color:#c4d69e}
+.mobile-tabs{background:rgba(20,26,26,.97);border-top:1px solid #35413b;backdrop-filter:blur(18px)}.mobile-tabs button{color:#98a49a}.mobile-tabs button.active{color:#d0e0ad}.mobile-tabs button.active .tab-icon{background:#c4d69e18;border-color:#73875e}.mobile-tabs .tab-icon{border-color:#3c4841}
+footer{border-color:#303a38;color:#9aa59d}.footer-note{color:#849188}
+@media(hover:hover) and (pointer:fine){.panel:hover,.plus-tool:hover{transform:translateY(-1px);box-shadow:none;border-color:#3f4d43}}
+@media(max-width:700px){.hero{padding-top:55px;min-height:0}.hero h1{font-size:clamp(42px,12vw,60px)}.hero-art{opacity:.22}.workspace{padding:34px 16px 24px}.panel{padding:17px}.section-title{margin-bottom:20px}.topbar{padding:0 16px}}
