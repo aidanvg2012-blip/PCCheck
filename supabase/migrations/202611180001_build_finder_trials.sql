@@ -1,4 +1,4 @@
--- PCCheck Build Finder: three free full build plans per account, then Plus access.
+-- PCCheck Build Finder: one free full build review per account, then Plus access.
 create table if not exists public.build_finder_trials (
   user_id uuid primary key references auth.users(id) on delete cascade,
   used_count integer not null default 0 check (used_count >= 0),
@@ -8,7 +8,7 @@ create table if not exists public.build_finder_trials (
 
 alter table public.build_finder_trials enable row level security;
 
-create or replace function public.consume_build_finder_trial(p_user_id uuid, p_limit integer default 3)
+create or replace function public.consume_build_finder_trial(p_user_id uuid, p_limit integer default 1)
 returns table(allowed boolean, used_count integer, remaining integer)
 language plpgsql
 security definer
