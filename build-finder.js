@@ -75,7 +75,8 @@
     const storage=pickCheapest(products.storage,p=>knownBrand(p,'storage')&&storageFits(p,Number(prefs.storage)));
     const targetPsu=Math.ceil((gpuWatts+meta.watts+100)*1.3/50)*50;
     const psu=pickCheapest(products.psu,p=>knownBrand(p,'psu')&&psuWatts(p)>=targetPsu);
-    const caseFit=prefs.size==='compact'?/mini|micro.?atx|m.?atx|compact/i:prefs.size==='atx'?/mid tower|atx/i:/mid tower|atx|micro.?atx|airflow|mesh/i;\n    const kase=pickCheapest(products.case,p=>knownBrand(p,'case')&&caseFit.test(p.name));
+    const caseFit=prefs.size==='compact'?/mini|micro.?atx|m.?atx|compact/i:prefs.size==='atx'?/mid tower|atx/i:/mid tower|atx|micro.?atx|airflow|mesh/i;
+    const kase=pickCheapest(products.case,p=>knownBrand(p,'case')&&caseFit.test(p.name));
     const parts=[['CPU',cpu],['GPU',gpu],['Motherboard',board],['Memory',ram],['Storage',storage],['Power supply',psu],['Case',kase]];
     const complete=parts.every(x=>x[1]);
     const total=parts.reduce((sum,x)=>sum+(x[1]?price(x[1]):0),0);
