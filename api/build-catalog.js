@@ -24,6 +24,7 @@ function productRow(product, doc, category) {
     maker: product.maker || null,
     model: product.model || null,
     partNumber: product.part_number || null,
+    upc: product.upc || null,
     lowestPrice: Number(latest?.low ?? product.week_close ?? product.week_low) || null,
     typicalPrice: Number(product.typical_price_end || product.week_close || 0) || null,
     lowestRetailer: latest?.low_store || product.lowest_store_end || null,
