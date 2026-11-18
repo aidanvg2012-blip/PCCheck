@@ -75,17 +75,17 @@
     const storage=pickCheapest(products.storage,p=>knownBrand(p,'storage')&&storageFits(p,Number(prefs.storage)));
     const targetPsu=Math.ceil((gpuWatts+meta.watts+100)*1.3/50)*50;
     const psu=pickCheapest(products.psu,p=>knownBrand(p,'psu')&&psuWatts(p)>=targetPsu);
-    const kase=pickCheapest(products.case,p=>knownBrand(p,'case')&&(/mid tower|atx|micro.?atx|airflow|mesh/i.test(p.name)));
+    const caseFit=prefs.size==='compact'?/mini|micro.?atx|m.?atx|compact/i:prefs.size==='atx'?/mid tower|atx/i:/mid tower|atx|micro.?atx|airflow|mesh/i;\n    const kase=pickCheapest(products.case,p=>knownBrand(p,'case')&&caseFit.test(p.name));
     const parts=[['CPU',cpu],['GPU',gpu],['Motherboard',board],['Memory',ram],['Storage',storage],['Power supply',psu],['Case',kase]];
     const complete=parts.every(x=>x[1]);
     const total=parts.reduce((sum,x)=>sum+(x[1]?price(x[1]):0),0);
-    return {parts,complete,total,targetPsu,socket:meta.socket,ramType:meta.ram,gpuWatts};
+    return {parts,complete,total,targetPsu,socket:meta.socket,ramType:meta.ram,gpuWatts,estimatedSystemWatts:gpuWatts+meta.watts+100};
   }
   function buildOptionsFor(prefs) {
     const products=catalog.products;
     const cpus=(products.cpu||[]).filter(p=>cpuMeta(p)&&score(p.name,CPU_RANK)>0&&(!prefs.platform||prefs.platform==='any'||(prefs.platform==='amd'?/ryzen/i.test(p.name):/core/i.test(p.name))));
     const gpus=(products.gpu||[]).filter(p=>score(p.name,GPU_RANK)>0);
-    const gpuWeight=prefs.use==='creator'||prefs.use==='workstation'?0.95:prefs.resolution==='4k'?1.25:prefs.resolution==='1080'?0.85:1.05;
+    const gpuWeight=prefs.use==='creator'||prefs.use==='workstation'?0.95:prefs.resolution==='4k'?1.25:prefs.resolution==='none'?0.45:prefs.resolution==='1080'?0.85:1.05;
     const cpuWeight=prefs.use==='creator'||prefs.use==='workstation'?1.3:prefs.use==='streaming'?1.12:1;
     const variants=[
       {key:'value',title:'Value build',budget:Math.round(prefs.budget*.82),multiplier:1,desc:'Prioritizes the lowest total while keeping the main platform balanced.'},
