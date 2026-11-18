@@ -2,7 +2,7 @@
 
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = 'pccheck_reports_v5';
-const APP_VERSION = '2.12.0';
+const APP_VERSION = '2.13.0';
 
 
 // Curated recognition catalog. Aliases are intentionally explicit to avoid guessing.
@@ -466,6 +466,15 @@ function buildUsedAssessment(d) {
   if (clean(d.psu) && /no name|generic|unknown|unbranded/i.test(d.psu)) warnings.push('The PSU is described as generic or unknown. Ask for its exact make and model before considering the PC.');
   if (clean(d.condition) && /tested|working|runs well|no issues/i.test(d.condition)) positives.push('The notes say the system has been tested or is working. Request a current demonstration anyway.');
   if (clean(d.storage) && /nvme|ssd/i.test(d.storage)) positives.push('The listing reports solid-state storage. Verify its capacity and health.');
+  if (d.conditionGrade === 'poor' || d.conditionGrade === 'for-parts') warnings.push('The selected condition is poor or parts-only. Price it as a repair project and verify every fault before considering it.');
+  if (d.testStatus === 'untested') warnings.push('The PC has not been tested. Do not treat a successful boot or seller description as proof that the hardware is reliable.');
+  if (d.testStatus === 'boots') warnings.push('Only a desktop boot was confirmed. Ask for a game or sustained-load test and check temperatures.');
+  if (Number(d.cpuTemp) > 90) warnings.push('The entered CPU load temperature is above 90°C. Check cooler mounting, fan operation, and the CPU manufacturer’s thermal guidance.');
+  if (Number(d.gpuTemp) > 85) warnings.push('The entered GPU load temperature is above 85°C. Check the exact GPU model’s thermal limits, airflow, and fan operation.');
+  if (d.conditionGrade === 'excellent' || d.conditionGrade === 'good') positives.push('The selected condition is '+d.conditionGrade+'. Confirm it with your own inspection and current photos.');
+  if (d.testStatus === 'gaming' || d.testStatus === 'stress') positives.push('The seller reports a '+(d.testStatus === 'gaming' ? 'gaming' : 'stress')+' test. Ask for the test name, duration, and an unedited result.');
+  if (d.warranty === 'active') positives.push('The listing reports remaining warranty. Confirm transferability and coverage with the manufacturer or retailer.');
+  if (clean(d.included)) positives.push('Included accessories were noted. Confirm every item is present before purchase.');
 
   const completeness = Math.round(((required.length - missing.length) / required.length) * 100);
   const cpuFamily = getCpuFamily(d.cpu);
@@ -473,7 +482,7 @@ function buildUsedAssessment(d) {
   const ramType = classifyRam(d.ram);
   let verdict = 'More information needed';
   let verdictText = 'PCCheck does not have enough verified information to make a confident buying assessment.';
-  if (warnings.some(w => /fault|repair project|generic or unknown/.test(w))) {
+  if (warnings.some(w => /fault|repair project|generic or unknown|poor or parts-only/.test(w))) {
     verdict = 'High caution';
     verdictText = 'The details entered include a fault or an important power-supply concern. Resolve these issues before treating this as a normal used gaming PC.';
   } else if (completeness === 100 && warnings.length <= 2) {
@@ -486,7 +495,7 @@ function buildUsedAssessment(d) {
     kind:'used', priceComparison, partsValue, title:`Used PC · ${clean(d.gpu) || 'GPU not entered'}`,
     summary:`${clean(d.cpu)||'CPU unknown'} / ${clean(d.ram)||'RAM unknown'} / ${clean(d.storage)||'storage unknown'} · ${money(d.price)}`,
     input:d, verdict, verdictText, completeness, warnings, positives, missing,
-    insights:[`CPU family: ${cpuFamily}`,`GPU generation guide: ${gpuTier}`,`Memory type: ${ramType || 'Not confirmed'}`],
+    insights:[`CPU family: ${cpuFamily}`,`GPU generation guide: ${gpuTier}`,`Memory type: ${ramType || 'Not confirmed'}`,...(clean(d.sellerPlatform)?[`Listing source: ${clean(d.sellerPlatform)}`]:[]),...(clean(d.testStatus)?[`Seller test: ${clean(d.testStatus)}`]:[])],
     createdAt:new Date().toISOString()
   };
 }
