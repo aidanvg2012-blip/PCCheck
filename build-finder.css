@@ -21,3 +21,16 @@
 .parts-result a:hover{text-decoration:underline}
 @media(max-width:900px){.parts-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.parts-explorer{padding:15px}.parts-filters{grid-template-columns:1fr}.parts-grid{grid-template-columns:1fr}.parts-explorer-head{align-items:flex-start;flex-direction:column}.parts-explorer-head .btn{width:100%}}
+
+/* Live retailer offer breakdown */
+.live-offers{margin-top:12px;border-top:1px solid rgba(180,218,240,.12);padding-top:9px}
+.live-offers summary{cursor:pointer;color:#a9e9ed;font-size:10px;font-weight:700;list-style-position:inside}
+.live-offers>div{display:grid;gap:7px;margin-top:9px}
+.live-offer{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:9px 10px;border:1px solid rgba(180,218,240,.1);border-radius:9px;background:rgba(5,12,24,.42)}
+.live-offer span{display:grid;gap:3px;min-width:0}
+.live-offer span b{font-size:10px;color:#e8f3ff}
+.live-offer small{font-size:8px;color:#90a5ba;line-height:1.4}
+.live-offer strong{font:700 11px 'Manrope';color:#a9f1ed;white-space:nowrap}
+.live-offer a{font-size:9px;color:#a9dcf2;text-decoration:none;white-space:nowrap}
+.live-offer a:hover{text-decoration:underline}
+@media(max-width:520px){.live-offer{grid-template-columns:minmax(0,1fr) auto}.live-offer a{grid-column:1/-1}}
