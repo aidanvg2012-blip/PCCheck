@@ -127,12 +127,14 @@
         } else {
           setStatus('Account created and signed in.', 'success');
           await refreshAccount();
+          if (new URLSearchParams(window.location.search).get('returnTo') === 'build-finder.html') window.location.assign('build-finder.html');
         }
       } else {
         const { error } = await client.auth.signInWithPassword({ email, password });
         if (error) throw error;
         setStatus('Signed in successfully.', 'success');
         await refreshAccount();
+        if (new URLSearchParams(window.location.search).get('returnTo') === 'build-finder.html') window.location.assign('build-finder.html');
       }
     } catch (error) {
       setStatus(error.message || 'Account request failed. Please try again.', 'error');
