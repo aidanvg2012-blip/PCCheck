@@ -27,7 +27,7 @@ begin
     set used_count = trial.used_count + 1,
         updated_at = now()
     where trial.used_count < p_limit
-  returning build_finder_trials.used_count into v_used;
+  returning trial.used_count into v_used;
 
   if v_used is not null then
     return query select true, v_used, greatest(p_limit - v_used, 0);
