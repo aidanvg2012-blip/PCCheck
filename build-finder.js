@@ -38,7 +38,7 @@
     const n=p.name.toUpperCase();
     const gen=n.includes(type);
     const cap=(n.match(/(?:^|\D)(8|16|24|32|48|64|96|128)\s*GB/)||[])[1];
-    return gen && (!cap || Number(cap)>=capacity);
+    return gen && Boolean(cap) && Number(cap)>=capacity;
   }
   function storageFits(p,capacity) {
     const n=p.name.toUpperCase();
@@ -101,7 +101,11 @@
         const cost=parts.total;
         const cpuScore=score(cpu.name,CPU_RANK)*cpuWeight;
         const gpuScore=score(gpu.name,GPU_RANK)*gpuWeight;
-        const scoreValue=cpuScore+gpuScore;
+        let scoreValue=cpuScore+gpuScore;
+        if(prefs.priority==='value') scoreValue=scoreValue/(Math.max(cost,1)/1000);
+        if(prefs.priority==='quiet') scoreValue-=(parts.estimatedSystemWatts||0)*.035;
+        if(prefs.priority==='upgrade'&&parts.socket==='AM5') scoreValue+=9;
+        if(prefs.priority==='performance') scoreValue+=cpuScore*.08+gpuScore*.12;
         const within=cost<=variant.budget;
         const adjusted=scoreValue-(within?0:((cost-variant.budget)/variant.budget)*95);
         if(!best||adjusted>best.adjusted||(adjusted===best.adjusted&&cost<best.parts.total)) best={parts,cpu,gpu,adjusted,within,scoreValue};
@@ -133,7 +137,7 @@
     $('usageLabel').textContent=data.hasPlus?'unlimited plans':'free plans remaining';
     $('accessCopy').textContent=data.hasPlus?'Your Plus membership unlocks unlimited researched build plans.':'Your account includes three full researched build plans. Plus removes the plan limit.';
     $('accountLink').textContent='Account & membership ↗';
-    $('accountLink').href='index.html#top';
+    $('accountLink').href='index.html#account';
     if(!data.hasPlus&&data.remaining<=0){
       $('finderWizard').hidden=true;
       $('finderResults').hidden=false;
@@ -146,12 +150,14 @@
     button.disabled=true;button.textContent='Researching component catalog…';status.textContent='Loading tracked parts and checking your free-plan access…';
     try{
       if(!catalog){const response=await fetch('/api/build-catalog',{headers:{Accept:'application/json'}});catalog=await response.json();if(!response.ok)throw new Error(catalog.error||'Price catalog unavailable.');}
-      const usage=await getUsage('POST');
-      if(!usage.allowed&&!usage.hasPlus){renderUsage(usage);throw new Error(usage.error||'Your free build plans are used.');}
-      renderUsage(usage);
+      let usage=await getUsage('GET');
+      if(!usage.hasPlus&&usage.remaining<=0){renderUsage(usage);throw new Error('You have used all three free Build Finder plans. Plus unlocks unlimited plans.');}
       const prefs=readPrefs();lastBuilds=buildOptionsFor(prefs);
       const usable=lastBuilds.filter(x=>!x.unavailable);
-      if(!usable.length) throw new Error('The weekly catalog did not contain enough exact, compatible parts for this budget. Try a larger budget or another platform.');
+      if(!usable.length) throw new Error('The weekly catalog did not contain enough exact, compatible parts for this budget. Try a larger budget or another platform. No trial use was consumed.');
+      usage=await getUsage('POST');
+      if(!usage.allowed&&!usage.hasPlus){renderUsage(usage);throw new Error(usage.error||'Your free build plans are used.');}
+      renderUsage(usage);
       $('resultsSummary').textContent=prefs.use+' · '+(prefs.resolution==='none'?'general workloads':prefs.resolution+'p target')+' · '+money(prefs.budget)+' parts budget. The three options are ranked from lower cost to higher performance.';
       $('buildOptions').innerHTML=lastBuilds.map(optionMarkup).join('');
       $('datasetStamp').textContent='Source: '+catalog.source+' · '+catalog.week+' · generated '+catalog.generated+' · CC BY 4.0';
