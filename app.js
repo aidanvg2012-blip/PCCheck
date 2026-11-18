@@ -762,32 +762,37 @@ $('clearSaved')?.addEventListener('click',()=>{
   };
   let activeType = '';
   let activeInput = null;
-  function close() { modal.hidden = true; activeType = ''; activeInput = null; }
+  function close() { modal.hidden = true; modal.removeAttribute('data-picker-open'); activeType = ''; activeInput = null; }
   function render() {
     const query = search.value.trim().toLowerCase();
     const list = (visualChoices[activeType] || []).filter(value => value.toLowerCase().includes(query));
     options.innerHTML = list.map(value => '<button type="button" class="hardware-choice" data-hardware-value="'+escapeHTML(value)+'"><span class="choice-dot"></span><span>'+escapeHTML(value)+'</span><span class="choice-arrow">↗</span></button>').join('') || '<p class="fine">No matching models. Try a shorter search or leave this field unknown.</p>';
   }
   function open(type) {
+    if (!Object.prototype.hasOwnProperty.call(visualChoices, type)) return;
     activeType = type;
-    activeInput = $('manualForm')?.querySelector('[name="' + type + '"]');
-    if (!activeInput) return;
+    const form = $('manualForm');
+    activeInput = form?.elements.namedItem(type) || null;
     title.textContent = 'Choose ' + fieldLabels[type];
-    hint.textContent = type === 'cpu' || type === 'gpu'
-      ? 'These are common model names. Check the listing or part label before selecting one.'
-      : 'Choose the closest capacity and type. This is not an exact model match.';
+    hint.textContent = activeInput
+      ? (type === 'cpu' || type === 'gpu'
+        ? 'These are common model names. Check the listing or part label before selecting one.'
+        : 'Choose the closest capacity and type. This is not an exact model match.')
+      : 'The matching input could not be found. Refresh the page and try again.';
     search.value = '';
     render();
     modal.hidden = false;
+    modal.setAttribute('data-picker-open', 'true');
     search.focus();
   }
-  document.addEventListener('click', event => {
-    const trigger = event.target.closest('[data-open-picker]');
-    if (!trigger) return;
-    event.preventDefault();
-    event.stopPropagation();
-    open(trigger.dataset.openPicker);
-  }, true);
+  // Bind directly to the actual cards. This avoids delegated-click issues on
+  // mobile browsers and keeps decorative SVG descendants from affecting targeting.
+  document.querySelectorAll('.visual-pick-card[data-open-picker]').forEach(trigger => {
+    trigger.addEventListener('click', event => {
+      event.preventDefault();
+      open(trigger.dataset.openPicker);
+    });
+  });
   search.addEventListener('input',render);
   options.addEventListener('click',event=>{
     const button=event.target.closest('[data-hardware-value]');
