@@ -87,7 +87,7 @@
         } catch (error) {
           if (window.PCCheckAuth) window.PCCheckAuth.hasPlus = false;
           window.dispatchEvent(new CustomEvent('pccheck:membership', { detail: { hasPlus: false } }));
-          $('accountPlusStatus').textContent = 'Membership status is temporarily unavailable.';
+          $('accountPlusStatus').textContent = error.message || 'Membership status is temporarily unavailable.';
         }
       }
     } catch (error) {
