@@ -26,13 +26,19 @@
     if (/CORE I[579]/.test(n)) return {socket:'LGA1700',ram:'DDR5',watts:/I9|14900|13900/.test(n)?253:/I7|14700|13700/.test(n)?200:150};
     return null;
   }
-  function socketBoard(name,socket) {
+  function socketBoard(name,socket,size='any') {
     const n=name.toUpperCase();
-    if(socket==='AM5') return /A620|B650|B850|X670|X870/.test(n);
-    if(socket==='AM4') return /A520|B450|B550|X470|X570/.test(n);
-    if(socket==='LGA1700') return /B760|Z790|Z690|H770|B660|Z790/.test(n) && !/DDR4|D4/.test(n);
-    if(socket==='LGA1851') return /B860|Z890/.test(n);
-    return false;
+    let chipset=false;
+    if(socket==='AM5') chipset=/A620|B650|B850|X670|X870/.test(n);
+    else if(socket==='AM4') chipset=/A520|B450|B550|X470|X570/.test(n);
+    else if(socket==='LGA1700') chipset=/B760|Z790|Z690|H770|B660/.test(n) && !/DDR4|D4\b/.test(n);
+    else if(socket==='LGA1851') chipset=/B860|Z890/.test(n);
+    if(!chipset) return false;
+    const matx=/\b(?:A620M|B650M|B850M|A520M|B550M|B760M|B660M|H610M)\b|MICRO.?ATX|M-ATX|MORTAR/.test(n);
+    const mini=/MINI.?ITX|\bITX\b/.test(n);
+    if(size==='compact') return matx||mini;
+    if(size==='atx') return !matx&&!mini;
+    return true;
   }
   function ramFits(p,type,capacity) {
     const n=p.name.toUpperCase();
@@ -70,12 +76,12 @@
   function componentsFor(cpu,gpu,prefs,products) {
     const meta=cpuMeta(cpu); if(!meta) return null;
     const gpuWatts= /RTX 5090/.test(gpu.name)?575:/RTX 5080|RX 7900 XTX/.test(gpu.name)?360:/RTX 5070|RX 9070|RX 7900 XT|RX 7800 XT/.test(gpu.name)?280:/RTX 5060|RX 7600|RX 7700|RX 6700|RX 6600/.test(gpu.name)?190:230;
-    const board=pickCheapest(products.motherboard,p=>knownBrand(p,'motherboard')&&socketBoard(p.name,meta.socket));
+    const board=pickCheapest(products.motherboard,p=>knownBrand(p,'motherboard')&&socketBoard(p.name,meta.socket,prefs.size));
     const ram=pickCheapest(products.ram,p=>knownBrand(p,'ram')&&ramFits(p,meta.ram,Number(prefs.ram)));
     const storage=pickCheapest(products.storage,p=>knownBrand(p,'storage')&&storageFits(p,Number(prefs.storage)));
     const targetPsu=Math.ceil((gpuWatts+meta.watts+100)*1.3/50)*50;
     const psu=pickCheapest(products.psu,p=>knownBrand(p,'psu')&&psuWatts(p)>=targetPsu);
-    const caseFit=prefs.size==='compact'?/mini|micro.?atx|m.?atx|compact/i:prefs.size==='atx'?/mid tower|atx/i:/mid tower|atx|micro.?atx|airflow|mesh/i;
+    const caseFit=prefs.size==='compact'?/mini.?itx|micro.?atx|m.?atx|compact/i:prefs.size==='atx'?/atx|mid tower|full tower/i:/mid tower|atx|micro.?atx|airflow|mesh/i;
     const kase=pickCheapest(products.case,p=>knownBrand(p,'case')&&caseFit.test(p.name));
     const parts=[['CPU',cpu],['GPU',gpu],['Motherboard',board],['Memory',ram],['Storage',storage],['Power supply',psu],['Case',kase]];
     const complete=parts.every(x=>x[1]);
@@ -121,7 +127,7 @@
   function optionMarkup(o,index) {
     if(o.unavailable) return '<article class="build-option"><span class="mini-label">'+escape(o.title.toUpperCase())+'</span><h3>Not enough verified data</h3><p>'+escape(o.reason)+'</p></article>';
     const parts=o.parts.map(([label,p])=>partMarkup(label,p)).join('');
-    const warnings=['Exact motherboard CPU/BIOS support still needs checking.','Case and GPU/cooler physical clearance are not verified from this catalog.','PSU wattage is estimated; quality, connectors, and transient behavior must be checked against manufacturer guidance.','Prices exclude shipping, tax, Windows, and peripherals.'];
+    const warnings=['Exact motherboard CPU/BIOS support still needs checking.','Case and GPU/cooler physical clearance are not verified from this catalog.','PSU wattage is estimated; quality, connectors, and transient behavior must be checked against manufacturer guidance.','CPU cooler is not included in this parts subtotal. Check whether the selected CPU includes a stock cooler or budget for a compatible cooler.','Prices exclude shipping, tax, Windows, and peripherals.'];
     return '<article class="build-option '+(index===1?'recommended':'')+'"><div class="build-option-head"><span>'+escape(o.title.toUpperCase())+'</span><span>'+(index===1?'BEST FIT':'ALTERNATIVE')+'</span></div><h3>'+escape(o.socket)+' platform</h3><p>'+escape(o.desc||'')+'</p><div class="build-total"><small>TRACKED PART SUBTOTAL</small><b>'+money(o.total)+'</b><em>'+(o.withinBudget?'Within target budget':'Above this option’s target budget')+'</em></div><div class="build-parts">'+parts+'</div><div class="build-warning">'+warnings.map(escape).join('<br>')+'</div><button class="btn ghost" type="button" data-export-option="'+index+'">Export this parts list ↓</button></article>';
   }
   async function getUsage(method='GET') {
