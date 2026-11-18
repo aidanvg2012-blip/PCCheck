@@ -28,3 +28,23 @@ test('live lookup does not assign a price to a near-but-not-exact model',async()
 test('live lookup blocks free accounts after their one review is used',async()=>{const res=await call({body:{parts:[{key:'cpu:7600',category:'cpu',name:'AMD Ryzen 5 7600'}]},fetchStub:async url=>{const u=String(url);if(u.includes('/auth/v1/user'))return Response.json({id:'user-1'});if(u.includes('/rest/v1/subscriptions'))return Response.json([]);if(u.includes('/rest/v1/build_finder_trials'))return Response.json([{used_count:1}]);throw new Error('Provider must not be called');}});assert.equal(res.code,403);});
 test('live lookup validates part categories',async()=>{const res=await call({body:{parts:[{key:'x',category:'unknown',name:'bad'}]},fetchStub:freeUserFetch});assert.equal(res.code,400);});
 test('exact matching distinguishes similar model suffixes',()=>{assert.equal(handler._exactModelMatch('Ryzen 5 7600','AMD Ryzen 5 7600X'),false);assert.equal(handler._exactModelMatch('RTX 5070 Ti','ASUS GeForce RTX 5070 Ti'),true);});
+
+test('provider failure across every part returns an error instead of a report',async()=>{
+ const res=await call({body:{parts:[{key:'cpu:7600',category:'cpu',name:'AMD Ryzen 5 7600'}]},fetchStub:async url=>{
+  const u=String(url);
+  if(u.includes('/auth/v1/user'))return Response.json({id:'user-1'});
+  if(u.includes('/rest/v1/subscriptions'))return Response.json([]);
+  if(u.includes('/rest/v1/build_finder_trials'))return Response.json([{used_count:0}]);
+  throw new Error('Provider unavailable');
+ }});
+ assert.equal(res.code,502);
+ assert.match(res.body.error,/provider failed/i);
+});
+test('GET reports missing provider configuration without contacting Supabase',async()=>{
+ const original=process.env.APISH_API_KEY;
+ delete process.env.APISH_API_KEY;
+ const res=await call({method:'GET',fetchStub:async()=>{throw new Error('No network call expected');},key:''});
+ assert.equal(res.code,503);
+ assert.equal(res.body.configured,false);
+ if(original!==undefined)process.env.APISH_API_KEY=original;
+});
