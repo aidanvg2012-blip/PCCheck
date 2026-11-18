@@ -42,7 +42,7 @@ async function getUserAndAccess(req){
 }
 async function priceOne(part,key){
   const category=CATEGORY_MAP[part.category],query=String(part.model||part.name).trim();
-  const search=await apiGet('/products',{category,q:query,country:'us',compatible_only:'true'},key);
+  const search=await apiGet('/products',{category,q:query,country:'us'},key);
   const candidates=Array.isArray(search.products)?search.products:[];
   const match=candidates.find(item=>exactModelMatch(query,item.name));
   if(!match?.id)return{key:part.key,found:false,requested:query,offers:[],message:'No exact PCPartPicker model match. No live price assigned.'};
