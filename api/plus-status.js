@@ -29,8 +29,14 @@ module.exports = async function handler(req, res) {
       headers: { apikey: serviceRoleKey, Authorization: 'Bearer ' + serviceRoleKey }
     });
     if (!subscriptionResponse.ok) {
-      console.error('Plus status lookup failed:', subscriptionResponse.status);
-      return res.status(502).json({ error: 'Could not check membership right now.' });
+      const detail = await subscriptionResponse.text().catch(() => '');
+      console.error('Plus status lookup failed:', subscriptionResponse.status, detail.slice(0, 700));
+      const schemaOutOfDate = /column .*livemode.* does not exist|livemode.*schema cache/i.test(detail);
+      return res.status(502).json({
+        error: schemaOutOfDate
+          ? 'PCCheck billing database needs its latest migration. Please try again after the database is updated.'
+          : 'Could not check membership right now.'
+      });
     }
     const rows = await subscriptionResponse.json();
     const row = Array.isArray(rows) ? rows[0] : null;
