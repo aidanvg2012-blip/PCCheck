@@ -29,6 +29,11 @@ This branch supports explicitly separated Stripe test and live modes. Keep Previ
 - [ ] Test a failed renewal in a separate test customer/subscription. Confirm Stripe sends `invoice.payment_failed`, the webhook retrieves the subscription's latest state, and Plus is not granted when the subscription becomes `past_due`.
 - [ ] Restore a successful test payment if testing recovery; confirm the subscription returns to `active` and Plus returns.
 - [ ] Sign out and confirm the account modal returns to the signed-out state.
+- [ ] Open Build Finder while signed out, choose Sign in, complete login, and confirm the browser returns to Build Finder.
+- [ ] Confirm Plus accounts can generate a build even if no free-trial counter row exists.
+- [ ] Confirm free accounts see their remaining one-time review and that a failed price lookup does not consume it.
+- [ ] With `APISH_API_KEY` absent, confirm Build Finder still produces a weekly-reference shortlist and clearly states that live offers are unavailable.
+- [ ] With the key configured in Preview, confirm exact-model live offers are shown and only a successful review consumes the allowance.
 
 ## Plus feature Preview checks
 
@@ -56,11 +61,12 @@ The lookup uses Pricify's weekly US retail dataset (CC BY 4.0), with attribution
 
 ## UI and navigation checks
 
-- [ ] Check the desktop tabbed workspace: each navigation item should show one focused destination without stacking every tool vertically. Verify the glass header, active tab, and scroll progress.
+- [ ] Check the desktop workspace: each navigation item should show one focused destination without stacking every tool vertically. Verify the restrained dark-neutral theme, active tab, and scroll progress.
 - [ ] Check the mobile bottom navigation still switches between Home, Used PC, Build, Saved, and Guides.
 - [ ] Confirm quick import tools and advanced used-PC details start collapsed and can be expanded.
 - [ ] Check forms, comparison tables, report actions, and account modal at desktop and mobile widths.
 - [ ] Check reduced-motion settings; animations should be minimized.
+- [ ] Check the expanded Used PC fields: listing source, condition grade, test status, load temperatures, warranty, and included accessories. Confirm high temperatures and untested/poor-condition selections add warnings without falsely certifying the PC.
 
 ## Before any live payment launch
 
@@ -68,6 +74,6 @@ Do not switch live payments on as part of this Preview test. The current checkou
 
 A parent/guardian who owns the Stripe account must complete the financial and business setup directly in Stripe, including identity/business verification, payout bank details, tax information, customer support/refund arrangements, and review of Stripe's terms. Do not send secret keys or private financial information through chat.
 
-The code now separates test and live subscription rows using the `livemode` database column. Before enabling live billing, apply `supabase/migrations/202611170001_subscription_livemode.sql` to the production Supabase project. A parent/guardian must then create a live monthly recurring Stripe Price and a separate live webhook endpoint with its own signing secret. Configure Production only with `STRIPE_MODE=live`, an `sk_live_` value in `STRIPE_SECRET_KEY`, the live recurring Price ID in `STRIPE_LIVE_PRICE_ID`, and that live endpoint's signing secret in `STRIPE_WEBHOOK_SECRET`. Keep Preview on `STRIPE_MODE=test` with test-only credentials. Never reuse test webhook secrets in live mode or vice versa. Run a small, parent-supervised real purchase/refund test only after support, refund, cancellation, tax, and privacy arrangements are ready. Also complete privacy/terms review, account deletion and data export, accessibility checks, security review, and a clear support contact.
+The code now separates test and live subscription rows using the `livemode` database column. Before using this branch, apply `supabase/migrations/202611170001_subscription_livemode.sql` to the Supabase project after the base subscriptions table and customer-index migration. Build Finder also needs `202611180001_build_finder_trials.sql` followed by `202611180002_single_free_review.sql`. A parent/guardian must then create a live monthly recurring Stripe Price and a separate live webhook endpoint with its own signing secret. Configure Production only with `STRIPE_MODE=live`, an `sk_live_` value in `STRIPE_SECRET_KEY`, the live recurring Price ID in `STRIPE_LIVE_PRICE_ID`, and that live endpoint's signing secret in `STRIPE_WEBHOOK_SECRET`. Keep Preview on `STRIPE_MODE=test` with test-only credentials. Never reuse test webhook secrets in live mode or vice versa. Run a small, parent-supervised real purchase/refund test only after support, refund, cancellation, tax, and privacy arrangements are ready. Also complete privacy/terms review, account deletion and data export, accessibility checks, security review, and a clear support contact.
 
 The live checkout path is code-supported but is not yet enabled on Production. A successful test checkout or webhook does not prove that live payments are ready.
