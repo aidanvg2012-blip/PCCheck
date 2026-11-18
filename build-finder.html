@@ -76,6 +76,19 @@
     <div class="finder-results-actions"><button class="btn ghost" id="downloadBuilds" type="button">Export research report ↓</button><a class="btn ghost" href="index.html#build">Run detailed compatibility checks ↗</a></div>
   </section>
 
+    <section class="parts-explorer panel" id="partsExplorer">
+    <div class="panel-head"><div><span class="mini-label">OPEN COMPONENT CATALOG</span><h2>Search tracked PC parts</h2></div><span class="pill">FREE RESEARCH</span></div>
+    <p class="fine">Browse tracked CPUs, graphics cards, motherboards, memory, storage, power supplies, and cases. Sort by the lowest recorded retailer price and open the source page for more retailer details.</p>
+    <div class="parts-filters">
+      <label>Category<select id="partsCategory"><option value="all">All components</option><option value="cpu">Processors</option><option value="gpu">Graphics cards</option><option value="motherboard">Motherboards</option><option value="ram">Memory</option><option value="storage">SSD storage</option><option value="psu">Power supplies</option><option value="case">PC cases</option></select></label>
+      <label>Search model<input id="partsSearch" type="search" placeholder="Search RTX 5070, Ryzen, B650…"></label>
+      <label>Sort prices<select id="partsSort"><option value="asc">Lowest to highest</option><option value="desc">Highest to lowest</option></select></label>
+    </div>
+    <div class="parts-explorer-head"><span id="partsExplorerStatus" class="fine">The catalog loads when you search or press the button.</span><button class="btn primary" id="loadPartsCatalog" type="button">Load parts catalog ↗</button></div>
+    <div id="partsExplorerResults" class="parts-grid"></div>
+    <p class="fine">This public catalog is a weekly sample of popular US PC parts. It shows one lowest tracked retailer and a typical price per model, not a complete in-app offer table for every retailer. Use each source link to inspect retailer listings and verify the checkout price.</p>
+  </section>
+
   <section class="finder-how panel">
     <div><span class="mini-label">RESEARCH, NOT GUESSWORK</span><h2>What PCCheck checks</h2></div>
     <div class="finder-how-grid">
