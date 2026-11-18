@@ -1,5 +1,5 @@
 'use strict';
-const LIMIT = 3;
+const LIMIT = 1;
 function send(res, status, body) { return res.status(status).json(body); }
 module.exports = async function handler(req, res) {
   if (!['GET','POST'].includes(req.method)) {
@@ -68,7 +68,7 @@ module.exports = async function handler(req, res) {
     return send(res,row?.allowed?200:403,{
       allowed:Boolean(row?.allowed),hasPlus:false,limit:LIMIT,
       used:Number(row?.used_count || 0),remaining:Number(row?.remaining || 0),
-      error:row?.allowed?undefined:'You have used all three free Build Finder plans. Plus unlocks unlimited plans.'
+      error:row?.allowed?undefined:'You have used the one free Build Finder review. Plus unlocks unlimited plans.'
     });
   } catch (error) {
     console.error('Build Finder usage endpoint failed:',error.message);
