@@ -2,7 +2,7 @@
 
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = 'pccheck_reports_v5';
-const APP_VERSION = '2.9.0';
+const APP_VERSION = '2.11.0';
 
 
 // Curated recognition catalog. Aliases are intentionally explicit to avoid guessing.
@@ -241,7 +241,6 @@ function persistReports() {
  });
 })();
 
-renderReports();
 function escapeHTML(value) {
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
