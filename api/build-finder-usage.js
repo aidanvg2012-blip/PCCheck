@@ -33,12 +33,16 @@ module.exports = async function handler(req, res) {
     if (!subResponse.ok) {
       const detail = await subResponse.text().catch(()=> '');
       console.error('Build Finder membership lookup failed:',subResponse.status,detail.slice(0,500));
-      return send(res,502,{error:'Could not verify membership. Please try again.'});
+      const missingBillingMigration = /column .*livemode.* does not exist|livemode.*schema cache/i.test(detail);
+      return send(res,missingBillingMigration?503:502,{error:missingBillingMigration?'PCCheck billing setup needs its latest Supabase migration. Please contact the site administrator.':'Could not verify membership. Please try again.'});
     }
     const rows = await subResponse.json();
     const sub = rows[0] || null;
     const active = Boolean(sub && ['active','trialing'].includes(sub.status)
       && (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now()));
+    if (req.method === 'GET' && active) {
+      return send(res,200,{hasPlus:true,limit:LIMIT,used:null,remaining:null});
+    }
     if (req.method === 'GET') {
       const usageResponse = await fetch(base + '/rest/v1/build_finder_trials?user_id=eq.'+encodeURIComponent(user.id)+'&select=used_count&limit=1', {
         headers:{apikey:serviceKey,Authorization:'Bearer '+serviceKey}
@@ -46,7 +50,8 @@ module.exports = async function handler(req, res) {
       if (!usageResponse.ok) {
         const detail = await usageResponse.text().catch(()=> '');
         console.error('Build Finder usage lookup failed:',usageResponse.status,detail.slice(0,500));
-        return send(res,502,{error:'Could not load your free-plan usage.'});
+        const setupMissing = /PGRST205|build_finder_trials|schema cache/i.test(detail);
+        return send(res,setupMissing?503:502,{error:setupMissing?'Build Finder setup is incomplete. The site administrator must apply the two Build Finder SQL migrations in Supabase.':'Could not load your free-plan usage.'});
       }
       const usage = await usageResponse.json();
       const used = Number(usage[0]?.used_count || 0);
@@ -61,7 +66,8 @@ module.exports = async function handler(req, res) {
     if (!consumeResponse.ok) {
       const detail = await consumeResponse.text().catch(()=> '');
       console.error('Build Finder trial consume failed:',consumeResponse.status,detail.slice(0,500));
-      return send(res,502,{error:'Could not update your trial usage. Please try again.'});
+      const setupMissing = /PGRST202|consume_build_finder_trial|schema cache/i.test(detail);
+      return send(res,setupMissing?503:502,{error:setupMissing?'Build Finder setup is incomplete. The site administrator must apply the Build Finder SQL migrations in Supabase.':'Could not update your trial usage. Please try again.'});
     }
     const result = await consumeResponse.json();
     const row = Array.isArray(result) ? result[0] : result;
