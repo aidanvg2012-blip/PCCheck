@@ -182,6 +182,8 @@
       });
       const liveData=await liveResponse.json().catch(()=>({}));
       if(!liveResponse.ok)throw new Error(liveData.error||'Live retailer prices could not be checked. Your free review was not used.');
+      const liveMatches=Object.values(liveData.matches||{});
+      if(!liveMatches.some(match=>match?.lowestPrice))throw new Error('No exact live retailer offers matched the selected parts. Check the component models and try again; your free review was not used.');
       const checkedAt=liveData.checkedAt||new Date().toISOString();
       for(const option of lastBuilds.filter(x=>!x.unavailable)){
         let subtotal=0,priced=0;
