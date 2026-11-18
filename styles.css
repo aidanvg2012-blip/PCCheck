@@ -614,3 +614,18 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 @media(max-width:900px){.plus-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.plus-metric-grid{gap:8px}.plus-metric{padding:12px 10px}.compare-actions{align-items:flex-start;gap:8px;flex-direction:column}.compare-actions>div{flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.panel:hover,.guide-card:hover,.plus-tool:hover,.capability-card:hover,.sample-build-card:hover,.visual-pick-card:hover{transform:none}}
+
+
+/* 2.12 product-focus polish: prioritize the two main customer journeys. */
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+.hero-actions .btn{min-width:180px;justify-content:center}
+.pro-price{display:flex;flex-direction:column;gap:4px}
+.pro-price b{font:600 10px var(--font-mono,'DM Mono',monospace);letter-spacing:.08em;color:#b7f5f2}
+.parts-catalog-details{margin:28px 0 22px;border:1px solid rgba(185,207,255,.14);border-radius:18px;background:rgba(255,255,255,.025);overflow:hidden}
+.parts-catalog-details>summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;cursor:pointer;list-style:none;color:#e7f2fb;font-weight:700}
+.parts-catalog-details>summary::-webkit-details-marker{display:none}
+.parts-catalog-details>summary:after{content:'+';font-size:20px;color:#9ce9ed}
+.parts-catalog-details[open]>summary:after{content:'−'}
+.parts-catalog-details>summary span{color:#8fa6bb;font:500 9px var(--font-mono,'DM Mono',monospace);letter-spacing:.08em;text-transform:uppercase}
+.parts-catalog-details .parts-explorer{margin:0;border:0;border-top:1px solid rgba(185,207,255,.1);border-radius:0}
+@media(max-width:600px){.hero-actions{display:grid;grid-template-columns:1fr}.hero-actions .btn{width:100%}.parts-catalog-details>summary{align-items:flex-start;flex-direction:column;gap:7px}}
