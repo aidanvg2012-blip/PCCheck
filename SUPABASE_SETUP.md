@@ -40,6 +40,6 @@ This is only the database and webhook foundation. Checkout is not yet linked to 
 
 Apply the migration `supabase/migrations/202611180001_build_finder_trials.sql` in the Supabase SQL Editor before enabling the Build Finder trial.
 
-It creates an account-linked usage counter and a service-role-only atomic function. Free accounts receive three generated build plans; Plus accounts are checked against the active Stripe-mode subscription and are not charged trial uses. The browser never sends a user ID to grant itself access.
+It creates an account-linked usage counter and a service-role-only atomic function. Free accounts receive one full generated build review; Plus accounts are checked against the active Stripe-mode subscription and are not charged trial uses. The browser never sends a user ID to grant itself access.
 
-The Build Finder requires the existing `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` Vercel environment variables. Keep service-role credentials server-side only. The migration does not activate live billing.
+The Build Finder requires the existing `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` Vercel environment variables. Keep service-role credentials server-side only. Live retailer pricing also requires `APISH_API_KEY` in Vercel Preview and Production environments. Keep this key server-side; never paste it into chat or client code. API.SH currently includes 1,000 free credits monthly per account. A parent/guardian should create and manage the provider account, set a monthly key cap, and review its terms. PCCheck uses PCPartPicker product search/detail endpoints and requests fresh lookups only when a build review is generated. The migration does not activate live billing.
