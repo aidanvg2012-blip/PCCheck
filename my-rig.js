@@ -17,7 +17,9 @@
   access.hidden=true;scan.disabled=false;$('rigManual').hidden=false;renderManual();
   $('rigManualForm').addEventListener('submit',event=>{event.preventDefault();const type=$('manualRigType').value,name=$('manualRigName').value.trim();if(!name)return;manualParts.push({type,name});localStorage.setItem(MANUAL_KEY,JSON.stringify(manualParts));$('manualRigName').value='';renderManual();});
   $('manualRigItems').addEventListener('click',event=>{const button=event.target.closest('[data-remove-manual]');if(!button)return;manualParts.splice(Number(button.dataset.removeManual),1);localStorage.setItem(MANUAL_KEY,JSON.stringify(manualParts));renderManual();});
-  if(lastSnapshot)render(lastSnapshot);\n  $('clearRig').addEventListener('click',()=>{localStorage.removeItem(SCAN_KEY);lastSnapshot=null;$('rigSummary').hidden=true;$('rigInventory').hidden=true;$('rigBluetooth').hidden=true;$('scanStatus').textContent='Local hardware snapshot cleared.';});\n  if(!window.pccheckDesktop?.getRigSnapshot){notice.hidden=false;$('scanMode').textContent='WEB PREVIEW';scan.disabled=true;$('scanStatus').textContent='Install the Windows desktop app to scan this computer.';return;}
+  if(lastSnapshot)render(lastSnapshot);
+  $('clearRig').addEventListener('click',()=>{localStorage.removeItem(SCAN_KEY);lastSnapshot=null;$('rigSummary').hidden=true;$('rigInventory').hidden=true;$('rigBluetooth').hidden=true;$('scanStatus').textContent='Local hardware snapshot cleared.';});
+  if(!window.pccheckDesktop?.getRigSnapshot){notice.hidden=false;$('scanMode').textContent='WEB PREVIEW';scan.disabled=true;$('scanStatus').textContent='Install the Windows desktop app to scan this computer.';return;}
   notice.hidden=true;$('scanMode').textContent='WINDOWS LOCAL SCAN';
   scan.addEventListener('click',async()=>{
    scan.disabled=true;$('scanStatus').textContent='Reading hardware information locally…';
