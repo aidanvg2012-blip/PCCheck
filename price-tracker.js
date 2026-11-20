@@ -63,6 +63,7 @@
   }
   function handleError(error){$('catalogStatus').textContent=error.message||'Could not complete that action.';if(!session?.access_token&&/sign in/i.test(error.message||''))window.location.href='index.html?returnTo=price-tracker.html#account';}
   $('priceCategory').addEventListener('change',renderProducts);$('priceSearch').addEventListener('input',renderProducts);$('priceSort').addEventListener('change',renderProducts);
+  $('checkManualPrice').addEventListener('click',async()=>{const category=$('priceCategory').value,name=$('priceSearch').value.trim();if(category==='all'||name.length<3){$('catalogStatus').textContent='Choose a component category and enter at least three characters of the exact model name.';return;}try{await checkProduct({id:'manual-'+category+'-'+name,category,name});}catch(error){handleError(error);}});
   $('refreshCatalog').addEventListener('click',loadCatalog);$('closeLive').addEventListener('click',()=>{$('liveResults').hidden=true;});
   $('priceProducts').addEventListener('click',async e=>{
     const check=e.target.closest('[data-check]'),save=e.target.closest('[data-save]'),rows=window._pccheckVisiblePriceProducts||[];
