@@ -11,7 +11,7 @@
   if(!data.session?.access_token){gate('Sign in to unlock My Rig','index.html?returnTo=my-rig.html#account');return;}
   const r=await fetch('/api/plus-status',{headers:{Authorization:'Bearer '+data.session.access_token}}),d=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(d.error||'Could not verify membership.');
-  if(!d.hasPlus){gate('My Rig is part of PCCheck Plus','index.html#plus');return;}
+  if(!d.hasPlus){gate('My Rig is part of PCCheck Plus','index.html#top');return;}
   access.hidden=true;scan.disabled=false;
   if(!window.pccheckDesktop?.getRigSnapshot){notice.hidden=false;$('scanMode').textContent='WEB PREVIEW';scan.disabled=true;$('scanStatus').textContent='Install the Windows desktop app to scan this computer.';return;}
   notice.hidden=true;$('scanMode').textContent='WINDOWS LOCAL SCAN';
