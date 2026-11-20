@@ -24,7 +24,8 @@ ipcMain.handle('pccheck:get-rig-snapshot',async event=>{
  return {
   scannedAt:new Date().toISOString(),
   cpu:{manufacturer:cpu.manufacturer,brand:cpu.brand,cores:cpu.cores,physicalCores:cpu.physicalCores,speed:cpu.speed},
-  gpu:(gpu.controllers||[]).map(g=>({name:g.model||g.name||'Graphics controller',vendor:g.vendor,vram:g.vram,driverVersion:g.driverVersion})),\n  displays:(gpu.displays||[]).map(d=>({model:d.model||d.name||'Display',resolution:d.resolution||null,connection:d.connection||null,main:Boolean(d.main)})),
+  gpu:(gpu.controllers||[]).map(g=>({name:g.model||g.name||'Graphics controller',vendor:g.vendor,vram:g.vram,driverVersion:g.driverVersion})),
+  displays:(gpu.displays||[]).map(d=>({model:d.model||d.name||'Display',resolution:d.resolution||null,connection:d.connection||null,main:Boolean(d.main)})),
   memory:{total:memory.total,type:memoryModules[0]?.type||null,speed:memoryModules[0]?.clockSpeed||null,slots:memoryModules.length||null,modules:memoryModules.map(m=>({size:m.size,type:m.type,clockSpeed:m.clockSpeed,manufacturer:m.manufacturer,partNum:m.partNum}))},
   baseboard:{manufacturer:baseboard.manufacturer,model:baseboard.model,version:baseboard.version},
   bios:{version:bios.version,releaseDate:bios.releaseDate},
