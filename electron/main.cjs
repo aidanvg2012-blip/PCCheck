@@ -5,7 +5,7 @@ const { execFile } = require('node:child_process');
 const si = require('systeminformation');
 const APP_URL = process.env.PCCHECK_APP_URL || 'https://pccheck.vercel.app';
 const APP_ORIGIN = new URL(APP_URL).origin;
-const trustedHosts = new Set(['pccheck.vercel.app','checkout.stripe.com','billing.stripe.com']);
+const trustedHosts = new Set([new URL(APP_URL).hostname,'pccheck.vercel.app','checkout.stripe.com','billing.stripe.com']);
 function runPowerShell(command){
  return new Promise(resolve=>{
   execFile('powershell.exe',['-NoProfile','-NonInteractive','-Command',command],{timeout:9000,windowsHide:true,maxBuffer:256*1024},(error,stdout)=>{
@@ -24,8 +24,8 @@ ipcMain.handle('pccheck:get-rig-snapshot',async event=>{
  return {
   scannedAt:new Date().toISOString(),
   cpu:{manufacturer:cpu.manufacturer,brand:cpu.brand,cores:cpu.cores,physicalCores:cpu.physicalCores,speed:cpu.speed},
-  gpu:(gpu.controllers||[]).map(g=>({name:g.model||g.name||'Graphics controller',vendor:g.vendor,vram:g.vram,driverVersion:g.driverVersion})),
-  memory:{total:memory.total,type:memoryModules[0]?.type||null,speed:memoryModules[0]?.clockSpeed||null,slots:memoryModules.length||null},
+  gpu:(gpu.controllers||[]).map(g=>({name:g.model||g.name||'Graphics controller',vendor:g.vendor,vram:g.vram,driverVersion:g.driverVersion})),\n  displays:(gpu.displays||[]).map(d=>({model:d.model||d.name||'Display',resolution:d.resolution||null,connection:d.connection||null,main:Boolean(d.main)})),
+  memory:{total:memory.total,type:memoryModules[0]?.type||null,speed:memoryModules[0]?.clockSpeed||null,slots:memoryModules.length||null,modules:memoryModules.map(m=>({size:m.size,type:m.type,clockSpeed:m.clockSpeed,manufacturer:m.manufacturer,partNum:m.partNum}))},
   baseboard:{manufacturer:baseboard.manufacturer,model:baseboard.model,version:baseboard.version},
   bios:{version:bios.version,releaseDate:bios.releaseDate},
   system:{manufacturer:system.manufacturer,model:system.model},
