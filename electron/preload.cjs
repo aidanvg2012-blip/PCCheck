@@ -1,2 +1,5 @@
 'use strict';
-// Deliberately empty: the remote PCCheck website runs without Node.js access.
+const { contextBridge, ipcRenderer } = require('electron');
+contextBridge.exposeInMainWorld('pccheckDesktop',Object.freeze({
+ getRigSnapshot:()=>ipcRenderer.invoke('pccheck:get-rig-snapshot')
+}));
