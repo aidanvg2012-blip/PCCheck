@@ -652,3 +652,28 @@ input,select,textarea{background:#111718;color:#edf0e9;border-color:#36413d;bord
 footer{border-color:#303a38;color:#9aa59d}.footer-note{color:#849188}
 @media(hover:hover) and (pointer:fine){.panel:hover,.plus-tool:hover{transform:translateY(-1px);box-shadow:none;border-color:#3f4d43}}
 @media(max-width:700px){.hero{padding-top:55px;min-height:0}.hero h1{font-size:clamp(42px,12vw,60px)}.hero-art{opacity:.22}.workspace{padding:34px 16px 24px}.panel{padding:17px}.section-title{margin-bottom:20px}.topbar{padding:0 16px}}
+
+
+/* 2.13.2 — ultrawide desktop layout */
+@media (min-width:1800px){
+  .topbar,body>footer{max-width:2040px;padding-left:clamp(28px,3vw,64px);padding-right:clamp(28px,3vw,64px)}
+  .hero{max-width:2040px;padding-left:clamp(28px,3vw,64px);padding-right:clamp(28px,3vw,64px);min-height:560px}
+  .hero h1{font-size:clamp(82px,5vw,112px)}
+  .hero>p{max-width:620px;font-size:16px}
+  .hero-art{width:min(48%,700px);height:430px;right:5%;top:65px}
+  .workspace{max-width:1760px;padding-left:clamp(28px,2vw,48px);padding-right:clamp(28px,2vw,48px)}
+  .section-title h2{font-size:clamp(38px,2.4vw,48px)}
+  .section-title p{max-width:900px;font-size:14px}
+  .panel{padding:30px}
+  .guide-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .home-capabilities{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .workflow-steps{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (min-width:2600px){
+  .topbar,body>footer,.hero{max-width:2240px}
+  .workspace{max-width:1920px}
+  .hero{min-height:620px}
+  .hero-art{width:min(49%,780px);height:470px}
+  .hero>p{max-width:700px;font-size:17px}
+  .panel{padding:34px}
+}
