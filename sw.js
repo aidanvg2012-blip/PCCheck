@@ -1,5 +1,5 @@
-const CACHE = 'pccheck-shell-v19';
-const CORE = ['./','./index.html','./styles.css','./app.js','./auth.js','./ui.js','./manifest.webmanifest','./icon.svg','./guides.html','./privacy.html','./pc-lab.html','./pc-lab.css','./pc-lab.js','./build-finder.html','./build-finder.css','./build-finder.js'];
+const CACHE = 'pccheck-shell-v20';
+const CORE = ['./','./index.html','./styles.css','./app.js','./auth.js','./ui.js','./manifest.webmanifest','./icon.svg','./guides.html','./privacy.html','./pc-lab.html','./pc-lab.css','./pc-lab.js','./build-finder.html','./build-finder.css','./build-finder.js','./price-tracker.html','./price-tracker.css','./price-tracker.js','./knowledge.html','./knowledge.css','./knowledge.js'];
 self.addEventListener('install', event => event.waitUntil((async () => { const cache = await caches.open(CACHE); await cache.addAll(CORE); await self.skipWaiting(); })()));
 self.addEventListener('activate', event => event.waitUntil((async () => { const keys = await caches.keys(); await Promise.all(keys.filter(key => key.startsWith('pccheck-shell-') && key !== CACHE).map(key => caches.delete(key))); await self.clients.claim(); })()));
 self.addEventListener('fetch', event => {
