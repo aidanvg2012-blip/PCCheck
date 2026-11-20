@@ -77,3 +77,13 @@ A parent/guardian who owns the Stripe account must complete the financial and bu
 The code now separates test and live subscription rows using the `livemode` database column. Before using this branch, apply `supabase/migrations/202611170001_subscription_livemode.sql` to the Supabase project after the base subscriptions table and customer-index migration. Build Finder also needs `202611180001_build_finder_trials.sql` followed by `202611180002_single_free_review.sql`. A parent/guardian must then create a live monthly recurring Stripe Price and a separate live webhook endpoint with its own signing secret. Configure Production only with `STRIPE_MODE=live`, an `sk_live_` value in `STRIPE_SECRET_KEY`, the live recurring Price ID in `STRIPE_LIVE_PRICE_ID`, and that live endpoint's signing secret in `STRIPE_WEBHOOK_SECRET`. Keep Preview on `STRIPE_MODE=test` with test-only credentials. Never reuse test webhook secrets in live mode or vice versa. Run a small, parent-supervised real purchase/refund test only after support, refund, cancellation, tax, and privacy arrangements are ready. Also complete privacy/terms review, account deletion and data export, accessibility checks, security review, and a clear support contact.
 
 The live checkout path is code-supported but is not yet enabled on Production. A successful test checkout or webhook does not prove that live payments are ready.
+
+
+## Price Tracker and desktop app
+
+- [ ] Browse the Price Tracker while signed out and confirm weekly reference prices remain visible.
+- [ ] Confirm manual exact-model search requires a component category and does not assign a price to a near-match.
+- [ ] Confirm live retailer lookup is Plus-only, checks one product per request, and displays the provider timestamp and retailer links.
+- [ ] Confirm the local watchlist survives a page refresh and is clearly described as manual, device-local tracking (not automatic price alerts).
+- [ ] If API.SH is enabled, the parent/guardian should set a monthly credit cap and review provider terms. Keep APISH_API_KEY server-side only.
+- [ ] The Windows x64 installer is an Electron wrapper around the hosted PCCheck website. It requires internet access; it is not a separate offline application. The build workflow runs after the release reaches main. The unsigned installer may show a Windows SmartScreen warning.
