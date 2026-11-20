@@ -17,7 +17,7 @@ async function apiGet(path,params,key){
   if(!response.ok)throw new Error('Retail price provider returned '+response.status+': '+String(data.error||response.statusText).slice(0,180));
   return data;
 }
-async function getUserAndAccess(req){
+async function getUserAndAccess(req,{plusOnly=false}={}){
   const supabaseUrl=process.env.SUPABASE_URL,serviceKey=process.env.SUPABASE_SERVICE_ROLE_KEY;
   const token=String(req.headers?.authorization||'').replace(/^Bearer\s+/i,'');
   if(!supabaseUrl||!serviceKey)throw Object.assign(new Error('Account service is not configured.'),{status:503});
@@ -33,12 +33,14 @@ async function getUserAndAccess(req){
   if(!subResponse.ok)throw Object.assign(new Error('Could not verify membership.'),{status:502});
   const subscriptions=await subResponse.json(),sub=subscriptions[0]||null;
   const hasPlus=Boolean(sub&&['active','trialing'].includes(sub.status)&&(!sub.current_period_end||new Date(sub.current_period_end).getTime()>Date.now()));
+  if(plusOnly&&!hasPlus)throw Object.assign(new Error('The live Price Tracker is a PCCheck Plus feature.'),{status:403});
   if(!hasPlus){
     const usageResponse=await fetch(base+'/rest/v1/build_finder_trials?user_id=eq.'+encodeURIComponent(user.id)+'&select=used_count&limit=1',{headers:{apikey:serviceKey,Authorization:'Bearer '+serviceKey}});
     if(!usageResponse.ok)throw Object.assign(new Error('Could not check your free review access.'),{status:502});
     const rows=await usageResponse.json();
     if(Number(rows[0]?.used_count||0)>=1)throw Object.assign(new Error('Your one free build review has already been used. Plus unlocks unlimited reviews.'),{status:403});
   }
+  return {hasPlus};
 }
 async function priceOne(part,key){
   const category=CATEGORY_MAP[part.category],query=String(part.model||part.name).trim();
@@ -65,10 +67,11 @@ module.exports=async function handler(req,res){
   const key=process.env.APISH_API_KEY;
   if(!key)return send(res,503,{error:'Live retailer pricing is not configured yet. Add APISH_API_KEY to Vercel.'});
   try{
-    await getUserAndAccess(req);
     let body=req.body;if(typeof body==='string'){try{body=JSON.parse(body);}catch{body=null;}}
+    await getUserAndAccess(req,{plusOnly:body?.priceSearch===true});
     const parts=Array.isArray(body?.parts)?body.parts:[];
     if(!parts.length||parts.length>21)return send(res,400,{error:'Send between 1 and 21 selected build parts.'});
+    if(body?.priceSearch===true&&parts.length!==1)return send(res,400,{error:'Price Tracker checks one exact product per request.'});
     const seen=new Set();
     for(const part of parts){
       if(!part||typeof part.key!=='string'||part.key.length>180||!CATEGORY_MAP[part.category]||typeof(part.model||part.name)!=='string'||String(part.model||part.name).trim().length<2||String(part.model||part.name).length>120)return send(res,400,{error:'A selected part has an invalid category, key, or model name.'});
