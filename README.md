@@ -1,31 +1,38 @@
 # PCCheck
 
-PCCheck is a responsive, tabbed PC buying and build-checking workspace.
+PCCheck is a responsive PC hardware research platform for used-PC buyers and custom builders.
 
 ## Main tools
 
-- Used gaming PC assessment with listing text extraction and on-device screenshot OCR.
-- Current new-retail component price references for exact CPU, GPU, RAM, storage, motherboard, PSU, and case models.
-- Custom build compatibility checks.
-- Local saved reports, export, print, and Plus comparison workspace.
+- Used gaming PC listing assessment, text extraction, and on-device screenshot OCR.
+- Build compatibility checks and a guided Build Finder.
+- Weekly component price references plus optional exact-model retailer lookups.
+- Searchable hardware knowledge base and buyer guides.
+- Local saved reports and PCCheck Plus comparison workspace.
+- My Rig: Plus-only Windows hardware inventory, with manual entries for components Windows cannot identify.
+- Windows x64 desktop app, distributed through the official GitHub Releases page.
 
 ## Market price data
 
-The market lookup uses the weekly US retail dataset published by Pricify (pricify.ai), licensed CC BY 4.0. PCCheck credits the source in its report and links to the matched product record. The dataset tracks selected popular products, not every component, and prices are weekly observations rather than a live second-by-second feed. An unmatched model is left unpriced.
+The market lookup uses the weekly US retail dataset published by Pricify (pricify.ai), licensed CC BY 4.0. The catalog covers selected products; prices are weekly observations rather than a live second-by-second feed. An unmatched model is left unpriced. Optional live retailer checks depend on parent/guardian-managed API.SH configuration and provider limits.
 
 The combined part total is a **new retail replacement-cost reference**, not a used-market valuation. Used resale value depends on age, condition, warranty, location, and recent sold listings. PCCheck does not claim to verify sold prices.
 
-## New research tools
+## My Rig and desktop app
 
-- Price Tracker: browse weekly component references, run exact-model live retailer checks for Plus accounts when API.SH is configured, and keep a local manual watchlist. Live checks are provider-credit-limited and do not promise automatic alerts.
-- Hardware knowledge base: searchable explainers for CPUs, GPUs, RAM, storage, power, cooling, compatibility, laptops, and used-PC buying.
-- My Rig: a Plus-only, user-triggered local Windows hardware inventory via the desktop app. Hardware scan data is not uploaded to PCCheck.
-- Windows desktop installer: an Electron x64 wrapper around the hosted PCCheck site. It requires an internet connection and does not bundle a separate offline copy of the service. Releases are published through GitHub Releases.
+My Rig requests a scan only after the user presses the button. The Windows desktop app reads CPU, graphics, RAM modules, storage, motherboard, BIOS, operating system, network adapter labels, display information, and Windows Bluetooth device names/status. The snapshot is cached in local browser storage on that device. It is not uploaded to PCCheck servers or stored in Supabase. PSU, case, cooler, and peripherals can be added manually.
+
+This is a hardware inventory snapshot, not continuous sensor monitoring. The desktop app wraps the hosted PCCheck site and requires an internet connection.
+
+## Monetization
+
+Google AdSense is disabled by default and only loads on the production host after a parent/guardian configures an approved publisher account and ad-unit IDs. See `MONETIZATION_SETUP.md`. The user is under 18; the AdSense account and payments must be owned and managed by a parent or guardian.
 
 ## Development
 
 - Static front end: `index.html`, `styles.css`, `app.js`, `ui.js`
-- Vercel API: `api/market-prices.js`
+- Vercel API: `api/`
 - Automated checks: `node --test tests/*.test.js`
+- Windows desktop release: push a reviewed `desktop-v*` tag to build and publish the installer.
 
-See `ACCOUNT_BETA_SETUP.md` for Preview and account/billing beta checks. See `MONETIZATION_SETUP.md` for parent-managed AdSense and desktop release setup. Stripe remains test-mode only; do not enable live payments from this branch.
+See `ACCOUNT_BETA_SETUP.md` for Preview and billing checks, and `MONETIZATION_SETUP.md` for AdSense and desktop release setup. Do not enable live billing or publish a desktop release until the parent/guardian release review is complete.
