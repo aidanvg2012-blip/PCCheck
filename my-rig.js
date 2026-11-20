@@ -34,9 +34,9 @@
   const cards=[
    card('PROCESSOR',cpu.brand,[cpu.manufacturer||'',(cpu.cores||'?')+' logical cores · '+(cpu.physicalCores||'?')+' physical cores',cpu.speed?cpu.speed+' GHz base speed':'Clock speed not reported'].filter(Boolean)),
    ...gpu.map((g,i)=>card('GRAPHICS '+(i+1),g.name,[g.vendor||'',g.vram?formatBytes(g.vram*1024*1024)+' VRAM':'VRAM not reported',g.driverVersion?'Driver '+g.driverVersion:'Driver version not reported'].filter(Boolean))),
-   card('MEMORY',formatBytes(mem.total),[mem.type||'Type not reported',(mem.speed?mem.speed+' MT/s':'Speed not reported'),(mem.slots||'?')+' module(s) reported']),
+   card('MEMORY',formatBytes(mem.total),[mem.type||'Type not reported',(mem.speed?mem.speed+' MHz':'Speed not reported'),(mem.slots||'?')+' module(s) reported',...(mem.modules||[]).map((m,i)=>'DIMM '+(i+1)+': '+formatBytes(m.size)+' · '+(m.partNum||m.manufacturer||m.type||'model not reported')+(m.clockSpeed?' · '+m.clockSpeed+' MHz':''))]),
    ...disks.map((x,i)=>card('STORAGE '+(i+1),x.name||x.model,[x.type||'Drive type not reported',formatBytes(x.size),x.interfaceType||'Interface not reported'].filter(Boolean))),
-   card('MOTHERBOARD',[board.manufacturer,board.model].filter(Boolean).join(' ')||'Not reported',[board.version?'Board version '+board.version:'Version not reported']),
+   card('MOTHERBOARD',[board.manufacturer,board.model].filter(Boolean).join(' ')||'Not reported',[board.version?'Board version '+board.version:'Version not reported']),\n   card('BIOS',bios.version||'Version not reported',[bios.releaseDate?'Released '+bios.releaseDate:'Release date not reported']),\n   ...(d.displays||[]).map((display,i)=>card('DISPLAY '+(i+1),display.model,[display.resolution||'Resolution not reported',display.connection||'Connection not reported',display.main?'Primary display':'Secondary display'])),
    card('SYSTEM',system.model||system.manufacturer||'PC model not reported',[system.manufacturer||'',os.distro||os.platform||'OS not reported',os.release?'Version '+os.release:'',bios.version?'BIOS '+bios.version:''].filter(Boolean)),
    card('NETWORK',nets.length+' adapter(s)',nets.map(x=>x.iface+' · '+(x.type||'network')).slice(0,6))
   ];
