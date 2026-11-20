@@ -2,7 +2,7 @@ name: Build PCCheck Windows x64 installer
 on:
   workflow_dispatch:
   push:
-    branches: [feature/plus-billing-test-suite]
+    branches: [main]
     paths:
       - 'package.json'
       - 'electron/**'
@@ -19,7 +19,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
       - name: Install desktop dependencies
         run: npm install
       - name: Build Windows x64 installer
