@@ -15,7 +15,7 @@ The market lookup uses the weekly US retail dataset published by Pricify (pricif
 
 The combined part total is a **new retail replacement-cost reference**, not a used-market valuation. Used resale value depends on age, condition, warranty, location, and recent sold listings. PCCheck does not claim to verify sold prices.
 
-## Development
+## New research tools\n\n- Price Tracker: browse weekly component references, run exact-model live retailer checks for Plus accounts when API.SH is configured, and keep a local manual watchlist. Live checks are provider-credit-limited and do not promise automatic alerts.\n- Hardware knowledge base: searchable explainers for CPUs, GPUs, RAM, storage, power, cooling, compatibility, laptops, and used-PC buying.\n- Windows desktop installer: an Electron x64 wrapper around the hosted PCCheck site. It requires an internet connection and does not bundle a separate offline copy of the service.\n\n## Development
 
 - Static front end: `index.html`, `styles.css`, `app.js`, `ui.js`
 - Vercel API: `api/market-prices.js`
