@@ -50,3 +50,4 @@ a:not(.btn):hover{color:var(--pc-cyan)}
 .ad-slot ins{max-width:100%;margin:auto}
 @media(min-width:1800px){.topbar,body>footer{max-width:2040px}.hero,.workspace{max-width:2040px}.ad-slot{width:min(100% - 96px,1600px)}}
 @media(max-width:700px){.topbar{border-radius:0!important}.ad-slot{width:calc(100% - 28px);margin:16px auto}}
+\n.home-capabilities{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))!important}\n
