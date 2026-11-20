@@ -18,14 +18,14 @@ ipcMain.handle('pccheck:get-rig-snapshot',async event=>{
  let origin='';try{origin=new URL(event.senderFrame.url).origin;}catch{}
  if(origin!==APP_ORIGIN)throw new Error('Hardware scan request came from an untrusted page.');
  if(process.platform!=='win32')throw new Error('The local hardware inventory currently supports Windows 10 and 11.');
- const [cpu,gpu,memory,baseboard,bios,system,os,disks,network,bluetooth]=await Promise.all([
-  si.cpu(),si.graphics(),si.mem(),si.baseboard(),si.bios(),si.system(),si.osInfo(),si.diskLayout(),si.networkInterfaces(),runPowerShell("Get-PnpDevice -Class Bluetooth -ErrorAction SilentlyContinue | Where-Object { $_.FriendlyName -and $_.Status -ne 'Error' } | Select-Object @{Name='name';Expression={$_.FriendlyName}},@{Name='status';Expression={$_.Status}} | ConvertTo-Json -Compress")
+ const [cpu,gpu,memory,memoryModules,baseboard,bios,system,os,disks,network,bluetooth]=await Promise.all([
+  si.cpu(),si.graphics(),si.mem(),si.memLayout(),si.baseboard(),si.bios(),si.system(),si.osInfo(),si.diskLayout(),si.networkInterfaces(),runPowerShell("Get-PnpDevice -Class Bluetooth -ErrorAction SilentlyContinue | Where-Object { $_.FriendlyName -and $_.Status -ne 'Error' } | Select-Object @{Name='name';Expression={$_.FriendlyName}},@{Name='status';Expression={$_.Status}} | ConvertTo-Json -Compress")
  ]);
  return {
   scannedAt:new Date().toISOString(),
   cpu:{manufacturer:cpu.manufacturer,brand:cpu.brand,cores:cpu.cores,physicalCores:cpu.physicalCores,speed:cpu.speed},
   gpu:(gpu.controllers||[]).map(g=>({name:g.model||g.name||'Graphics controller',vendor:g.vendor,vram:g.vram,driverVersion:g.driverVersion})),
-  memory:{total:memory.total,type:memory.type||null,speed:memory.clockSpeed||null,slots:memory.memSlots||null},
+  memory:{total:memory.total,type:memoryModules[0]?.type||null,speed:memoryModules[0]?.clockSpeed||null,slots:memoryModules.length||null},
   baseboard:{manufacturer:baseboard.manufacturer,model:baseboard.model,version:baseboard.version},
   bios:{version:bios.version,releaseDate:bios.releaseDate},
   system:{manufacturer:system.manufacturer,model:system.model},
