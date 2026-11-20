@@ -48,3 +48,15 @@ test('GET reports missing provider configuration without contacting Supabase',as
  assert.equal(res.body.configured,false);
  if(original!==undefined)process.env.APISH_API_KEY=original;
 });
+
+test('standalone Price Tracker lookup is Plus-only',async()=>{
+ const res=await call({body:{priceSearch:true,parts:[{key:'tracker:cpu:7600',category:'cpu',name:'AMD Ryzen 5 7600'}]},fetchStub:async url=>{
+  const u=String(url);
+  if(u.includes('/auth/v1/user'))return Response.json({id:'user-1'});
+  if(u.includes('/rest/v1/subscriptions'))return Response.json([]);
+  if(u.includes('/rest/v1/build_finder_trials'))return Response.json([{used_count:0}]);
+  throw new Error('Provider must not be called for a free account');
+ }});
+ assert.equal(res.code,403);
+ assert.match(res.body.error,/Plus feature/i);
+});
