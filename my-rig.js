@@ -2,8 +2,8 @@
 (async()=>{
  const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const formatBytes=n=>{if(!Number.isFinite(Number(n))||Number(n)<=0)return 'Not reported';let v=Number(n),u=['B','KB','GB','TB'];let i=0;while(v>=1024&&i<u.length-1){v/=1024;i++;}return (i===0?v.toFixed(0):v.toFixed(1))+' '+u[i];};
- const access=$('rigAccess'),scan=$('scanRig'),notice=$('desktopNotice'),MANUAL_KEY='pccheck-my-rig-manual-v1';
- let manualParts=[];try{manualParts=JSON.parse(localStorage.getItem(MANUAL_KEY)||'[]');if(!Array.isArray(manualParts))manualParts=[];}catch{manualParts=[];}
+ const access=$('rigAccess'),scan=$('scanRig'),notice=$('desktopNotice'),MANUAL_KEY='pccheck-my-rig-manual-v1',SCAN_KEY='pccheck-my-rig-snapshot-v1';
+ let manualParts=[],lastSnapshot=null;try{manualParts=JSON.parse(localStorage.getItem(MANUAL_KEY)||'[]');if(!Array.isArray(manualParts))manualParts=[];}catch{manualParts=[];}try{lastSnapshot=JSON.parse(localStorage.getItem(SCAN_KEY)||'null');}catch{lastSnapshot=null;}
  function renderManual(){const box=$('manualRigItems');if(!box)return;box.innerHTML=manualParts.length?manualParts.map((x,i)=>'<div class="manual-rig-item"><div><small>'+esc(x.type)+'</small><b>'+esc(x.name)+'</b></div><button type="button" data-remove-manual="'+i+'" aria-label="Remove '+esc(x.name)+'">Remove</button></div>').join(''):'<p class="fine">No manual components added yet.</p>'; }
  function gate(message,cta){access.hidden=false;access.innerHTML='<span class="mini-label">PCHECK PLUS / MEMBER ACCESS</span><h2>'+esc(message)+'</h2><p>My Rig is a Plus feature. Sign in with an active Plus subscription to use local hardware inventory.</p><a class="btn primary" href="'+cta+'">Continue ↗</a>';scan.disabled=true;notice.hidden=true;}
  try{
@@ -17,11 +17,11 @@
   access.hidden=true;scan.disabled=false;$('rigManual').hidden=false;renderManual();
   $('rigManualForm').addEventListener('submit',event=>{event.preventDefault();const type=$('manualRigType').value,name=$('manualRigName').value.trim();if(!name)return;manualParts.push({type,name});localStorage.setItem(MANUAL_KEY,JSON.stringify(manualParts));$('manualRigName').value='';renderManual();});
   $('manualRigItems').addEventListener('click',event=>{const button=event.target.closest('[data-remove-manual]');if(!button)return;manualParts.splice(Number(button.dataset.removeManual),1);localStorage.setItem(MANUAL_KEY,JSON.stringify(manualParts));renderManual();});
-  if(!window.pccheckDesktop?.getRigSnapshot){notice.hidden=false;$('scanMode').textContent='WEB PREVIEW';scan.disabled=true;$('scanStatus').textContent='Install the Windows desktop app to scan this computer.';return;}
+  if(lastSnapshot)render(lastSnapshot);\n  $('clearRig').addEventListener('click',()=>{localStorage.removeItem(SCAN_KEY);lastSnapshot=null;$('rigSummary').hidden=true;$('rigInventory').hidden=true;$('rigBluetooth').hidden=true;$('scanStatus').textContent='Local hardware snapshot cleared.';});\n  if(!window.pccheckDesktop?.getRigSnapshot){notice.hidden=false;$('scanMode').textContent='WEB PREVIEW';scan.disabled=true;$('scanStatus').textContent='Install the Windows desktop app to scan this computer.';return;}
   notice.hidden=true;$('scanMode').textContent='WINDOWS LOCAL SCAN';
   scan.addEventListener('click',async()=>{
    scan.disabled=true;$('scanStatus').textContent='Reading hardware information locally…';
-   try{const data=await window.pccheckDesktop.getRigSnapshot();render(data);$('scanStatus').textContent='Scan complete · '+new Date(data.scannedAt).toLocaleString();}
+   try{const data=await window.pccheckDesktop.getRigSnapshot();lastSnapshot=data;localStorage.setItem(SCAN_KEY,JSON.stringify(data));render(data);$('scanStatus').textContent='Scan complete · '+new Date(data.scannedAt).toLocaleString();}
    catch(e){$('scanStatus').textContent=e.message||'The local scan could not complete.';}
    finally{scan.disabled=false;}
   });
