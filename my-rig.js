@@ -13,7 +13,7 @@
   if(!data.session?.access_token){gate('Sign in to unlock My Rig','index.html?returnTo=my-rig.html#account');return;}
   const r=await fetch('/api/plus-status',{headers:{Authorization:'Bearer '+data.session.access_token}}),d=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(d.error||'Could not verify membership.');
-  if(!d.hasPlus){gate('My Rig is part of PCCheck Plus','index.html#top');return;}
+  if(!d.hasPlus){gate('My Rig is part of PCCheck Plus','index.html#plus');return;}
   access.hidden=true;scan.disabled=false;$('rigManual').hidden=false;renderManual();
   $('rigManualForm').addEventListener('submit',event=>{event.preventDefault();const type=$('manualRigType').value,name=$('manualRigName').value.trim();if(!name)return;manualParts.push({type,name});localStorage.setItem(MANUAL_KEY,JSON.stringify(manualParts));$('manualRigName').value='';renderManual();});
   $('manualRigItems').addEventListener('click',event=>{const button=event.target.closest('[data-remove-manual]');if(!button)return;manualParts.splice(Number(button.dataset.removeManual),1);localStorage.setItem(MANUAL_KEY,JSON.stringify(manualParts));renderManual();});
