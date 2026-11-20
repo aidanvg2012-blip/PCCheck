@@ -118,7 +118,7 @@
         if (password.length < 10) throw new Error('Use a password with at least 10 characters.');
         const { data, error } = await client.auth.signUp({
           email, password,
-          options: { emailRedirectTo: window.location.origin + (['build-finder.html','price-tracker.html'].includes(new URLSearchParams(window.location.search).get('returnTo')) ? '/?returnTo=' + new URLSearchParams(window.location.search).get('returnTo') + '#account' : '/') }
+          options: { emailRedirectTo: window.location.origin + (['build-finder.html','price-tracker.html','my-rig.html'].includes(new URLSearchParams(window.location.search).get('returnTo')) ? '/?returnTo=' + new URLSearchParams(window.location.search).get('returnTo') + '#account' : '/') }
         });
         if (error) throw error;
         if (!data.session) {
@@ -127,14 +127,14 @@
         } else {
           setStatus('Account created and signed in.', 'success');
           await refreshAccount();
-          if (['build-finder.html','price-tracker.html'].includes(new URLSearchParams(window.location.search).get('returnTo'))) window.location.assign('build-finder.html');
+          if (['build-finder.html','price-tracker.html'].includes(new URLSearchParams(window.location.search).get('returnTo'))) window.location.assign(new URLSearchParams(window.location.search).get('returnTo'));
         }
       } else {
         const { error } = await client.auth.signInWithPassword({ email, password });
         if (error) throw error;
         setStatus('Signed in successfully.', 'success');
         await refreshAccount();
-        if (new URLSearchParams(window.location.search).get('returnTo') === 'build-finder.html') window.location.assign('build-finder.html');
+        if (['build-finder.html','price-tracker.html','my-rig.html'].includes(new URLSearchParams(window.location.search).get('returnTo'))) window.location.assign(new URLSearchParams(window.location.search).get('returnTo'));
       }
     } catch (error) {
       setStatus(error.message || 'Account request failed. Please try again.', 'error');
