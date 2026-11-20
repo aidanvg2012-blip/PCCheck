@@ -1,0 +1,28 @@
+{
+  "name": "pccheck-desktop",
+  "version": "2.14.0",
+  "private": true,
+  "description": "Installable Windows desktop shell for PCCheck",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "desktop:dev": "electron .",
+    "desktop:build:win": "electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "^39.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.pccheck.desktop",
+    "productName": "PCCheck",
+    "directories": { "output": "dist" },
+    "files": ["electron/**/*"],
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }] },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}
