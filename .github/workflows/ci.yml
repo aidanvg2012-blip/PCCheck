@@ -1,0 +1,25 @@
+name: PCCheck checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, feature/plus-billing-test-suite]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: |
+          for file in app.js auth.js pc-lab.js build-finder.js price-tracker.js knowledge.js my-rig.js ads.js ads-config.js electron/main.cjs electron/preload.cjs api/*.js tests/*.js; do
+            node --check "$file"
+          done
+      - name: Run billing tests
+        run: node --test tests/*.test.js

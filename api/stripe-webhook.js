@@ -9,6 +9,9 @@ module.exports = async function handler(req, res) {
   const signingSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  const stripeMode = process.env.STRIPE_MODE || 'test';
+  const isLive = stripeMode === 'live';
   if (!signingSecret || !supabaseUrl || !serviceRoleKey) {
     return res.status(503).json({ error: 'Webhook is not configured.' });
   }
@@ -21,15 +24,44 @@ module.exports = async function handler(req, res) {
     }
 
     const event = JSON.parse(rawBody.toString('utf8'));
-    if (!['customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted'].includes(event.type)) {
+    if (!['test', 'live'].includes(stripeMode) || event.livemode !== isLive) {
+      return res.status(400).json({ error: 'Webhook event does not match the configured Stripe mode.' });
+    }
+    if (invoiceEventsForMode(event.type) && (!stripeSecretKey || !stripeSecretKey.startsWith(isLive ? 'sk_live_' : 'sk_test_'))) {
+      return res.status(503).json({ error: 'Stripe lookup key does not match the configured mode.' });
+    }
+
+    const subscriptionEvents = [
+      'customer.subscription.created',
+      'customer.subscription.updated',
+      'customer.subscription.deleted'
+    ];
+    const invoiceEvents = ['invoice.paid', 'invoice.payment_failed'];
+    if (!subscriptionEvents.includes(event.type) && !invoiceEvents.includes(event.type)) {
       return res.status(200).json({ received: true, ignored: true });
     }
 
-    const subscription = event.data && event.data.object;
+    let subscription = event.data && event.data.object;
+    if (invoiceEvents.includes(event.type)) {
+      const invoice = subscription;
+      const subscriptionId = invoice?.subscription ||
+        invoice?.parent?.subscription_details?.subscription ||
+        invoice?.lines?.data?.find(line => line.parent?.subscription_item_details?.subscription)
+          ?.parent?.subscription_item_details?.subscription;
+      if (!subscriptionId) return res.status(200).json({ received: true, ignored: true });
+      const lookup = await fetch('https://api.stripe.com/v1/subscriptions/' + encodeURIComponent(subscriptionId), {
+        headers: { Authorization: 'Bearer ' + stripeSecretKey }
+      });
+      const lookupBody = await lookup.json().catch(() => ({}));
+      if (!lookup.ok || !lookupBody.id) {
+        console.error('Stripe subscription lookup failed:', lookup.status);
+        return res.status(502).json({ error: 'Could not retrieve subscription state.' });
+      }
+      subscription = lookupBody;
+    }
+
     const userId = subscription?.metadata?.supabase_user_id;
     if (!subscription?.id || !userId) {
-      // Do not create an entitlement unless the subscription is linked to an
-      // authenticated PCCheck account.
       console.warn('Stripe subscription missing PCCheck user metadata.');
       return res.status(200).json({ received: true, ignored: true });
     }
@@ -37,6 +69,7 @@ module.exports = async function handler(req, res) {
     const priceId = subscription.items?.data?.[0]?.price?.id || null;
     const record = {
       user_id: userId,
+      livemode: isLive,
       stripe_customer_id: typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id,
       stripe_subscription_id: subscription.id,
       stripe_price_id: priceId,
@@ -78,6 +111,10 @@ module.exports = async function handler(req, res) {
 };
 
 module.exports.config = { api: { bodyParser: false } };
+
+function invoiceEventsForMode(type) {
+  return type === 'invoice.paid' || type === 'invoice.payment_failed';
+}
 
 function readRawBody(req) {
   return new Promise((resolve, reject) => {

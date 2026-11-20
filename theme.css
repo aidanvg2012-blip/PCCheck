@@ -1,0 +1,54 @@
+/* PCCheck 2.15 — Obsidian / electric cyan visual system */
+:root{color-scheme:dark;--pc-bg:#080d16;--pc-panel:#101a2a;--pc-panel2:#142238;--pc-line:#263b54;--pc-text:#edf5ff;--pc-muted:#9aacc2;--pc-cyan:#67e8f9;--pc-violet:#a78bfa;--pc-green:#9be7c4}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{background:radial-gradient(ellipse at 16% -12%,#17334b55,transparent 40%),radial-gradient(ellipse at 88% 12%,#28204c44,transparent 34%),var(--pc-bg)!important;color:var(--pc-text)!important;font-family:'DM Sans',sans-serif}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.18;background-image:linear-gradient(#5b7a9a10 1px,transparent 1px),linear-gradient(90deg,#5b7a9a10 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,black,transparent 80%)}
+.topbar{background:#0a1220eF!important;border:1px solid #263b54!important;border-radius:14px!important;box-shadow:0 16px 50px #0005!important;backdrop-filter:blur(20px)!important}
+.topbar nav a{color:#9aacc2!important;border-radius:7px}
+.topbar nav a:hover,.topbar nav a.active,.topbar nav a[aria-current=page]{background:#67e8f91a!important;color:#d9faff!important}
+.brand-name,.brand{color:#edf5ff!important}.logo{border:1px solid #67e8f9!important;color:#67e8f9!important;background:#67e8f910!important;box-shadow:0 0 22px #67e8f91a!important}
+.hero h1,.price-hero h1,.knowledge-hero h1,.finder-hero h1,.section-title h2,.section-title h1,.page-title{font-family:'Manrope',sans-serif!important;letter-spacing:-.055em!important}
+.hero h1 em,.price-hero h1 em,.knowledge-hero h1 em,.page-title em{color:var(--pc-cyan)!important;background:none!important}
+.eyebrow,.mini-label,.finder-kicker{color:var(--pc-cyan)!important;letter-spacing:.14em!important}
+.eyebrow i{background:var(--pc-cyan)!important;box-shadow:0 0 12px #67e8f9aa!important}
+.hero>p,.section-title p,.knowledge-hero p,.price-hero p,.finder-hero p{color:var(--pc-muted)!important}
+.panel,.guide-card,.report-result,.saved-card,.plus-tool,.visual-picker-panel,.build-explorer,.workflow-rail,.pro-teaser,.pro-preview,.knowledge-card,.knowledge-tools,.knowledge-bottom,.price-main,.watch-panel,.explain-panel,.price-results,.price-notice,.finder-panel,.finder-card{background:linear-gradient(145deg,#111d2d,#0e1725)!important;border:1px solid var(--pc-line)!important;border-radius:13px!important;box-shadow:0 14px 36px #0003!important}
+.panel-head h2,.panel-head h3,.panel h2,.panel h3,.knowledge-card h2,.knowledge-bottom h2{color:var(--pc-text)!important}
+input,select,textarea{background:#091321!important;color:var(--pc-text)!important;border:1px solid #2b425d!important;border-radius:8px!important}
+input:focus,select:focus,textarea:focus{border-color:var(--pc-cyan)!important;box-shadow:0 0 0 3px #67e8f91c!important}
+.btn.primary,.hero-actions .primary{background:linear-gradient(110deg,#67e8f9,#a5f3fc)!important;color:#07131e!important;border:0!important;font-weight:800!important;box-shadow:0 7px 24px #67e8f922!important}
+.btn.primary:hover{filter:brightness(1.06);transform:translateY(-2px)}
+.btn.ghost,.profile,.saved-card button,.saved-actions button{background:#15253a!important;color:#d8eaff!important;border:1px solid #334d6b!important}
+.btn.ghost:hover,.profile:hover{border-color:var(--pc-cyan)!important;background:#1b3049!important}
+.pill,.step,.price-pill,.price-tag{background:#67e8f910!important;border:1px solid #3a687b!important;color:var(--pc-cyan)!important;border-radius:6px!important}
+.capability-card,.workflow-step,.visual-pick-card,.sample-build-card,.guide-card,.price-product{background:#111e2e!important;border:1px solid #263d58!important;border-radius:11px!important}
+.capability-card:hover,.workflow-step:hover,.visual-pick-card:hover,.sample-build-card:hover,.guide-card:hover{border-color:#67e8f977!important;box-shadow:0 14px 36px #0005!important}
+.cap-icon,.cap-arrow,.workflow-number,.workflow-symbol,.pick-cta{color:var(--pc-cyan)!important}
+.part-art{background:#16283d!important}
+.part-art svg{stroke:var(--pc-cyan)!important}
+.pro-price b,.pro-demo-note,.fine{color:#9aacc2!important}
+.glass-float{background:#101d2d!important;border:1px solid #2c4664!important;box-shadow:0 14px 35px #0005!important}
+.glass-float small{color:#9aacc2!important}.glass-float b{color:#edf5ff!important}.glass-float i,.glass-float strong{color:var(--pc-cyan)!important}
+.hero-stats{color:var(--pc-cyan)!important}.hero-stats small{color:#8198b3!important}
+.workflow-line{background:#29445f!important}
+.verdict.good{color:#9be7c4!important;border-color:#36775f!important;background:#9be7c410!important}
+.verdict.bad{color:#ffaaa9!important}.verdict.neutral{color:#e6c79d!important}
+.meter i{background:linear-gradient(90deg,#67e8f9,#a78bfa)!important}
+.modal{background:#101c2d!important;border-color:#2d4664!important;box-shadow:0 25px 90px #0009!important}
+.modal-backdrop{background:#020711dc!important}
+.mobile-tabs{background:#091321f5!important;border-top:1px solid #263b54!important}
+.mobile-tabs button{color:#849ab4!important}.mobile-tabs button.active{color:#baf7ff!important}
+.mobile-tabs button.active .tab-icon{background:#67e8f91a!important;border-color:#67e8f9!important}
+.mobile-tabs .tab-icon{border-color:#314962!important}
+footer{border-color:#263b54!important;color:#879bb4!important}
+a{color:inherit}
+a:not(.btn):hover{color:var(--pc-cyan)}
+.ad-slot{display:block;width:min(100% - 48px,1200px);min-height:0;margin:24px auto;padding:0;text-align:center}
+.ad-slot[hidden]{display:none!important}
+.ad-slot:not(:empty){min-height:110px}
+.ad-slot-label{display:block;margin-bottom:8px;font:9px 'DM Mono',monospace;letter-spacing:.16em;color:#7087a1}
+.ad-slot ins{max-width:100%;margin:auto}
+@media(min-width:1800px){.topbar,body>footer{max-width:2040px}.hero,.workspace{max-width:2040px}.ad-slot{width:min(100% - 96px,1600px)}}
+@media(max-width:700px){.topbar{border-radius:0!important}.ad-slot{width:calc(100% - 28px);margin:16px auto}}
+
+.home-capabilities{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))!important}

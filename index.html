@@ -2,53 +2,109 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="PCCheck helps you review used gaming PCs and check basic custom PC build compatibility.">
-<meta name="theme-color" content="#080b12"><meta name="application-name" content="PCCheck"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PCCheck"><link rel="apple-touch-icon" href="icon.svg"><meta name="version" content="2.4.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>PCCheck — PC buying and build checker</title>
-<link rel="stylesheet" href="styles.css">
+<meta name="description" content="PCCheck helps you evaluate used PCs, check build compatibility, plan upgrades, and estimate PC power and storage needs.">
+<meta name="google-adsense-account" content="ca-pub-3032393863909234">
+<meta name="theme-color" content="#080d16"><meta name="application-name" content="PCCheck"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PCCheck"><link rel="apple-touch-icon" href="icon.svg"><meta name="version" content="2.15.0"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>PCCheck — Hardware intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <div class="glow g1"></div><div class="glow g2"></div>
+<div class="scroll-progress" aria-hidden="true"><span id="scrollProgressBar"></span></div>
 <header class="topbar">
-  <a class="brand" href="#top" aria-label="PCCheck home"><span class="logo">PC</span> PC<span>CHECK</span></a>
-  <nav aria-label="Main navigation"><a href="#analyze">Used PC</a><a href="#build">Build checker</a><a href="#saved">Saved reports</a><a href="guides.html">Guides</a><a href="privacy.html">Privacy & limits</a></nav>
-  
+  <a class="brand" href="#top" aria-label="PCCheck home"><span class="logo" aria-hidden="true"><svg viewBox="0 0 36 36" role="presentation"><path d="M7 8h12.5c6.5 0 10.5 3.8 10.5 9.8S26 27.5 19.5 27.5H7V8Zm7 6v7.5h5.2c2.6 0 4.1-1.3 4.1-3.8s-1.5-3.7-4.1-3.7H14Z" fill="currentColor"/><path d="M28.5 8H33v19.5h-4.5z" fill="#B8A8FF"/></svg></span><span class="brand-name">PC<span>CHECK</span></span></a>
+  <nav aria-label="Main navigation"><a href="#top">Overview</a><a href="#analyze">Used PC</a><a href="build-finder.html">Build Finder</a><a href="price-tracker.html">Price Tracker</a><a href="my-rig.html">My Rig</a><a href="knowledge.html">Knowledge</a><a href="download.html">Download</a><a href="#build">Build checker</a><a href="#saved">Saved reports</a><a href="#guides">Guides</a></nav>
+  <button class="profile" id="accountOpenButton" type="button">Sign in</button>
 </header>
 <nav class="mobile-tabs" aria-label="App navigation">
-  <button type="button" data-tab="home" class="active" aria-current="page"><span aria-hidden="true">⌂</span><small>Home</small></button>
-  <button type="button" data-tab="analyze"><span aria-hidden="true">◉</span><small>Used PC</small></button>
-  <button type="button" data-tab="build"><span aria-hidden="true">▦</span><small>Build</small></button>
-  <button type="button" data-tab="saved"><span aria-hidden="true">▤</span><small>Saved</small></button>
-  <button type="button" data-tab="guides"><span aria-hidden="true">⌘</span><small>Guides</small></button>
+  <button type="button" data-tab="home" class="active" aria-current="page"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z"/></svg></span><small>Home</small></button>
+  <button type="button" data-tab="analyze"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5M8 10.8h5.6M10.8 8v5.6"/></svg></span><small>Used PC</small></button>
+  <button type="button" data-tab="build"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 9 5v8l-9 5-9-5V8l9-5Z"/><path d="m3.5 8.2 8.5 5 8.5-5M12 13.2V21"/></svg></span><small>Build</small></button>
+  <button type="button" data-tab="saved"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5v-12Z"/><path d="M4 6v12a2 2 0 0 1 2-2h14"/></svg></span><small>Saved</small></button>
+  <button type="button" data-tab="guides"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5v-12Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><small>Guides</small></button>
 </nav>
 <main id="top">
 <section class="hero">
-  <div class="eyebrow"><i></i> PC BUYING TOOLKIT</div>
-  <h1>Know the PC.<br><em>Before you pay.</em></h1>
-  <p>Review used gaming PC details, catch missing information, and check basic compatibility before you spend money on a build.</p>
-  <div class="hero-actions"><a class="btn primary" href="#analyze">Check a used PC <b>↗</b></a><a class="btn ghost" href="#build">Check a build</a></div>
-  <div class="hero-stats"><span>01 <small>USED PC REVIEW</small></span><span>02 <small>BUILD COMPATIBILITY</small></span><span>03 <small>SAVED REPORTS</small></span><span>04 <small>BUYER GUIDES</small></span></div>
-  <div class="pro-teaser">
-    <div><span class="mini-label">OPTIONAL / PCCHECK PLUS</span><h3>More insight. Better decisions.</h3><p>Preview upcoming tools for deeper PC comparisons and cleaner reports.</p></div>
-    <div class="pro-teaser-actions"><span class="pro-price">Planned test price <b>$4.99/mo</b></span><button class="btn ghost" id="proPreviewButton" type="button">Preview Plus ↗</button></div>
+  <div class="eyebrow"><i></i> INDEPENDENT PC BUYING TOOLS</div>
+  <h1>Know the specs.<br><em>Then decide.</em></h1>
+  <p>Evaluate used PC listings, compare exact hardware, and check custom builds before you spend. Clear information, practical checks, and no fake hardware certifications.</p>
+  <div class="hero-actions"><a class="btn primary" href="#analyze">Check a used PC <b>↗</b></a><a class="btn ghost" href="build-finder.html">Plan a new build ↗</a></div>
+  <div class="hero-stats"><span><b>01</b><small>MARKET INTELLIGENCE</small></span><span><b>02</b><small>LISTING ANALYSIS</small></span><span><b>03</b><small>BUILD VALIDATION</small></span><span><b>04</b><small>YOUR WORKSPACE</small></span></div>
+  <div class="pro-teaser" id="plus">
+    <div><span class="mini-label">THE PCHECK ADVANTAGE / PLUS PREVIEW</span><h3>Go deeper with PCCheck Plus.</h3><p>Turn saved reports into a buying workspace: compare PCs, inspect full report details, and review build versions. Reports stay on this device.</p></div>
+    <div class="pro-teaser-actions"><span class="pro-price">PLUS <b>IN DEVELOPMENT</b></span><button class="btn ghost" id="proPreviewButton" type="button">Preview Plus ↗</button></div>
   </div>
   <div class="pro-preview" id="proPreview" hidden aria-live="polite">
     <div class="pro-preview-head"><div><span class="mini-label">PLUS / PRODUCT PREVIEW</span><h3>What a paid plan could include</h3></div><span class="pill">DEMO ONLY</span></div>
     <div class="pro-feature-grid">
-      <article><b>01 / Comparison workspace</b><p>Compare multiple saved PC assessments side by side.</p><small>Planned feature</small></article>
-      <article><b>02 / Expanded reports</b><p>More detailed risk explanations and printable report layouts.</p><small>Planned feature</small></article>
-      <article><b>03 / Build history</b><p>Keep versions of a build and review changes over time.</p><small>Planned feature</small></article>
+      <article><b>01 / PC shortlist insights</b><p>See saved listing counts, median asking price, and spec completeness.</p><small>Plus workspace</small></article>
+      <article><b>02 / Comparison workspace</b><p>Compare up to three saved PCs and export the comparison as CSV.</p><small>Plus workspace</small></article>
+      <article><b>03 / Expanded reports</b><p>Inspect every saved input field and review report details.</p><small>Plus workspace</small></article>
+      <article><b>04 / Build history</b><p>Keep dated build snapshots and reopen earlier versions.</p><small>Plus workspace</small></article><article><b>05 / My Rig hardware monitor</b><p>Scan your Windows PC locally to view CPU, GPU, memory, drives, motherboard, network and Bluetooth device names.</p><small>Plus · Desktop app required</small></article>
     </div>
-    <p class="pro-demo-note">Stripe test checkout preview. No live payments are accepted. A successful test checkout does not unlock Plus yet; account access will be connected after subscription storage and verification are added.</p>
-    <button class="btn primary" id="plusCheckoutButton" type="button">Try test checkout — $4.99/mo</button>
+    <p class="pro-demo-note">Stripe test checkout preview. No live payments are accepted. Account linking is in beta; Plus access is granted only after a verified Stripe webhook updates your subscription record.</p>
+    <button class="btn primary" id="plusCheckoutButton" type="button">Preview test checkout (no real payment)</button>
     <p class="fine" id="plusCheckoutStatus" role="status" aria-live="polite"></p>
     <button class="btn ghost" id="closeProPreview" type="button">Close preview</button>
   </div>
-  <div class="hero-art" aria-hidden="true"><div class="ring r1"></div><div class="ring r2"></div><div class="gpu"><div class="gpu-screen">PC<span>CHECK</span><small>HARDWARE INTELLIGENCE</small></div></div><div class="float f1">LOCAL CHECKS <b>● READY</b></div><div class="float f2">BUY SMARTER&nbsp; ✦ &nbsp;BUILD BETTER</div></div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div>
+    <svg class="hero-illustration" viewBox="0 0 560 470" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="boardGlass" x1="95" y1="45" x2="450" y2="410" gradientUnits="userSpaceOnUse"><stop stop-color="#D8F7FF" stop-opacity=".24"/><stop offset=".5" stop-color="#8D9DFF" stop-opacity=".12"/><stop offset="1" stop-color="#6EE7E0" stop-opacity=".04"/></linearGradient>
+        <linearGradient id="edge" x1="100" y1="50" x2="430" y2="390" gradientUnits="userSpaceOnUse"><stop stop-color="#A5F3FC"/><stop offset=".52" stop-color="#A5A6FF"/><stop offset="1" stop-color="#6EE7D8"/></linearGradient>
+        <linearGradient id="fan" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#C7F9FF" stop-opacity=".32"/><stop offset="1" stop-color="#8B8BFF" stop-opacity=".05"/></linearGradient>
+        <radialGradient id="fanCore"><stop stop-color="#D9FBFF"/><stop offset=".18" stop-color="#83E8EF"/><stop offset="1" stop-color="#526B9D" stop-opacity=".15"/></radialGradient>
+        <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>
+      </defs>
+      <ellipse cx="280" cy="246" rx="180" ry="130" fill="#5DE7E9" fill-opacity=".14" filter="url(#softGlow)"/>
+      <path d="M93 115 334 31l146 84-241 88L93 115Z" fill="#B8C7FF" fill-opacity=".07" stroke="url(#edge)" stroke-opacity=".55"/>
+      <path d="m93 115 146 88v173L93 291V115Z" fill="#8BE7F0" fill-opacity=".055" stroke="#8BE7F0" stroke-opacity=".32"/>
+      <path d="m239 203 241-88v173l-241 88V203Z" fill="#9D9BFF" fill-opacity=".09" stroke="#B7B5FF" stroke-opacity=".4"/>
+      <path d="m116 128 120 72v145l-120-72V128Z" fill="url(#boardGlass)" stroke="#B5F8FF" stroke-opacity=".36"/>
+      <path d="m252 212 204-74v137l-204 74V212Z" fill="#111B30" fill-opacity=".74" stroke="url(#edge)" stroke-opacity=".6"/>
+      <g transform="translate(272 235) skewY(-19)">
+        <rect width="164" height="103" rx="13" fill="#111D32" stroke="#B7B9FF" stroke-opacity=".75"/>
+        <rect x="10" y="10" width="144" height="83" rx="9" fill="url(#boardGlass)" stroke="#D7F7FF" stroke-opacity=".22"/>
+        <circle cx="52" cy="51" r="34" fill="#07111F" stroke="#91EAF0" stroke-opacity=".8" stroke-width="1.5"/>
+        <circle cx="52" cy="51" r="26" fill="url(#fan)" stroke="#A7F7F4" stroke-opacity=".6"/>
+        <circle cx="52" cy="51" r="7" fill="url(#fanCore)"/>
+        <path d="M52 26c9 5 13 12 9 19-9 1-16-5-17-13m33 19c-5 9-12 13-19 9-1-9 5-16 13-17M52 76c-9-5-13-12-9-19 9-1 16 5 17 13M27 51c5-9 12-13 19-9 1 9-5 16-13 17" fill="#B8F6FF" fill-opacity=".35"/>
+        <circle cx="111" cy="51" r="29" fill="#07111F" stroke="#B6B5FF" stroke-opacity=".85" stroke-width="1.5"/>
+        <circle cx="111" cy="51" r="22" fill="url(#fan)" stroke="#B8B6FF" stroke-opacity=".65"/>
+        <circle cx="111" cy="51" r="6" fill="url(#fanCore)"/>
+        <path d="M111 30c8 4 11 10 8 16-8 1-13-4-14-11m27 16c-4 8-10 11-16 8-1-8 4-13 11-14m-16 27c-8-4-11-10-8-16 8-1 13 4 14 11m-27-16c4-8 10-11 16-8 1 8-4 13-11 14" fill="#D3D1FF" fill-opacity=".35"/>
+      </g>
+      <g stroke="#8CEEF0" stroke-opacity=".55" stroke-width="1.3"><path d="m129 91 25-9 18 11 30-11"/><path d="m361 66 24-9 18 12 24-9"/><path d="m461 319 26-10 18 11"/><path d="m75 300-24 9-17-10"/></g>
+      <g fill="#B6F6F6"><circle cx="129" cy="91" r="3"/><circle cx="202" cy="82" r="3"/><circle cx="361" cy="66" r="3"/><circle cx="427" cy="60" r="3"/><circle cx="461" cy="319" r="3"/></g>
+      <g fill="#B8C5D8" fill-opacity=".72"><rect x="117" y="312" width="47" height="4" rx="2" transform="rotate(30 117 312)"/><rect x="126" y="328" width="32" height="4" rx="2" transform="rotate(30 126 328)"/><rect x="402" y="354" width="34" height="4" rx="2" transform="rotate(-20 402 354)"/></g>
+    </svg>
+    <div class="glass-float float-market"><span class="float-icon">↗</span><div><small>MARKET SIGNAL</small><b>Tracked price references</b></div><i>WEEKLY DATA</i></div>
+    <div class="glass-float float-build"><span class="float-icon">✳</span><div><small>BUILD CHECK</small><b>Compatibility insights</b></div><strong>01 / 03</strong></div>
+    <div class="glass-float float-chip"><span class="pulse-dot"></span> HARDWARE, DECODED</div>
+  </div>
+  <div class="home-capabilities">
+    <a href="#analyze" class="capability-card"><span class="cap-icon">⌁</span><div><small>01 / MARKET INTELLIGENCE</small><b>Compare part prices</b><p>See tracked weekly new-retail references for exact matches.</p></div><span class="cap-arrow">↗</span></a>
+    <a href="#analyze" class="capability-card"><span class="cap-icon">◈</span><div><small>02 / USED PC ANALYSIS</small><b>Look past the listing</b><p>Spot missing details and questions to ask.</p></div><span class="cap-arrow">↗</span></a>
+    <a href="#build" class="capability-card"><span class="cap-icon">⌘</span><div><small>03 / BUILD VALIDATION</small><b>Check before you buy</b><p>Review fit, sockets, memory and power.</p></div><span class="cap-arrow">↗</span></a><a href="my-rig.html" class="capability-card"><span class="cap-icon">▣</span><div><small>04 / YOUR HARDWARE</small><b>Know what is inside</b><p>Build a private inventory of your own PC.</p></div><span class="cap-arrow">↗</span></a>
+  </div>
+  <div class="workflow-rail" aria-label="How PCCheck works">
+    <div class="workflow-heading"><span class="mini-label">A BETTER WAY TO BUY HARDWARE</span><span class="workflow-line"></span><span class="workflow-caption">THREE SIMPLE STEPS</span></div>
+    <div class="workflow-steps">
+      <article class="workflow-step"><span class="workflow-number">01</span><div><b>Identify the hardware</b><p>Match exact component models and listing details.</p></div><span class="workflow-symbol">⌕</span></article>
+      <article class="workflow-step"><span class="workflow-number">02</span><div><b>Understand the signals</b><p>Review pricing context, missing specs and fit checks.</p></div><span class="workflow-symbol">⌁</span></article>
+      <article class="workflow-step"><span class="workflow-number">03</span><div><b>Make the call</b><p>Use the report to decide what to verify next.</p></div><span class="workflow-symbol">↗</span></article>
+    </div>
+  </div>
 </section>
 
+<section class="ad-slot" data-ad-slot-key="home" hidden aria-label="Advertisement"><span class="ad-slot-label">ADVERTISEMENT</span></section>
 <section class="workspace" id="analyze">
-  <div class="section-title"><div class="eyebrow">01 / USED PC LISTING</div><h2>Review a used gaming PC</h2><p>Paste listing details or upload a screenshot. PCCheck extracts likely specs for you to review before running a check.</p></div>
+  <div class="section-title"><div class="eyebrow">01 / USED PC LISTING</div><h2>Review a used gaming PC</h2><p>Enter exact component models to compare them with the latest tracked new-retail prices. You can also import a listing to fill in the details faster.</p></div>
+  <details class="import-tools"><summary>Quick import tools · paste a listing or upload a screenshot</summary>
   <div class="panel import-panel">
     <div class="panel-head"><div><span class="mini-label">QUICK SPEC EXTRACTION</span><h3>Paste the listing details</h3></div><span class="pill">LOCAL PARSER</span></div>
     <p class="fine">Open the product page, copy its title and description/specifications, then paste them here. PCCheck will look for known CPU, GPU, RAM, and storage names. It does not bypass site restrictions or automatically read private/dynamic pages.</p>
@@ -65,32 +121,76 @@
     <textarea id="ocrText" rows="4" placeholder="Recognized text will appear here. You can edit it before extracting specs."></textarea>
     <button class="btn ghost" id="extractOcrText" type="button" disabled>Extract specs from recognized text</button>
   </div>
-  <div class="or"><span>ENTER THE PC DETAILS</span></div>
+  </details>
+  <div class="visual-picker-panel panel">
+  <div class="panel-head"><div><span class="mini-label">NO HARDWARE KNOWLEDGE REQUIRED</span><h3>Pick parts by picture</h3></div><span class="pill">GUIDED MODE</span></div>
+  <p class="fine">Not sure what the names mean? Choose a component type, look at the illustration, then pick the closest option. You can also choose “I don't know” and PCCheck will flag it as missing instead of guessing.</p>
+  <div class="visual-picker-grid">
+    <button type="button" class="visual-pick-card" data-open-picker="cpu"><span class="part-art"><svg viewBox="0 0 100 74" aria-hidden="true"><rect x="24" y="7" width="52" height="60" rx="7"/><rect x="34" y="17" width="32" height="40" rx="3"/><path d="M39 23h22v28H39zM17 17h7m-7 12h7m-7 12h7m-7 12h7m52-36h7m-7 12h7m-7 12h7m-7 12h7M35 3v4m15-4v4m15-4v4M35 67v4m15-4v4m15-4v4"/></svg></span><b>Processor (CPU)</b><small>Small square chip</small><span class="pick-cta">Choose CPU ↗</span></button>
+    <button type="button" class="visual-pick-card" data-open-picker="gpu"><span class="part-art"><svg viewBox="0 0 100 74" aria-hidden="true"><rect x="7" y="14" width="86" height="43" rx="7"/><circle cx="34" cy="35" r="15"/><circle cx="68" cy="35" r="15"/><circle cx="34" cy="35" r="5"/><circle cx="68" cy="35" r="5"/><path d="M14 59h72M20 57v9m7-9v9m56-9v9M93 24h5m-5 9h5m-5 9h5"/></svg></span><b>Graphics card (GPU)</b><small>Long card with fans</small><span class="pick-cta">Choose GPU ↗</span></button>
+    <button type="button" class="visual-pick-card" data-open-picker="ram"><span class="part-art"><svg viewBox="0 0 100 74" aria-hidden="true"><rect x="9" y="20" width="82" height="34" rx="5"/><rect x="17" y="27" width="12" height="17" rx="2"/><rect x="34" y="27" width="12" height="17" rx="2"/><rect x="51" y="27" width="12" height="17" rx="2"/><rect x="68" y="27" width="12" height="17" rx="2"/><path d="M19 55v5m9-5v5m9-5v5m9-5v5m9-5v5m9-5v5m9-5v5m9-5v5"/></svg></span><b>Memory (RAM)</b><small>Thin memory sticks</small><span class="pick-cta">Choose RAM ↗</span></button>
+    <button type="button" class="visual-pick-card" data-open-picker="storage"><span class="part-art"><svg viewBox="0 0 100 74" aria-hidden="true"><rect x="10" y="20" width="80" height="34" rx="6"/><circle cx="27" cy="37" r="8"/><circle cx="27" cy="37" r="3"/><path d="M43 31h35M43 39h27M43 47h19M17 17v3m66-3v3m-66 34v4m66-4v4"/></svg></span><b>Storage (SSD / HDD)</b><small>Drive or small stick</small><span class="pick-cta">Choose storage ↗</span></button>
+    <button type="button" class="visual-pick-card" data-open-picker="motherboard"><span class="part-art"><svg viewBox="0 0 100 74" aria-hidden="true"><path d="M23 7h48l9 9v50H23z"/><rect x="34" y="17" width="22" height="20" rx="3"/><rect x="60" y="18" width="12" height="29" rx="2"/><rect x="34" y="43" width="22" height="17" rx="2"/><path d="M17 15h6m-6 12h6m-6 12h6m-6 12h6M80 24h6m-6 12h6m-6 12h6"/></svg></span><b>Motherboard</b><small>Large main circuit board</small><span class="pick-cta">Choose board ↗</span></button>
+    <button type="button" class="visual-pick-card" data-open-picker="psu"><span class="part-art"><svg viewBox="0 0 100 74" aria-hidden="true"><rect x="18" y="12" width="64" height="50" rx="6"/><circle cx="48" cy="36" r="17"/><circle cx="48" cy="36" r="5"/><path d="M48 19c8 5 8 12 0 17-8-5-8-12 0-17Zm17 17c-5 8-12 8-17 0 5-8 12-8 17 0ZM48 53c-8-5-8-12 0-17 8 5 8 12 0 17ZM31 36c5-8 12-8 17 0-5 8-12 8-17 0Z"/></svg></span><b>Power supply (PSU)</b><small>Metal box with fan</small><span class="pick-cta">Choose PSU ↗</span></button>
+    <button type="button" class="visual-pick-card" data-open-picker="case"><span class="part-art"><svg viewBox="0 0 100 74" aria-hidden="true"><rect x="30" y="5" width="43" height="64" rx="6"/><rect x="36" y="12" width="31" height="48" rx="3"/><circle cx="51" cy="28" r="10"/><circle cx="51" cy="48" r="8"/><path d="M61 9h5m-24 56h17"/></svg></span><b>PC case</b><small>Outer tower enclosure</small><span class="pick-cta">Choose case ↗</span></button>
+  </div>
+  <p class="fine picker-footnote">Illustrations are shape guides, not exact product photos. For an accurate market-price match, use the exact model printed on the part or listing.</p>
+</div>
+<div class="or"><span>ENTER THE PC DETAILS</span></div>
   <form class="panel manual" id="manualForm">
     <div class="panel-head"><div><span class="mini-label">USED PC ASSESSMENT</span><h3>What is the seller offering?</h3></div><span class="step">01 / 02</span></div>
     
     <div class="fields">
-      <label>CPU <input name="cpu" required placeholder="Ryzen 5 5600X" list="cpuSuggestions" autocomplete="off"><datalist id="cpuSuggestions"></datalist></label>
-      <label>GPU <input name="gpu" required placeholder="RTX 3060" list="gpuSuggestions" autocomplete="off"><datalist id="gpuSuggestions"></datalist></label>
-      <label>RAM <input name="ram" required placeholder="16GB DDR4" list="ramSuggestions" autocomplete="off"><datalist id="ramSuggestions"><option value="16GB DDR4"><option value="32GB DDR4"><option value="16GB DDR5"><option value="32GB DDR5"><option value="64GB DDR5"></datalist></label>
-      <label>Storage <input name="storage" required placeholder="1TB NVMe SSD" list="storageSuggestions" autocomplete="off"><datalist id="storageSuggestions"><option value="500GB SSD"><option value="1TB NVMe SSD"><option value="2TB NVMe SSD"><option value="1TB HDD"></datalist></label>
+      <label>CPU <input name="cpu" placeholder="Ryzen 5 5600X" list="cpuSuggestions" autocomplete="off"><datalist id="cpuSuggestions"></datalist></label>
+      <label>GPU <input name="gpu" placeholder="RTX 3060" list="gpuSuggestions" autocomplete="off"><datalist id="gpuSuggestions"></datalist></label>
+      <label>RAM <input name="ram" placeholder="Corsair Vengeance 32GB DDR5-6000 (exact kit)" list="ramSuggestions" autocomplete="off"><datalist id="ramSuggestions"></datalist></label>
+      <label>Storage <input name="storage" placeholder="Samsung 990 Pro 2TB NVMe (exact model)" list="storageSuggestions" autocomplete="off"><datalist id="storageSuggestions"></datalist></label>
       <label>Asking price (USD) <input name="price" type="number" min="0" step="1" placeholder="650"></label>
+      <details class="advanced-fields full-field"><summary>More details · motherboard, power supply, condition & comparisons</summary><div class="fields">
       <label>Comparable PC price #1 (USD) <input name="comp1" type="number" min="0" step="1" placeholder="Similar PC listing price"></label>
       <label>Comparable PC price #2 (USD) <input name="comp2" type="number" min="0" step="1" placeholder="Similar PC listing price"></label>
       <label>Comparable PC price #3 (USD) <input name="comp3" type="number" min="0" step="1" placeholder="Similar PC listing price"></label>
       <label>Power supply model <input name="psu" placeholder="Corsair RM650x 650W"></label>
       <label>Motherboard model <input name="motherboard" placeholder="MSI B550 Tomahawk"></label>
       <label>Approximate age <input name="age" placeholder="Built in 2022"></label>
-      <label class="full-field">Condition / seller notes <textarea name="condition" rows="3" placeholder="Tested and working, no known issues, includes Wi-Fi... "></textarea></label>
+      <label>Case model <input name="case" placeholder="NZXT H5 Flow"></label>
+      <label>Listing platform <select name="sellerPlatform"><option value="">Not specified</option><option>Facebook Marketplace</option><option>eBay</option><option>OfferUp</option><option>Craigslist</option><option>Local retailer</option><option>Other</option></select></label>
+      <label>Overall condition <select name="conditionGrade"><option value="">Not assessed</option><option value="excellent">Excellent</option><option value="good">Good</option><option value="fair">Fair / visible wear</option><option value="poor">Poor / damaged</option><option value="for-parts">For parts only</option></select></label>
+      <label>What has been tested? <select name="testStatus"><option value="">Not confirmed</option><option value="untested">Not tested</option><option value="boots">Boots to desktop only</option><option value="gaming">Game tested</option><option value="stress">Stress tested</option></select></label>
+      <label>CPU temperature under load (°C) <input name="cpuTemp" type="number" min="0" max="150" placeholder="Optional"></label>
+      <label>GPU temperature under load (°C) <input name="gpuTemp" type="number" min="0" max="150" placeholder="Optional"></label>
+      <label>Warranty status <select name="warranty"><option value="">Not known</option><option value="active">Warranty remaining</option><option value="expired">Expired</option><option value="none">No warranty</option></select></label>
+      <label class="full-field">Included items / accessories <textarea name="included" rows="2" placeholder="Wi-Fi antenna, power cable, original box, keyboard..."></textarea></label>
+      <label class="full-field">Condition / seller notes <textarea name="condition" rows="3" placeholder="Visible wear, fan noise, repairs, crashes, missing parts, or other seller claims..."></textarea></label>
+      </div></details>
     </div>
-    <button class="btn primary" type="submit">Analyze this PC →</button>
-    <p class="fine">The assessment checks the information you provide and flags questions to ask. Price comparisons use similar listing prices you enter; PCCheck does not fetch live market prices.</p>
+    <div class="assessment-submit"><button class="btn primary" type="submit">Analyze PC & check latest market prices →</button><span class="fine" id="marketLookupStatus" role="status" aria-live="polite">Exact model names give the best price matches.</span></div>
+    <p class="fine">Market lookup uses the latest tracked weekly new-retail prices for exact matches. It is a replacement-cost reference, not a used resale valuation. Unmatched models are left blank rather than guessed.</p>
   </form>
   <div id="reportOutput" class="report-host" hidden aria-live="polite"></div>
 </section>
 
 <section class="workspace build-section" id="build">
-  <div class="section-title"><div class="eyebrow">02 / CUSTOM PC BUILD</div><h2>Check a custom build</h2><p>Enter the main component details to catch common compatibility problems.</p></div>
+  <div class="section-title"><div class="eyebrow">02 / CUSTOM PC BUILD</div><h2>Build compatibility</h2><p>Check sockets, memory, case fit, power, and other common compatibility details. Need a parts list first? <a href="build-finder.html">Use the needs-based Build Finder ↗</a></p></div>
+  <div class="build-explorer panel">
+    <div class="panel-head"><div><span class="mini-label">BUILD EXPLORER / INTERACTIVE EXAMPLES</span><h3>Start with a build idea</h3></div><span class="pill">TRY A SAMPLE</span></div>
+    <p class="fine">Explore three example PC configurations, then load one directly into the compatibility checker. These are educational starting points, not prebuilt recommendations or live-priced shopping lists.</p>
+    <div class="sample-build-grid">
+      <article class="sample-build-card">
+        <div class="sample-build-visual sample-value"><span class="build-orb"></span><svg viewBox="0 0 180 110" aria-hidden="true"><rect x="34" y="13" width="112" height="82" rx="10"/><circle cx="65" cy="54" r="24"/><circle cx="65" cy="54" r="8"/><circle cx="116" cy="54" r="24"/><circle cx="116" cy="54" r="8"/><path d="M44 101h92M52 95v6m76-6v6"/></svg><span class="build-tier">ENTRY / VALUE</span></div>
+        <div class="sample-build-content"><span class="mini-label">01 / 1080P STARTER</span><h4>Everyday gaming</h4><p>Balanced older-platform example for a first gaming build.</p><ul><li>Ryzen 5 5600X</li><li>Radeon RX 6600</li><li>32GB DDR4 · 1TB NVMe</li><li>650W PSU planning example</li></ul><button class="btn ghost" type="button" data-sample-build="starter">Load & check build ↗</button></div>
+      </article>
+      <article class="sample-build-card featured">
+        <div class="sample-build-visual sample-balanced"><span class="build-orb"></span><svg viewBox="0 0 180 110" aria-hidden="true"><rect x="34" y="13" width="112" height="82" rx="10"/><circle cx="65" cy="54" r="24"/><circle cx="65" cy="54" r="8"/><circle cx="116" cy="54" r="24"/><circle cx="116" cy="54" r="8"/><path d="M44 101h92M52 95v6m76-6v6"/></svg><span class="build-tier">MOST VERSATILE</span></div>
+        <div class="sample-build-content"><span class="mini-label">02 / 1440P BALANCED</span><h4>Modern all-rounder</h4><p>A newer platform with a stronger graphics-card example.</p><ul><li>Ryzen 5 7600</li><li>GeForce RTX 5070</li><li>32GB DDR5 · 2TB NVMe</li><li>750W PSU planning example</li></ul><button class="btn primary" type="button" data-sample-build="balanced">Load & check build ↗</button></div>
+      </article>
+      <article class="sample-build-card">
+        <div class="sample-build-visual sample-enthusiast"><span class="build-orb"></span><svg viewBox="0 0 180 110" aria-hidden="true"><rect x="34" y="13" width="112" height="82" rx="10"/><circle cx="65" cy="54" r="24"/><circle cx="65" cy="54" r="8"/><circle cx="116" cy="54" r="24"/><circle cx="116" cy="54" r="8"/><path d="M44 101h92M52 95v6m76-6v6"/></svg><span class="build-tier">ENTHUSIAST</span></div>
+        <div class="sample-build-content"><span class="mini-label">03 / HIGH PERFORMANCE</span><h4>Performance focused</h4><p>High-end example with extra headroom for demanding games.</p><ul><li>Ryzen 7 9800X3D</li><li>GeForce RTX 5080</li><li>64GB DDR5 · 2TB NVMe</li><li>1000W PSU planning example</li></ul><button class="btn ghost" type="button" data-sample-build="enthusiast">Load & check build ↗</button></div>
+      </article>
+    </div>
+    <p class="fine sample-build-note" id="sampleBuildStatus" role="status" aria-live="polite">Choose an example to automatically fill the checker and review its compatibility notes.</p>
+  </div>
   <form class="panel" id="buildForm">
     <div class="panel-head"><div><span class="mini-label">COMPATIBILITY CHECKER</span><h3>Your planned parts</h3></div><span class="step">BASIC CHECKS</span></div>
     <div class="fields">
@@ -121,10 +221,11 @@
 </section>
 
 <section class="workspace saved-section" id="saved">
-  <div class="section-title"><div class="eyebrow">03 / YOUR WORKSPACE</div><h2>Saved reports</h2><p>Reports are saved in this browser on this device.</p></div>
+  <div class="section-title"><div class="eyebrow">03 / YOUR WORKSPACE</div><h2>Your saved workspace</h2><p>Save reports on this device. Plus adds side-by-side comparison and build history.</p></div>
+  <div id="plusWorkspace" class="plus-workspace" aria-live="polite"><div class="plus-locked"><b>PCCheck Plus tools</b><p>Sign in and activate Plus to unlock comparisons, expanded reports, and build history.</p><button class="btn ghost" type="button" id="plusWorkspaceSignIn">Sign in / account</button></div></div>
   <div id="savedReports" class="saved-list"><div class="empty">No saved reports yet. Create and save a report above.</div></div>
   <div class="saved-tools"><button class="btn ghost" id="exportAll" type="button">Export all reports</button><button class="btn ghost" id="clearSaved" type="button">Clear saved reports</button></div>
-  <p class="storage-status" id="storageStatus">Local browser storage · No account or cloud sync yet</p>
+  <p class="storage-status" id="storageStatus">Saved locally · Cloud report sync is not enabled</p>
 </section>
 
 <section class="workspace guide-section" id="guides">
@@ -139,11 +240,52 @@
 </section>
 
 <section class="workspace about-section" id="about">
-  <div class="section-title"><div class="eyebrow">ABOUT PCCHECK</div><h2>Make better PC decisions.</h2><p>PCCheck is an independent decision-support tool for people buying used gaming PCs or planning a custom build.</p></div>
-  <div class="panel about-panel"><h3>Accuracy before hype</h3><p>PCCheck uses transparent rule-based checks, not an AI claim or a hidden certification. It can help organize details and surface common issues, but it cannot physically test hardware, verify seller claims, guarantee performance, or replace manufacturer specifications.</p><h3>Privacy and data</h3><p>In this prototype, reports stay in your browser's local storage. No sign-in, cloud account, analytics, marketplace account connection, or automatic listing scraping is provided. Clearing browser data may remove saved reports. Do not enter passwords, payment details, or other sensitive information.</p><h3>Independent project</h3><p>PCCheck is not affiliated with Facebook Marketplace, eBay, Craigslist, OfferUp, AMD, Intel, NVIDIA, or any PC manufacturer. Product and brand names are used only to identify hardware or listing sources.</p><p class="fine">This is an early product release. Always verify critical details with the manufacturer and inspect a used computer in person before buying.</p></div>
+  <div class="section-title"><div class="eyebrow">ABOUT THE PROJECT</div><h2>About PCCheck</h2><p>PCCheck is an independent decision-support tool for people buying used gaming PCs or planning a custom build.</p></div>
+  <div class="panel about-panel"><h3>Accuracy before hype</h3><p>PCCheck uses transparent rule-based checks, not an AI claim or a hidden certification. It can help organize details and surface common issues, but it cannot physically test hardware, verify seller claims, guarantee performance, or replace manufacturer specifications.</p><h3>Privacy and data</h3><p>In this prototype, reports stay in your browser's local storage. Account sign-in is currently a beta feature handled by Supabase. Saved reports remain in this browser and are not synced to an account. PCCheck does not provide marketplace account connections or automatic listing scraping. Clearing browser data may remove saved reports. Do not enter passwords, payment details, or other sensitive information.</p><h3>Independent project</h3><p>PCCheck is not affiliated with Facebook Marketplace, eBay, Craigslist, OfferUp, AMD, Intel, NVIDIA, or any PC manufacturer. Product and brand names are used only to identify hardware or listing sources.</p><p class="fine">This is an early product release. Always verify critical details with the manufacturer and inspect a used computer in person before buying.</p></div>
 </section>
 </main>
 <footer><a class="brand" href="#top"><span class="logo">PC</span> PC<span>CHECK</span></a><span>Independent PC evaluation tool · Early release</span><span class="footer-note"><a href="guides.html">Buyer guides</a> · <a href="privacy.html">Privacy & limits</a> · Not affiliated with any marketplace.</span></footer>
 
+<div class="modal-backdrop hardware-picker-backdrop" id="hardwarePickerModal" hidden>
+  <section class="modal hardware-picker-modal" role="dialog" aria-modal="true" aria-labelledby="hardwarePickerTitle">
+    <button class="close" id="hardwarePickerClose" type="button" aria-label="Close component picker">×</button>
+    <span class="mini-label">VISUAL HARDWARE GUIDE</span>
+    <h2 id="hardwarePickerTitle">Choose a component</h2>
+    <p class="fine" id="hardwarePickerHint">Pick the closest match. You can change it later.</p>
+    <input id="hardwarePickerSearch" type="search" placeholder="Search models or options…" autocomplete="off">
+    <div class="hardware-picker-options" id="hardwarePickerOptions"></div>
+    <button class="btn ghost" id="hardwarePickerUnknown" type="button">I don't know this part</button>
+  </section>
+</div>
+<div class="modal-backdrop account-backdrop" id="accountModal" hidden>
+  <section class="modal account-modal" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+    <button class="close" id="accountCloseButton" type="button" aria-label="Close account window">×</button>
+    <span class="mini-label">YOUR PCHECK ID</span>
+    <h2 id="accountTitle">Sign in to PCCheck</h2>
+    <p>Sign in to manage your account and check your Plus membership. Saved reports still stay on this device for now.</p>
+    <div id="accountSignedOut">
+      <form id="accountForm">
+        <label>Email address<input id="accountEmail" type="email" autocomplete="email" required maxlength="254"></label>
+        <label>Password<input id="accountPassword" type="password" autocomplete="current-password" required minlength="1" maxlength="128"></label>
+        <label class="account-consent" id="accountConsentRow" hidden><input id="accountConsent" type="checkbox"> I am at least 13 and have permission from a parent or guardian to use this account where required.</label>
+        <button class="btn primary" id="accountSubmit" type="submit">Sign in</button>
+      </form>
+      <p class="fine" id="accountStatus" role="status" aria-live="polite"></p>
+      <button class="text-button account-toggle" id="accountModeToggle" type="button">New to PCCheck? Create an account</button>
+    </div>
+    <div id="accountSignedIn" hidden>
+      <p class="account-email" id="accountEmailDisplay"></p>
+      <div class="account-membership" id="accountPlusStatus" aria-live="polite">Checking membership…</div>
+      <p class="fine">Your saved PC reports are still stored locally in this browser. Cloud sync is not enabled.</p>
+      <button class="btn ghost" id="accountManageBilling" type="button" hidden>Manage subscription</button><button class="btn ghost" id="accountSignOut" type="button">Sign out</button>
+    </div>
+    <p class="fine account-beta">Account beta. Do not enter payment details here. Checkout remains in Stripe test mode.</p>
+  </section>
+</div>
+
+<script src="ads-config.js" defer></script><script src="ads.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="auth.js" defer></script>
+<script src="ui.js" defer></script>
 <script src="app.js" defer></script>
 </body></html>

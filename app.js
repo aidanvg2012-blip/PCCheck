@@ -2,7 +2,7 @@
 
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = 'pccheck_reports_v5';
-const APP_VERSION = '2.4.0';
+const APP_VERSION = '2.13.1';
 
 
 // Curated recognition catalog. Aliases are intentionally explicit to avoid guessing.
@@ -210,18 +210,24 @@ function persistReports() {
  });
 })();
 
-/* Stripe Checkout: test mode only. Paid access is not granted by a redirect. */
+/* Stripe Checkout: authenticated test mode only. Paid access comes from verified webhook state. */
 (() => {
  const button = document.getElementById('plusCheckoutButton');
  const status = document.getElementById('plusCheckoutStatus');
  if (!button || !status) return;
  button.addEventListener('click', async () => {
    button.disabled = true;
-   status.textContent = 'Preparing secure test checkout…';
    try {
+     const session = await window.PCCheckAuth?.getSession();
+     if (!session?.access_token) {
+       status.textContent = 'Sign in or create a PCCheck account before trying test checkout.';
+       window.PCCheckAuth?.openModal();
+       return;
+     }
+     status.textContent = 'Preparing secure test checkout…';
      const response = await fetch('/api/create-checkout-session', {
        method: 'POST',
-       headers: {'Content-Type':'application/json'},
+       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
        body: JSON.stringify({})
      });
      const data = await response.json().catch(() => ({}));
@@ -229,12 +235,12 @@ function persistReports() {
      window.location.assign(data.url);
    } catch (error) {
      status.textContent = error.message || 'Unable to start checkout. Please try again.';
+   } finally {
      button.disabled = false;
    }
  });
 })();
 
-renderReports();
 function escapeHTML(value) {
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
@@ -379,12 +385,69 @@ function getPriceComparison(d) {
   else { verdict='Above comparable prices'; detail=`The asking price is ${Math.round((ratio-1)*100)}% above the median. Consider negotiating or comparing more closely matched systems.`; }
   return {available:true,asking,comps,median,low:Math.min(...comps),high:Math.max(...comps),ratio,verdict,detail};
 }
+function marketMoney(value) {
+  const amount = Number(value);
+  return Number.isFinite(amount) && amount > 0
+    ? amount.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : 'Not available';
+}
+function getPartsValue(d) {
+  const market = d.marketPrices || {};
+  const fields = [
+    ['CPU','cpu',d.cpu],['GPU','gpu',d.gpu],['RAM','ram',d.ram],
+    ['Storage','storage',d.storage],['Motherboard','motherboard',d.motherboard],
+    ['Power supply','psu',d.psu],['Case','case',d.case]
+  ];
+  const parts = fields.map(([label,key,model]) => ({
+    label, key, model: clean(model), result: market.matches?.[key] || null
+  }));
+  const matched = parts.filter(part => part.result?.found && Number(part.result.typicalPrice) > 0);
+  const total = matched.reduce((sum,part) => sum + Number(part.result.typicalPrice),0);
+  const asking = Number(d.price);
+  return {
+    parts, matchedCount: matched.length, total,
+    asking: asking > 0 ? asking : null,
+    percentOfReplacement: asking > 0 && total > 0 ? asking / total * 100 : null,
+    difference: asking > 0 && total > 0 ? asking - total : null,
+    week: market.week || null, source: market.source || 'Pricify (pricify.ai)',
+    generated: market.generated || null, error: market.error || null
+  };
+}
+function partsValueMarkup(value) {
+  const rows = value.parts.map(part => {
+    const result = part.result;
+    if (!part.model) return `<tr><th>${escapeHTML(part.label)}</th><td>Not entered</td><td>—</td><td>—</td></tr>`;
+    if (!result?.found) return `<tr><th>${escapeHTML(part.label)}</th><td>${escapeHTML(part.model)}</td><td><span class="market-unmatched">No exact match</span></td><td><small>${escapeHTML(result?.message || 'Not found in the tracked catalog')}</small></td></tr>`;
+    const source = result.sourceUrl && /^https:\/\//i.test(result.sourceUrl)
+      ? `<a href="${escapeHTML(result.sourceUrl)}" target="_blank" rel="noopener noreferrer">Source</a>` : '—';
+    const low = result.lowestPrice ? `${marketMoney(result.lowestPrice)} · ${escapeHTML(result.lowestRetailer || 'Tracked retailer')} · ${result.retailers || 0} retailers` : '—';
+    return `<tr><th>${escapeHTML(part.label)}</th><td>${escapeHTML(result.name)}</td><td><b>${marketMoney(result.typicalPrice)}</b><small>Typical tracked new retail</small></td><td>${low}<small>${source}</small></td></tr>`;
+  }).join('');
+  const priceCompare = value.difference === null ? 'Enter the seller’s asking price to compare.'
+    : value.difference <= 0 ? `Asking price is ${marketMoney(Math.abs(value.difference))} below the tracked new-part replacement cost.`
+    : `Asking price is ${marketMoney(value.difference)} above the tracked new-part replacement cost.`;
+  const freshness = value.week ? `Dataset ${escapeHTML(value.week)} · prices observed through ${escapeHTML(value.parts.find(p=>p.result?.asOf)?.result?.asOf || 'the published week')}` : 'Market dataset date unavailable';
+  const totalText = value.matchedCount ? marketMoney(value.total) : 'Not available';
+  const generated = value.generated ? new Date(value.generated).toLocaleString() : '';
+  return `<section class="parts-value market-value"><div class="market-value-heading"><div><span class="mini-label">LATEST MARKET PRICE DATA</span><h4>Tracked new-part replacement cost</h4><p class="report-note">Matched ${value.matchedCount} of ${value.parts.length} entered component models.</p></div><div class="market-total"><span>Matched new-part total</span><b>${totalText}</b></div></div><div class="comparison-scroll"><table class="comparison-table market-table"><thead><tr><th>Part</th><th>Matched product</th><th>Typical current price</th><th>Lowest tracked price</th></tr></thead><tbody>${rows}</tbody></table></div><div class="parts-value-result"><b>${value.percentOfReplacement === null ? 'Asking price comparison unavailable' : `${value.percentOfReplacement.toFixed(1)}% of new-part replacement cost`}</b><span>${escapeHTML(priceCompare)}</span></div><p class="report-note">${freshness}${generated ? ` · published ${escapeHTML(generated)}` : ''}. Source: <a href="https://github.com/pricify-ai/pc-hardware-prices" target="_blank" rel="noopener noreferrer">Pricify (CC BY 4.0)</a>.</p><p class="market-disclaimer">This is a new retail replacement-cost benchmark, not a used resale valuation. Used prices depend on age, condition, warranty, local demand, and verified sold listings. The dataset tracks selected popular products; an unmatched part is left unpriced rather than guessed. Check the linked source before buying.</p>${value.error ? `<p class="report-note">${escapeHTML(value.error)}</p>` : ''}</section>`;
+}
 function priceChartMarkup(price) {
   if (!price.available) return `<div class="price-analysis"><h4>Price comparison</h4><p class="report-note">Enter an asking price and at least two comparable prices from similar PCs to generate a chart and recommendation. Compare similar specs, condition, and included accessories.</p></div>`;
   const values=[...price.comps,price.asking];
   const max=Math.max(...values)*1.12;
   const rows=values.map((v,i)=>`<div class="price-bar-row"><span>${i===values.length-1?'This PC':`Comparable ${i+1}`}</span><div class="price-track"><i class="${i===values.length-1?'asking':''}" style="width:${Math.max(3,v/max*100)}%"></i></div><b>${money(v)}</b></div>`).join('');
   return `<div class="price-analysis"><h4>Price comparison</h4><div class="price-verdict"><b>${escapeHTML(price.verdict)}</b><span>Median comparable: ${money(price.median)}</span></div><p class="report-note">${escapeHTML(price.detail)} Comparable range: ${money(price.low)}–${money(price.high)}. Based on ${price.comps.length} asking prices you entered. Use closely matched systems and exclude listings with very different condition or parts.</p><div class="price-chart" role="img" aria-label="Bar chart comparing this PC price with comparable listing prices">${rows}</div><p class="report-note">This is a comparison of asking prices you supplied, not verified sold prices or an automatic live market valuation. It does not adjust for exact model, condition, warranty, or location.</p></div>`;
+}
+
+async function lookupMarketPrices(d) {
+  const keys = ['cpu','gpu','ram','storage','motherboard','psu','case'];
+  const params = new URLSearchParams();
+  for (const key of keys) if (clean(d[key])) params.set(key, clean(d[key]));
+  if (![...params.keys()].length) return { matches: {} };
+  const response = await fetch('/api/market-prices?' + params.toString(), { headers: { Accept: 'application/json' } });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Market price lookup failed.');
+  return data;
 }
 
 function buildUsedAssessment(d) {
@@ -403,6 +466,15 @@ function buildUsedAssessment(d) {
   if (clean(d.psu) && /no name|generic|unknown|unbranded/i.test(d.psu)) warnings.push('The PSU is described as generic or unknown. Ask for its exact make and model before considering the PC.');
   if (clean(d.condition) && /tested|working|runs well|no issues/i.test(d.condition)) positives.push('The notes say the system has been tested or is working. Request a current demonstration anyway.');
   if (clean(d.storage) && /nvme|ssd/i.test(d.storage)) positives.push('The listing reports solid-state storage. Verify its capacity and health.');
+  if (d.conditionGrade === 'poor' || d.conditionGrade === 'for-parts') warnings.push('The selected condition is poor or parts-only. Price it as a repair project and verify every fault before considering it.');
+  if (d.testStatus === 'untested') warnings.push('The PC has not been tested. Do not treat a successful boot or seller description as proof that the hardware is reliable.');
+  if (d.testStatus === 'boots') warnings.push('Only a desktop boot was confirmed. Ask for a game or sustained-load test and check temperatures.');
+  if (Number(d.cpuTemp) > 90) warnings.push('The entered CPU load temperature is above 90°C. Check cooler mounting, fan operation, and the CPU manufacturer’s thermal guidance.');
+  if (Number(d.gpuTemp) > 85) warnings.push('The entered GPU load temperature is above 85°C. Check the exact GPU model’s thermal limits, airflow, and fan operation.');
+  if (d.conditionGrade === 'excellent' || d.conditionGrade === 'good') positives.push('The selected condition is '+d.conditionGrade+'. Confirm it with your own inspection and current photos.');
+  if (d.testStatus === 'gaming' || d.testStatus === 'stress') positives.push('The seller reports a '+(d.testStatus === 'gaming' ? 'gaming' : 'stress')+' test. Ask for the test name, duration, and an unedited result.');
+  if (d.warranty === 'active') positives.push('The listing reports remaining warranty. Confirm transferability and coverage with the manufacturer or retailer.');
+  if (clean(d.included)) positives.push('Included accessories were noted. Confirm every item is present before purchase.');
 
   const completeness = Math.round(((required.length - missing.length) / required.length) * 100);
   const cpuFamily = getCpuFamily(d.cpu);
@@ -410,7 +482,7 @@ function buildUsedAssessment(d) {
   const ramType = classifyRam(d.ram);
   let verdict = 'More information needed';
   let verdictText = 'PCCheck does not have enough verified information to make a confident buying assessment.';
-  if (warnings.some(w => /fault|repair project|generic or unknown/.test(w))) {
+  if (warnings.some(w => /fault|repair project|generic or unknown|poor or parts-only/.test(w))) {
     verdict = 'High caution';
     verdictText = 'The details entered include a fault or an important power-supply concern. Resolve these issues before treating this as a normal used gaming PC.';
   } else if (completeness === 100 && warnings.length <= 2) {
@@ -418,11 +490,12 @@ function buildUsedAssessment(d) {
     verdictText = 'The core specifications are present. This is not a guarantee of condition, performance, compatibility, or fair price.';
   }
   const priceComparison = getPriceComparison(d);
+  const partsValue = getPartsValue(d);
   return {
-    kind:'used', priceComparison, title:`Used PC · ${clean(d.gpu) || 'GPU not entered'}`,
+    kind:'used', priceComparison, partsValue, title:`Used PC · ${clean(d.gpu) || 'GPU not entered'}`,
     summary:`${clean(d.cpu)||'CPU unknown'} / ${clean(d.ram)||'RAM unknown'} / ${clean(d.storage)||'storage unknown'} · ${money(d.price)}`,
     input:d, verdict, verdictText, completeness, warnings, positives, missing,
-    insights:[`CPU family: ${cpuFamily}`,`GPU generation guide: ${gpuTier}`,`Memory type: ${ramType || 'Not confirmed'}`],
+    insights:[`CPU family: ${cpuFamily}`,`GPU generation guide: ${gpuTier}`,`Memory type: ${ramType || 'Not confirmed'}`,...(clean(d.sellerPlatform)?[`Listing source: ${clean(d.sellerPlatform)}`]:[]),...(clean(d.testStatus)?[`Seller test: ${clean(d.testStatus)}`]:[])],
     createdAt:new Date().toISOString()
   };
 }
@@ -524,14 +597,14 @@ function reportMarkup(report) {
     if (report.missing.length) body += `<h4>Missing core details</h4><ul>${report.missing.map(x=>`<li>${escapeHTML(x)} not entered</li>`).join('')}</ul>`;
     if (report.warnings.length) body += `<h4>Buyer checks</h4><ul class="warning-list">${report.warnings.map(x=>`<li>${escapeHTML(x)}</li>`).join('')}</ul>`;
     if (report.positives.length) body += `<h4>Potential positives to verify</h4><ul>${report.positives.map(x=>`<li>${escapeHTML(x)}</li>`).join('')}</ul>`;
-    body += `<p class="report-note">Asking price: <b>${money(report.input.price)}</b>.</p>${priceChartMarkup(report.priceComparison || getPriceComparison(report.input))}`;
+    body += `<p class="report-note">Asking price: <b>${money(report.input.price)}</b>.</p>${partsValueMarkup(report.partsValue || getPartsValue(report.input))}${priceChartMarkup(report.priceComparison || getPriceComparison(report.input))}`;
   } else {
     body += `<div class="check-list">${report.checks.map(c=>`<div class="check-row"><span class="check-dot ${c.status}">${c.status==='pass'?'✓':c.status==='fail'?'!':c.status==='warn'?'!':'?'}</span><div><b>${escapeHTML(c.name)}</b><p>${escapeHTML(c.detail)}</p></div></div>`).join('')}</div>`;
     if (report.issues.length) body += `<h4>Fix before buying parts</h4><ul class="warning-list">${report.issues.map(x=>`<li>${escapeHTML(x)}</li>`).join('')}</ul>`;
     body += `<p class="report-note">${report.passed} passed · ${report.failed} conflict(s) · ${report.warnings} warnings · ${report.unknown} not checked.</p>`;
     body += `<p class="report-note">These are basic checks only. They do not verify BIOS support, physical clearances, connector availability, cooler fit, or every model-specific requirement.</p>`;
   }
-  return `<div class="report-result"><div class="report-top"><div><span class="mini-label">PCHECK REPORT</span><h3>${escapeHTML(report.title)}</h3></div><span class="verdict ${tone}">${escapeHTML(status)}</span></div><p class="report-summary">${escapeHTML(report.summary)}</p>${body}${source}<div class="report-actions"><button class="btn ghost" type="button" id="saveCurrent">Save report</button><button class="btn ghost" type="button" id="printReport">Print / PDF</button><button class="btn ghost" type="button" id="exportReport">Export JSON</button><button class="text-button" type="button" id="closeReport">Close</button></div></div>`;
+  return `<div class="report-result"><div class="report-top"><div><span class="mini-label">PCHECK REPORT</span><h3>${escapeHTML(report.title)}</h3></div><span class="verdict ${tone}">${escapeHTML(status)}</span></div><p class="report-summary">${escapeHTML(report.summary)}</p>${body}<div class="report-actions"><button class="btn ghost" type="button" id="saveCurrent">Save report</button><button class="btn ghost" type="button" id="printReport">Print / PDF</button><button class="btn ghost" type="button" id="exportReport">Export JSON</button><button class="text-button" type="button" id="closeReport">Close</button></div></div>`;
 }
 function openReport(report) {
   activeReport = report;
@@ -550,25 +623,144 @@ function saveReport(report) {
   persistReports();
   $('saveCurrent').textContent = 'Saved ✓';
   $('saveCurrent').disabled = true;
+  renderReports();
+}
+let plusToolsEnabled = false;
+const compareSelection = new Set();
+window.addEventListener('pccheck:membership', event => {
+  plusToolsEnabled = Boolean(event.detail?.hasPlus);
+  if (!plusToolsEnabled) compareSelection.clear();
+  renderReports();
+});
+function reportDate(report) {
+  const date = new Date(report.savedAt || report.createdAt || Date.now());
+  return Number.isNaN(date.getTime()) ? 'Date unavailable' : date.toLocaleDateString();
+}
+function displayValue(value) {
+  if (value === null || value === undefined || value === '') return '—';
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
+function renderPlusWorkspace() {
+  const host = $('plusWorkspace');
+  if (!host) return;
+  if (!plusToolsEnabled) {
+    host.innerHTML = '<div class="plus-locked"><b>PCCheck Plus tools</b><p>Sign in with an active Plus account to unlock PC shortlist insights, side-by-side comparisons, expanded reports, and build history. Saved reports remain on this device.</p><button class="btn ghost" type="button" id="plusWorkspaceSignIn">Sign in / account</button></div>';
+    $('plusWorkspaceSignIn')?.addEventListener('click', () => window.PCCheckAuth?.openModal());
+    return;
+  }
+  const selected = reports.filter(r => compareSelection.has(r.id));
+  const compareMarkup = selected.length < 2
+    ? '<div class="empty">Select two or three saved reports below to compare them.</div>'
+    : `<div class="comparison-scroll"><table class="comparison-table"><thead><tr><th>Detail</th>${selected.map(r=>`<th>${escapeHTML(r.title)}</th>`).join('')}</tr></thead><tbody>${comparisonRows(selected)}</tbody></table></div>`;
+  const usedReports = reports.filter(r=>r.kind==='used');
+  const prices = usedReports.map(r=>Number(r.input?.price)).filter(v=>Number.isFinite(v)&&v>0).sort((a,b)=>a-b);
+  const medianPrice = prices.length ? (prices.length%2 ? prices[(prices.length-1)/2] : (prices[prices.length/2-1]+prices[prices.length/2])/2) : null;
+  const completenessValues = usedReports.map(r=>Number(r.completeness)).filter(v=>Number.isFinite(v));
+  const averageCompleteness = completenessValues.length ? Math.round(completenessValues.reduce((a,b)=>a+b,0)/completenessValues.length) : null;
+  const cautionCount = usedReports.filter(r=>r.verdict==='High caution').length;
+  const shortlistMarkup = usedReports.length
+    ? `<div class="plus-metric-grid">
+        <article class="plus-metric"><span>SAVED USED PCS</span><b>${usedReports.length}</b><small>Across this browser</small></article>
+        <article class="plus-metric"><span>MEDIAN ASKING PRICE</span><b>${medianPrice===null?'—':money(medianPrice)}</b><small>${prices.length} listing price${prices.length===1?'':'s'} entered</small></article>
+        <article class="plus-metric"><span>AVG. SPEC COMPLETENESS</span><b>${averageCompleteness===null?'—':averageCompleteness+'%'}</b><small>Core CPU, GPU, RAM and storage fields</small></article>
+        <article class="plus-metric"><span>HIGH-CAUTION REPORTS</span><b>${cautionCount}</b><small>Review these before deciding</small></article>
+      </div><p class="fine">These figures summarize only the reports saved in this browser. Asking prices are user-entered, not verified sale prices or market valuations.</p>`
+    : '<div class="empty">Save used-PC assessments to build your shortlist overview.</div>';
+  const builds = reports.filter(r=>r.kind==='build');
+  const historyMarkup = builds.length
+    ? `<div class="history-list">${builds.map(r=>{const same=builds.filter(x=>x.title===r.title);const version=same.length-same.indexOf(r);return `<article class="history-item"><b>${escapeHTML(r.title)} · Version ${version}</b><span>${reportDate(r)} · ${escapeHTML(r.status || r.verdict || 'Saved')}</span><small>${escapeHTML(r.summary)}</small><button type="button" data-open="${escapeHTML(r.id)}">Open version</button></article>`;}).join('')}</div>`
+    : '<div class="empty">Save a custom build report to start its local version history.</div>';
+  host.innerHTML = `<div class="plus-tools-grid">
+    <section class="plus-tool"><div class="mini-label">01 / SHORTLIST INSIGHTS</div><h3>Your saved PC overview</h3><p>A quick snapshot of the used-PC reports you have saved, so you can spot missing information and compare asking prices at a glance.</p>${shortlistMarkup}</section>
+    <section class="plus-tool"><div class="mini-label">02 / COMPARISON WORKSPACE</div><h3>Compare saved PCs</h3><p>Choose up to three saved reports. Compare their entered specifications and assessment results side by side.</p><div class="compare-actions"><span>${selected.length} of 3 selected</span><div><button type="button" class="text-button" id="exportCompare" ${selected.length<2?'disabled':''}>Export CSV</button> <button type="button" class="text-button" id="clearCompare">Clear selection</button></div></div>${compareMarkup}</section>
+    <section class="plus-tool"><div class="mini-label">03 / EXPANDED REPORTS</div><h3>Full input details</h3><p>Use “Details” on any saved report to inspect every field entered for that assessment. Reports can still be printed or exported as JSON.</p></section>
+    <section class="plus-tool"><div class="mini-label">04 / BUILD HISTORY</div><h3>Saved build versions</h3><p>Each saved custom-build report is kept as a dated snapshot on this device. Save again after changing parts to record another version.</p>${historyMarkup}</section>
+  </div>`;
+  $('clearCompare')?.addEventListener('click',()=>{compareSelection.clear();renderReports();});
+  $('exportCompare')?.addEventListener('click',()=>exportComparisonCSV(selected));
+  host.querySelectorAll('[data-open]').forEach(button=>button.addEventListener('click',()=>{const report=reports.find(r=>r.id===button.dataset.open);if(report)openReport(report);}));
+}
+function exportComparisonCSV(selected) {
+  if (!plusToolsEnabled || selected.length < 2 || selected.length > 3) return;
+  const keys = [...new Set(selected.flatMap(r=>Object.keys(r.input || {})))].slice(0,40);
+  const rows = [
+    ['Detail', ...selected.map(r=>r.title)],
+    ['Assessment', ...selected.map(r=>r.verdict || r.status || '—')],
+    ['Summary', ...selected.map(r=>r.summary || '—')],
+    ['Saved date', ...selected.map(reportDate)],
+    ...keys.map(key=>[key, ...selected.map(r=>displayValue(r.input?.[key]))])
+  ];
+  const quote = value => { const raw=String(value ?? ''); const safe=/^\s*[=+\-@]/.test(raw) ? "'"+raw : raw; return '"'+safe.replace(/"/g,'""')+'"'; };
+  const csv = '\uFEFF' + rows.map(row=>row.map(quote).join(',')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  const link = document.createElement('a');
+  link.href=url; link.download='pccheck-pc-comparison.csv'; link.click();
+  window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function comparisonRows(selected) {
+  const keys = [...new Set(selected.flatMap(r=>Object.keys(r.input || {})))].slice(0,16);
+  const rows = [['Assessment',r=>r.status || r.verdict || '—'],['Summary',r=>r.summary || '—'],...keys.map(key=>[key.replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase()),r=>displayValue(r.input?.[key])])];
+  return rows.map(([label,get])=>`<tr><th>${escapeHTML(label)}</th>${selected.map(r=>`<td>${escapeHTML(get(r))}</td>`).join('')}</tr>`).join('');
 }
 function renderReports() {
   const host = $('savedReports');
-  if (!reports.length) { host.innerHTML = '<div class="empty">No saved reports yet. Create and save a report to see it here.</div>'; return; }
-  host.innerHTML = reports.map(r => `<article class="saved-card"><div><h4>${escapeHTML(r.title)}</h4><p>${escapeHTML(r.summary)} · ${new Date(r.savedAt || r.createdAt).toLocaleDateString()}</p></div><div class="saved-actions"><button type="button" data-open="${escapeHTML(r.id)}">View</button><button type="button" data-delete="${escapeHTML(r.id)}">Delete</button></div></article>`).join('');
+  if (!reports.length) {
+    host.innerHTML = '<div class="empty">No saved reports yet. Create and save a report to see it here.</div>';
+    renderPlusWorkspace();
+    return;
+  }
+  host.innerHTML = reports.map(r => {
+    const details = plusToolsEnabled ? `<button type="button" data-details="${escapeHTML(r.id)}">Details</button>` : '';
+    const selector = plusToolsEnabled ? `<label class="compare-check"><input type="checkbox" data-compare="${escapeHTML(r.id)}" ${compareSelection.has(r.id)?'checked':''} ${(!compareSelection.has(r.id)&&compareSelection.size>=3)?'disabled':''}> Compare</label>` : '';
+    const raw = plusToolsEnabled ? `<pre class="report-details" data-details-panel="${escapeHTML(r.id)}" hidden>${escapeHTML(JSON.stringify(r.input || {},null,2))}</pre>` : '';
+    return `<article class="saved-card"><div class="saved-card-main"><h4>${escapeHTML(r.title)}</h4><p>${escapeHTML(r.summary)} · ${reportDate(r)}</p>${raw}</div><div class="saved-actions">${selector}<button type="button" data-open="${escapeHTML(r.id)}">View</button>${details}<button type="button" data-delete="${escapeHTML(r.id)}">Delete</button></div></article>`;
+  }).join('');
+  renderPlusWorkspace();
 }
 $('savedReports').addEventListener('click', event => {
-  const openId = event.target.dataset.open;
-  const deleteId = event.target.dataset.delete;
+  const button = event.target.closest('button');
+  if (!button) return;
+  const openId = button.dataset.open;
+  const deleteId = button.dataset.delete;
+  const detailId = button.dataset.details;
   if (openId) { const report = reports.find(r=>r.id===openId); if (report) openReport(report); }
-  if (deleteId) { reports = reports.filter(r=>r.id!==deleteId); persistReports(); }
+  if (detailId) { const panel=$('savedReports').querySelector(`[data-details-panel="${CSS.escape(detailId)}"]`); if(panel) panel.hidden=!panel.hidden; }
+  if (deleteId) { reports = reports.filter(r=>r.id!==deleteId); compareSelection.delete(deleteId); persistReports(); renderReports(); }
+});
+$('savedReports').addEventListener('change', event => {
+  const id = event.target.dataset.compare;
+  if (!id || !plusToolsEnabled) return;
+  if (event.target.checked) {
+    if (compareSelection.size >= 3) { event.target.checked=false; return; }
+    compareSelection.add(id);
+  } else compareSelection.delete(id);
+  renderReports();
 });
 
-$('manualForm').addEventListener('submit', event => {
+$('manualForm').addEventListener('submit', async event => {
   event.preventDefault();
-  const d = formData(event.currentTarget);
+  const form = event.currentTarget;
+  const d = formData(form);
   if (!d.cpu.trim() || !d.gpu.trim() || !d.ram.trim() || !d.storage.trim()) return;
   d.cpu = recognizeField('cpu', d.cpu);
   d.gpu = recognizeField('gpu', d.gpu);
+  const button = form.querySelector('[type="submit"]');
+  const status = $('marketLookupStatus');
+  const originalLabel = button.textContent;
+  button.disabled = true;
+  button.textContent = 'Checking current part prices…';
+  if (status) status.textContent = 'Matching exact models against current retailer data…';
+  try {
+    d.marketPrices = await lookupMarketPrices(d);
+    if (status) status.textContent = 'Market reference added to your report.';
+  } catch (error) {
+    d.marketPrices = { matches: {}, error: error.message || 'Market lookup unavailable.' };
+    if (status) status.textContent = 'Price source unavailable. Your PC assessment can still continue.';
+  } finally {
+    button.disabled = false;
+    button.textContent = originalLabel;
+  }
   openReport(buildUsedAssessment(d));
 });
 $('buildForm').addEventListener('submit', event => {
@@ -591,6 +783,93 @@ $('clearSaved')?.addEventListener('click',()=>{
   if (!reports.length) return;
   if (confirm('Delete every saved PCCheck report from this browser? This cannot be undone.')) { reports=[]; persistReports(); }
 });
+
+
+// Guided visual hardware picker: simple shape illustrations lead to a curated model list.
+(() => {
+  const modal = $('hardwarePickerModal');
+  if (!modal) return;
+  const title = $('hardwarePickerTitle'), hint = $('hardwarePickerHint');
+  const search = $('hardwarePickerSearch'), options = $('hardwarePickerOptions');
+  const fieldLabels = {cpu:'Processor (CPU)',gpu:'Graphics card (GPU)',ram:'Memory (RAM)',storage:'Storage',motherboard:'Motherboard',psu:'Power supply (PSU)',case:'PC case'};
+  const visualChoices = {
+    cpu: HARDWARE_CATALOG.cpu.map(([name])=>name),
+    gpu: HARDWARE_CATALOG.gpu.map(([name])=>name),
+    ram: ['8GB DDR4','16GB DDR4','32GB DDR4','16GB DDR5','32GB DDR5','48GB DDR5','64GB DDR5'],
+    storage: ['256GB SSD','500GB SSD','1TB SATA SSD','1TB NVMe SSD','2TB NVMe SSD','4TB NVMe SSD','1TB HDD','2TB HDD'],
+    motherboard: ['MSI B550 Tomahawk','MSI MAG B650 Tomahawk WiFi','ASUS TUF Gaming B650-Plus','Gigabyte B650 AORUS Elite AX','MSI PRO Z790-A WiFi','ASUS ROG Strix Z890-E Gaming WiFi'],
+    psu: ['Corsair RM650x','Corsair RM750e','Seasonic Focus GX-750','be quiet! Pure Power 12 M 850W','Corsair RM1000x'],
+    case: ['NZXT H5 Flow','Corsair 4000D Airflow','Fractal Design North','Lian Li Lancool 216','Montech Air 903 Max']
+  };
+  let activeType = '';
+  let activeInput = null;
+  function close() { modal.hidden = true; modal.removeAttribute('data-picker-open'); activeType = ''; activeInput = null; }
+  function render() {
+    const query = search.value.trim().toLowerCase();
+    const list = (visualChoices[activeType] || []).filter(value => value.toLowerCase().includes(query));
+    options.innerHTML = list.map(value => '<button type="button" class="hardware-choice" data-hardware-value="'+escapeHTML(value)+'"><span class="choice-dot"></span><span>'+escapeHTML(value)+'</span><span class="choice-arrow">↗</span></button>').join('') || '<p class="fine">No matching models. Try a shorter search or leave this field unknown.</p>';
+  }
+  function open(type) {
+    if (!Object.prototype.hasOwnProperty.call(visualChoices, type)) return;
+    activeType = type;
+    const form = $('manualForm');
+    activeInput = form?.elements.namedItem(type) || null;
+    title.textContent = 'Choose ' + fieldLabels[type];
+    hint.textContent = activeInput
+      ? (type === 'cpu' || type === 'gpu'
+        ? 'These are common model names. Check the listing or part label before selecting one.'
+        : 'Choose the closest capacity and type. This is not an exact model match.')
+      : 'The matching input could not be found. Refresh the page and try again.';
+    search.value = '';
+    render();
+    modal.hidden = false;
+    modal.setAttribute('data-picker-open', 'true');
+    search.focus();
+  }
+  // Bind directly to the actual cards. This avoids delegated-click issues on
+  // mobile browsers and keeps decorative SVG descendants from affecting targeting.
+  document.querySelectorAll('.visual-pick-card[data-open-picker]').forEach(trigger => {
+    trigger.addEventListener('click', event => {
+      event.preventDefault();
+      open(trigger.dataset.openPicker);
+    });
+  });
+  search.addEventListener('input',render);
+  options.addEventListener('click',event=>{
+    const button=event.target.closest('[data-hardware-value]');
+    if(!button || !activeInput) return;
+    activeInput.value=button.dataset.hardwareValue;
+    activeInput.dispatchEvent(new Event('input',{bubbles:true}));
+    activeInput.dispatchEvent(new Event('change',{bubbles:true}));
+    close();
+  });
+  $('hardwarePickerUnknown').addEventListener('click',()=>{
+    if(activeInput){activeInput.value='';activeInput.dispatchEvent(new Event('input',{bubbles:true}));}
+    close();
+  });
+  $('hardwarePickerClose').addEventListener('click',close);
+  modal.addEventListener('click',event=>{if(event.target===modal)close();});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!modal.hidden)close();});
+})();
+
+// Loadable example builds make the compatibility checker useful before users know their parts.
+(() => {
+  const form=$('buildForm'), status=$('sampleBuildStatus');
+  if(!form) return;
+  const samples = {
+    starter:{cpu:'AMD Ryzen 5 5600X',gpu:'AMD Radeon RX 6600',cpuSocket:'AM4',boardSocket:'AM4',ramType:'DDR4',boardRam:'DDR4',boardForm:'ATX',caseForm:'ATX',psuWatts:650,gpuPower:132,cpuPower:65,ramCapacity:32,boardMaxRam:128,storage:'1TB NVMe SSD'},
+    balanced:{cpu:'AMD Ryzen 5 7600',gpu:'NVIDIA GeForce RTX 5070',cpuSocket:'AM5',boardSocket:'AM5',ramType:'DDR5',boardRam:'DDR5',boardForm:'ATX',caseForm:'ATX',psuWatts:750,gpuPower:250,cpuPower:90,ramCapacity:32,boardMaxRam:192,storage:'2TB NVMe SSD'},
+    enthusiast:{cpu:'AMD Ryzen 7 9800X3D',gpu:'NVIDIA GeForce RTX 5080',cpuSocket:'AM5',boardSocket:'AM5',ramType:'DDR5',boardRam:'DDR5',boardForm:'ATX',caseForm:'ATX',psuWatts:1000,gpuPower:360,cpuPower:120,ramCapacity:64,boardMaxRam:192,storage:'2TB NVMe SSD'}
+  };
+  document.querySelectorAll('[data-sample-build]').forEach(button=>button.addEventListener('click',()=>{
+    const key=button.dataset.sampleBuild, sample=samples[key];
+    if(!sample) return;
+    Object.entries(sample).forEach(([name,value])=>{const field=form.elements.namedItem(name);if(field)field.value=String(value);});
+    if(status)status.textContent='Example loaded. PCCheck will now run the compatibility checks; review exact manufacturer specifications before using this as a real parts list.';
+    form.requestSubmit();
+    form.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  }));
+})();
 
 renderReports();
 wireHardwareRecognition();

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101416"><meta name="description" content="Compare weekly PC hardware price references with current exact-model retailer offers.">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="price-tracker.css"><link rel="stylesheet" href="theme.css">
+<title>PCCheck — Parts price tracker</title>
+</head>
+<body class="finder-page price-page">
+<div class="glow g1"></div><div class="glow g2"></div>
+<header class="topbar">
+<a class="brand" href="index.html"><span class="logo">PC</span><span class="brand-name">PC<span>CHECK</span></span></a>
+<nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="build-finder.html">Build Finder</a><a href="price-tracker.html" aria-current="page">Price Tracker</a><a href="my-rig.html">My Rig</a><a href="knowledge.html">Knowledge</a><a href="download.html">Download</a><a href="guides.html">Guides</a></nav>
+<a class="btn ghost" href="index.html?returnTo=price-tracker.html#account">My account</a>
+</header>
+<main class="price-shell">
+<section class="price-hero">
+<div class="eyebrow"><i></i> PCHECK / COMPONENT MARKET</div>
+<div class="price-hero-grid">
+<div><span class="finder-kicker">COMPARE. VERIFY. THEN BUY.</span><h1>Know what parts<br><em>cost right now.</em></h1>
+<p>Search tracked hardware, compare weekly price references, and check current retailer offers for an exact model. No guessed prices and no hidden retailer rankings.</p>
+<div class="price-trust"><span>WEEKLY PRICE HISTORY</span><span>LIVE RETAILER OFFERS</span><span>EXACT MODEL MATCHING</span></div></div>
+<div class="price-hero-stat"><small>PRICE DATA</small><b>2 layers</b><span>Weekly market reference + current retailer listings</span></div>
+</div>
+</section>
+<section class="price-notice panel">
+<div><span class="mini-label">LIVE LOOKUP STATUS</span><h2 id="providerTitle">Checking retailer pricing…</h2><p id="providerCopy">Loading provider availability and the tracked parts catalog.</p></div>
+<div class="price-pill" id="providerPill">CHECKING</div>
+</section>
+<section class="price-layout">
+<div class="price-main panel">
+<div class="panel-head"><div><span class="mini-label">01 / FIND A COMPONENT</span><h2>Parts catalog</h2></div><span class="pill" id="catalogWeek">WEEKLY DATA</span></div>
+<div class="price-filters">
+<label>Category<select id="priceCategory"><option value="all">All categories</option><option value="cpu">Processors</option><option value="gpu">Graphics cards</option><option value="motherboard">Motherboards</option><option value="ram">Memory</option><option value="storage">Storage</option><option value="psu">Power supplies</option><option value="case">Cases</option></select></label>
+<label>Search exact model<input id="priceSearch" type="search" placeholder="RTX 5070, Ryzen 7 7800X3D…"></label>
+<label>Sort by<select id="priceSort"><option value="low">Lowest tracked price</option><option value="high">Highest tracked price</option><option value="name">Model name</option></select></label>
+</div>
+<div class="price-catalog-meta"><span id="catalogStatus">Loading components…</span><div class="price-catalog-actions"><button class="btn ghost" id="checkManualPrice" type="button">Check typed model ↗</button><button class="btn ghost" id="refreshCatalog" type="button">Refresh catalog</button></div></div>
+<div id="priceProducts" class="price-products" aria-live="polite"></div>
+<p class="price-footnote">Weekly reference data is supplied by Pricify under CC BY 4.0. Current offers are provided through PCPartPicker data via API.SH when configured. Retailer price, stock, shipping, tax, and return terms can change before checkout.</p>
+</div>
+<aside class="price-side">
+<section class="panel watch-panel"><div class="panel-head"><div><span class="mini-label">02 / KEEP AN EYE ON IT</span><h2>My watchlist</h2></div><span class="pill">ON THIS DEVICE</span></div>
+<p class="fine">Save products and compare your last checked offer with the next one. This is a manual tracker, not an automatic alert service.</p>
+<div id="watchlistItems" class="watchlist-items"><p class="fine">No saved products yet.</p></div>
+</section>
+<section class="panel explain-panel"><span class="mini-label">HOW TO READ PRICES</span><h3>Two different signals</h3>
+<div><b>Weekly reference</b><p>A tracked market observation from the latest dataset. Useful for context, but not a live checkout quote.</p></div>
+<div><b>Live retailer offer</b><p>An exact-model listing returned by the retailer data provider. Check the retailer page for final price, stock, shipping, tax, and seller terms.</p></div>
+<div><b>No exact match</b><p>PCCheck leaves the product unpriced rather than assigning an offer to a similar model.</p></div>
+</section>
+</aside>
+</section>
+<section class="price-results panel" id="liveResults" hidden aria-live="polite"><div class="panel-head"><div><span class="mini-label">03 / CURRENT RETAILER CHECK</span><h2 id="liveTitle">Live offers</h2></div><button class="btn ghost" id="closeLive" type="button">Close</button></div><p class="fine" id="liveMeta"></p><div id="liveOffers" class="live-offers"></div></section>
+<section class="ad-slot" data-ad-slot-key="tracker" hidden aria-label="Advertisement"><span class="ad-slot-label">ADVERTISEMENT</span></section>
+</main>
+<footer><a class="brand" href="index.html"><span class="logo">PC</span> PC<span>CHECK</span></a><span>Independent PC research tools</span><span class="footer-note"><a href="privacy.html">Privacy & limits</a></span></footer>
+<script src="ads-config.js" defer></script><script src="ads.js" defer></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="price-tracker.js" defer></script>
+</body></html>

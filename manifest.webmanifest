@@ -1,11 +1,11 @@
 {
-  "name": "PCCheck \u2014 PC buying and build checker",
+  "name": "PCCheck — PC research and build finder",
   "short_name": "PCCheck",
-  "description": "Review used gaming PCs, extract common hardware details, and check basic custom-build compatibility.",
+  "description": "Research PC parts, compare tracked prices, build a compatible parts shortlist, analyze used PCs, and plan upgrades.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#080b12",
-  "theme_color": "#080b12",
+  "background_color": "#080d16",
+  "theme_color": "#080d16",
   "icons": [
     {
       "src": "icon.svg",

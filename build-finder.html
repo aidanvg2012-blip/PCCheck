@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101416">
+<meta name="description" content="Build a researched PC around your games, workload, budget, and upgrade plans. Compare tracked component prices and compatibility notes.">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="build-finder.css"><link rel="stylesheet" href="theme.css">
+<title>PCCheck — Build Finder</title>
+</head>
+<body class="finder-page">
+<div class="glow g1"></div><div class="glow g2"></div>
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="logo">PC</span><span class="brand-name">PC<span>CHECK</span></span></a>
+  <nav aria-label="Main navigation"><a href="index.html#top">Overview</a><a href="index.html#analyze">Used PC</a><a href="build-finder.html" aria-current="page">Build Finder</a><a href="price-tracker.html">Price Tracker</a><a href="my-rig.html">My Rig</a><a href="knowledge.html">Knowledge</a><a href="download.html">Download</a><a href="index.html#build">Compatibility</a><a href="guides.html">Guides</a></nav>
+  <a class="btn ghost" href="index.html?returnTo=build-finder.html#account">My account</a>
+</header>
+<main class="finder-shell">
+  <section class="finder-hero">
+    <div class="eyebrow"><i></i> PCHECK / BUILD INTELLIGENCE</div>
+    <div class="finder-hero-grid">
+      <div><span class="finder-kicker">YOUR NEEDS → A REAL PARTS LIST</span>
+        <h1>Plan a build<br><em>around your budget.</em></h1>
+        <p>Tell us what you do, what you want to spend, and what matters most. PCCheck researches tracked components, builds a parts shortlist, and flags what still needs manufacturer verification.</p>
+        <div class="finder-trust"><span>01 / NEEDS-BASED</span><span>02 / PRICE-SOURCED</span><span>03 / COMPATIBILITY-AWARE</span></div>
+      </div>
+      <div class="finder-hero-visual" aria-hidden="true"><div class="finder-ring"></div><div class="finder-chip"><span>PC</span><b>BUILD</b><small>RESEARCH ENGINE</small></div><div class="finder-float finder-float-a"><small>PRICE SIGNAL</small><b>TRACKED DATA</b></div><div class="finder-float finder-float-b"><small>BUILD LOGIC</small><b>PART MATCHING</b></div></div>
+    </div>
+  </section>
+
+  <section class="finder-access panel">
+    <div><span class="mini-label">BUILD FINDER ACCESS</span><h2 id="accessTitle">Checking your account…</h2><p id="accessCopy" class="fine">Sign in to start your one included full build review. Plus is still in beta; no live payments are enabled.</p></div>
+    <div class="finder-usage"><b id="usageCount">—</b><span id="usageLabel">plans remaining</span></div>
+    <a class="btn ghost" id="accountLink" href="index.html?returnTo=build-finder.html#account">Sign in to continue ↗</a>
+  </section>
+
+  <section class="finder-wizard panel" id="finderWizard" hidden>
+    <div class="panel-head"><div><span class="mini-label">01 / TELL US WHAT YOU NEED</span><h2>Build preferences</h2></div><span class="pill">PERSONALIZED RESEARCH</span></div>
+    <div class="finder-form-grid">
+      <label>What will you use this PC for?
+        <select id="needUse"><option value="gaming">Gaming</option><option value="streaming">Gaming + streaming</option><option value="creator">Video editing / creative work</option><option value="workstation">3D, development, and heavy workloads</option><option value="everyday">School, browsing, and everyday use</option></select>
+      </label>
+      <label>What resolution are you targeting?
+        <select id="needResolution"><option value="1080">1080p gaming</option><option value="1440" selected>1440p gaming</option><option value="4k">4K gaming</option><option value="none">No gaming focus</option></select>
+      </label>
+      <label>Maximum parts budget (USD)
+        <select id="needBudget"><option value="650">$650</option><option value="800">$800</option><option value="1000">$1,000</option><option value="1200" selected>$1,200</option><option value="1500">$1,500</option><option value="1800">$1,800</option><option value="2200">$2,200</option><option value="2800">$2,800</option><option value="3500">$3,500</option></select>
+        <small>PC tower parts only. Monitor, peripherals, tax, shipping, and Windows are not included.</small>
+      </label>
+      <label>What matters most?
+        <select id="needPriority"><option value="value">Best value for the money</option><option value="balanced" selected>Balanced performance</option><option value="quiet">Lower power draw / efficiency</option><option value="upgrade">Easy future upgrades</option><option value="performance">Maximum performance within budget</option></select>
+      </label>
+      <label>Memory target
+        <select id="needRam"><option value="16">16 GB</option><option value="32" selected>32 GB</option><option value="64">64 GB</option></select>
+      </label>
+      <label>Storage target
+        <select id="needStorage"><option value="1000">1 TB NVMe SSD</option><option value="2000" selected>2 TB NVMe SSD</option><option value="4000">4 TB NVMe SSD</option></select>
+      </label>
+      <label>Preferred platform
+        <select id="needPlatform"><option value="any" selected>Any reliable platform</option><option value="amd">AMD CPU</option><option value="intel">Intel CPU</option></select>
+      </label>
+      <label>Case size
+        <select id="needSize"><option value="any" selected>Any standard size</option><option value="compact">Compact / micro-ATX if available</option><option value="atx">Standard ATX tower</option></select>
+      </label>
+    </div>
+    <div class="finder-form-foot"><p class="fine">PCCheck will only price exact products present in its source catalog. If a component cannot be matched, it will be marked unavailable instead of receiving an invented price.</p><button class="btn primary" id="generateBuilds" type="button">Research my PC builds <b>↗</b></button></div>
+    <p class="finder-status" id="finderStatus" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="finder-results" id="finderResults" hidden aria-live="polite">
+    <div class="finder-results-head"><div><span class="eyebrow">02 / YOUR RESEARCH SHORTLIST</span><h2>Build options for your needs</h2><p id="resultsSummary"></p></div><button class="btn ghost" id="newSearch" type="button">Edit preferences</button></div>
+    <div id="buildOptions" class="build-options"></div>
+    <div class="finder-data-note panel"><b>How to read these prices</b><p>Candidate parts are selected from Pricify’s weekly public US hardware dataset. Before the report is shown, PCCheck checks each selected model against current PCPartPicker retailer listings through API.SH and displays matched retailer offers, availability notes, and the lowest listed price. If a model cannot be matched exactly or has no current offers, it is marked unpriced rather than guessed.</p><p>Live lookups are refreshed when the report is generated. Retailer stock, shipping, tax, seller, exact part number, and return policy can still change; verify the checkout page before buying.</p><small id="datasetStamp"></small></div>
+    <div class="finder-results-actions"><button class="btn ghost" id="downloadBuilds" type="button">Export research report ↓</button><a class="btn ghost" href="index.html#build">Run detailed compatibility checks ↗</a></div>
+  </section>
+
+    <details class="parts-catalog-details"><summary>Browse individual components <span>Optional research tool</span></summary>
+  <section class="parts-explorer panel" id="partsExplorer">
+    <div class="panel-head"><div><span class="mini-label">OPEN COMPONENT CATALOG</span><h2>Search tracked PC parts</h2></div><span class="pill">FREE RESEARCH</span></div>
+    <p class="fine">Browse tracked CPUs, graphics cards, motherboards, memory, storage, power supplies, and cases. Sort by the lowest recorded retailer price and open the source page for more retailer details.</p>
+    <div class="parts-filters">
+      <label>Category<select id="partsCategory"><option value="all">All components</option><option value="cpu">Processors</option><option value="gpu">Graphics cards</option><option value="motherboard">Motherboards</option><option value="ram">Memory</option><option value="storage">SSD storage</option><option value="psu">Power supplies</option><option value="case">PC cases</option></select></label>
+      <label>Search model<input id="partsSearch" type="search" placeholder="Search RTX 5070, Ryzen, B650…"></label>
+      <label>Sort prices<select id="partsSort"><option value="asc">Lowest to highest</option><option value="desc">Highest to lowest</option></select></label>
+    </div>
+    <div class="parts-explorer-head"><span id="partsExplorerStatus" class="fine">The catalog loads when you search or press the button.</span><button class="btn primary" id="loadPartsCatalog" type="button">Load parts catalog ↗</button></div>
+    <div id="partsExplorerResults" class="parts-grid"></div>
+    <p class="fine">This public catalog is a weekly sample of popular US PC parts. It shows one lowest tracked retailer and a typical price per model, not a complete in-app offer table for every retailer. Use each source link to inspect retailer listings and verify the checkout price.</p>
+  </section>
+  </details>
+
+  <section class="finder-how panel">
+    <div><span class="mini-label">RESEARCH, NOT GUESSWORK</span><h2>What PCCheck checks</h2></div>
+    <div class="finder-how-grid">
+      <article><b>Component selection</b><p>Matches processor platform, motherboard chipset family, memory generation, storage capacity, and estimated power needs where source data supports it.</p></article>
+      <article><b>Price evidence</b><p>Shows tracked price, typical price, retailer count, source, and data date for each matched part.</p></article>
+      <article><b>Compatibility warnings</b><p>Calls out BIOS support, physical dimensions, PSU quality, connectors, and other details that still need exact manufacturer checks.</p></article>
+    </div>
+    <p class="fine">Performance tiers are broad planning guides, not guaranteed FPS results. The builder does not certify a complete system. Always verify exact model numbers and manufacturer compatibility lists.</p>
+  </section>
+</main>
+<footer><a class="brand" href="index.html"><span class="logo">PC</span> PC<span>CHECK</span></a><span>Independent PC research tools</span><span class="footer-note"><a href="privacy.html">Privacy & limits</a></span></footer>
+<script src="ads-config.js" defer></script><script src="ads.js" defer></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="build-finder.js" defer></script>
+</body></html>
