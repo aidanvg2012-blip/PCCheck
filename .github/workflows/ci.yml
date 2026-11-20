@@ -18,7 +18,7 @@ jobs:
           node-version: 22
       - name: Check JavaScript syntax
         run: |
-          for file in app.js auth.js pc-lab.js build-finder.js price-tracker.js knowledge.js electron/main.cjs api/*.js tests/*.js; do
+          for file in app.js auth.js pc-lab.js build-finder.js price-tracker.js knowledge.js my-rig.js ads.js ads-config.js electron/main.cjs electron/preload.cjs api/*.js tests/*.js; do
             node --check "$file"
           done
       - name: Run billing tests
