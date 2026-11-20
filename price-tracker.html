@@ -6,14 +6,14 @@
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="price-tracker.css">
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="price-tracker.css"><link rel="stylesheet" href="theme.css">
 <title>PCCheck — Parts price tracker</title>
 </head>
 <body class="finder-page price-page">
 <div class="glow g1"></div><div class="glow g2"></div>
 <header class="topbar">
 <a class="brand" href="index.html"><span class="logo">PC</span><span class="brand-name">PC<span>CHECK</span></span></a>
-<nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="build-finder.html">Build Finder</a><a href="price-tracker.html" aria-current="page">Price Tracker</a><a href="knowledge.html">Knowledge</a><a href="guides.html">Guides</a></nav>
+<nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="build-finder.html">Build Finder</a><a href="price-tracker.html" aria-current="page">Price Tracker</a><a href="my-rig.html">My Rig</a><a href="knowledge.html">Knowledge</a><a href="download.html">Download</a><a href="guides.html">Guides</a></nav>
 <a class="btn ghost" href="index.html?returnTo=price-tracker.html#account">My account</a>
 </header>
 <main class="price-shell">
@@ -55,7 +55,7 @@
 </aside>
 </section>
 <section class="price-results panel" id="liveResults" hidden aria-live="polite"><div class="panel-head"><div><span class="mini-label">03 / CURRENT RETAILER CHECK</span><h2 id="liveTitle">Live offers</h2></div><button class="btn ghost" id="closeLive" type="button">Close</button></div><p class="fine" id="liveMeta"></p><div id="liveOffers" class="live-offers"></div></section>
-</main>
+<section class="ad-slot" data-ad-slot-key="tracker" hidden aria-label="Advertisement"><span class="ad-slot-label">ADVERTISEMENT</span></section>\n</main>
 <footer><a class="brand" href="index.html"><span class="logo">PC</span> PC<span>CHECK</span></a><span>Independent PC research tools</span><span class="footer-note"><a href="privacy.html">Privacy & limits</a></span></footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="price-tracker.js" defer></script>
+<script src="ads-config.js" defer></script><script src="ads.js" defer></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="price-tracker.js" defer></script>
 </body></html>
