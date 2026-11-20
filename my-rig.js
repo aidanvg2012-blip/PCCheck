@@ -2,7 +2,7 @@
 (async()=>{
  const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const formatBytes=n=>{if(!Number.isFinite(Number(n))||Number(n)<=0)return 'Not reported';let v=Number(n),u=['B','KB','GB','TB'];let i=0;while(v>=1024&&i<u.length-1){v/=1024;i++;}return (i===0?v.toFixed(0):v.toFixed(1))+' '+u[i];};
- const access=$('rigAccess'),scan=$('scanRig'),notice=$('desktopNotice');
+ const access=$('rigAccess'),scan=$('scanRig'),notice=$('desktopNotice'),MANUAL_KEY='pccheck-my-rig-manual-v1';\n let manualParts=[];try{manualParts=JSON.parse(localStorage.getItem(MANUAL_KEY)||'[]');if(!Array.isArray(manualParts))manualParts=[];}catch{manualParts=[];}\n function renderManual(){const box=$('manualRigItems');if(!box)return;box.innerHTML=manualParts.length?manualParts.map((x,i)=>'<div class="manual-rig-item"><div><small>'+esc(x.type)+'</small><b>'+esc(x.name)+'</b></div><button type="button" data-remove-manual="'+i+'" aria-label="Remove '+esc(x.name)+'">Remove</button></div>').join(''):'<p class="fine">No manual components added yet.</p>'; }
  function gate(message,cta){access.hidden=false;access.innerHTML='<span class="mini-label">PCHECK PLUS / MEMBER ACCESS</span><h2>'+esc(message)+'</h2><p>My Rig is a Plus feature. Sign in with an active Plus subscription to use local hardware inventory.</p><a class="btn primary" href="'+cta+'">Continue ↗</a>';scan.disabled=true;notice.hidden=true;}
  try{
   if(!window.supabase?.createClient)throw new Error('Account service unavailable. Refresh and try again.');
@@ -12,7 +12,7 @@
   const r=await fetch('/api/plus-status',{headers:{Authorization:'Bearer '+data.session.access_token}}),d=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(d.error||'Could not verify membership.');
   if(!d.hasPlus){gate('My Rig is part of PCCheck Plus','index.html#top');return;}
-  access.hidden=true;scan.disabled=false;
+  access.hidden=true;scan.disabled=false;$('rigManual').hidden=false;renderManual();\n  $('rigManualForm').addEventListener('submit',event=>{event.preventDefault();const type=$('manualRigType').value,name=$('manualRigName').value.trim();if(!name)return;manualParts.push({type,name});localStorage.setItem(MANUAL_KEY,JSON.stringify(manualParts));$('manualRigName').value='';renderManual();});\n  $('manualRigItems').addEventListener('click',event=>{const button=event.target.closest('[data-remove-manual]');if(!button)return;manualParts.splice(Number(button.dataset.removeManual),1);localStorage.setItem(MANUAL_KEY,JSON.stringify(manualParts));renderManual();});
   if(!window.pccheckDesktop?.getRigSnapshot){notice.hidden=false;$('scanMode').textContent='WEB PREVIEW';scan.disabled=true;$('scanStatus').textContent='Install the Windows desktop app to scan this computer.';return;}
   notice.hidden=true;$('scanMode').textContent='WINDOWS LOCAL SCAN';
   scan.addEventListener('click',async()=>{
@@ -40,7 +40,7 @@
    card('SYSTEM',system.model||system.manufacturer||'PC model not reported',[system.manufacturer||'',os.distro||os.platform||'OS not reported',os.release?'Version '+os.release:'',bios.version?'BIOS '+bios.version:''].filter(Boolean)),
    card('NETWORK',nets.length+' adapter(s)',nets.map(x=>x.iface+' · '+(x.type||'network')).slice(0,6))
   ];
-  $('rigCards').innerHTML=cards.join('');
+  $('rigCards').innerHTML=cards.join('')+manualParts.map(x=>card('MANUAL / '+x.type,x.name,['Added by you · stored on this device'])).join('');
   const bt=d.bluetooth||[];$('bluetoothCount').textContent=bt.length+' DEVICES';$('bluetoothItems').innerHTML=bt.length?bt.map(x=>'<div class="bluetooth-device"><span>◉</span><div><b>'+esc(x.name)+'</b><small>'+esc(x.status||'Detected by Windows')+'</small></div></div>').join(''):'<p class="fine">No Bluetooth devices were reported by Windows. Bluetooth may be disabled, unavailable, or hidden by the device driver.</p>';
   $('rigScannedAt').textContent='SCANNED '+new Date(d.scannedAt).toLocaleString();
  }
