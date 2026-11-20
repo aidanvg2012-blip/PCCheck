@@ -18,8 +18,9 @@ ipcMain.handle('pccheck:get-rig-snapshot',async event=>{
  let origin='';try{origin=new URL(event.senderFrame.url).origin;}catch{}
  if(origin!==APP_ORIGIN)throw new Error('Hardware scan request came from an untrusted page.');
  if(process.platform!=='win32')throw new Error('The local hardware inventory currently supports Windows 10 and 11.');
+ const safe=(promise,fallback)=>promise.catch(()=>fallback);
  const [cpu,gpu,memory,memoryModules,baseboard,bios,system,os,disks,network,bluetooth]=await Promise.all([
-  si.cpu(),si.graphics(),si.mem(),si.memLayout(),si.baseboard(),si.bios(),si.system(),si.osInfo(),si.diskLayout(),si.networkInterfaces(),runPowerShell("Get-PnpDevice -Class Bluetooth -ErrorAction SilentlyContinue | Where-Object { $_.FriendlyName -and $_.Status -ne 'Error' } | Select-Object @{Name='name';Expression={$_.FriendlyName}},@{Name='status';Expression={$_.Status}} | ConvertTo-Json -Compress")
+  safe(si.cpu(),{}),safe(si.graphics(),{}),safe(si.mem(),{}),safe(si.memLayout(),[]),safe(si.baseboard(),{}),safe(si.bios(),{}),safe(si.system(),{}),safe(si.osInfo(),{}),safe(si.diskLayout(),[]),safe(si.networkInterfaces(),[]),runPowerShell("Get-PnpDevice -Class Bluetooth -ErrorAction SilentlyContinue | Where-Object { $_.FriendlyName -and $_.Status -ne 'Error' } | Select-Object @{Name='name';Expression={$_.FriendlyName}},@{Name='status';Expression={$_.Status}} | ConvertTo-Json -Compress")
  ]);
  return {
   scannedAt:new Date().toISOString(),
