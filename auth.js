@@ -127,7 +127,7 @@
         } else {
           setStatus('Account created and signed in.', 'success');
           await refreshAccount();
-          if (['build-finder.html','price-tracker.html'].includes(new URLSearchParams(window.location.search).get('returnTo'))) window.location.assign(new URLSearchParams(window.location.search).get('returnTo'));
+          if (['build-finder.html','price-tracker.html','my-rig.html'].includes(new URLSearchParams(window.location.search).get('returnTo'))) window.location.assign(new URLSearchParams(window.location.search).get('returnTo'));
         }
       } else {
         const { error } = await client.auth.signInWithPassword({ email, password });
