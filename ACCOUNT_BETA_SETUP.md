@@ -87,3 +87,16 @@ The live checkout path is code-supported but is not yet enabled on Production. A
 - [ ] Confirm the local watchlist survives a page refresh and is clearly described as manual, device-local tracking (not automatic price alerts).
 - [ ] If API.SH is enabled, the parent/guardian should set a monthly credit cap and review provider terms. Keep APISH_API_KEY server-side only.
 - [ ] The Windows x64 installer is an Electron wrapper around the hosted PCCheck website. It requires internet access; it is not a separate offline application. The build workflow runs after the release reaches main. The unsigned installer may show a Windows SmartScreen warning.
+
+
+## My Rig Plus feature
+
+- [ ] Sign in with a Plus account and open `my-rig.html`.
+- [ ] Confirm a Free account cannot access the inventory page.
+- [ ] In the Windows x64 desktop app, press Scan this PC and check CPU, graphics, RAM modules, drives, motherboard, BIOS, OS, network adapters, displays, and Bluetooth names/status.
+- [ ] Confirm a scan works even if one hardware category is unavailable; missing values should display as not reported.
+- [ ] Add a case, PSU, cooler, monitor, and peripherals manually; refresh the page and confirm these entries remain in this browser only.
+- [ ] Clear the cached local scan and confirm the hardware snapshot disappears.
+- [ ] Verify scan data is not sent to PCCheck APIs or saved in Supabase. Review Bluetooth names before sharing screenshots.
+
+The scan is a point-in-time inventory, not continuous temperature, fan, voltage, clock, or power monitoring.
